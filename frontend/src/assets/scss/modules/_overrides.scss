@@ -1,0 +1,104 @@
+////////////////////////////////////////////////////////////
+// Overrides
+////////////////////////////////////////////////////////////
+iframe {
+    pointer-events: none;
+}
+
+.core,
+.wrapper {
+    display: flex;
+}
+
+.MuiTablePagination-displayedRows {
+    margin-top: unset;
+    margin-bottom: unset;
+}
+
+.MuiTablePagination-selectLabel {
+    margin-top: unset;
+    margin-bottom: unset;
+}
+
+.react-draggable:hover {
+    cursor: grab;
+}
+
+.react-draggable-dragging:hover {
+    cursor: grabbing;
+}
+
+.react-grid-placeholder {
+    background: #1966CC !important;
+}
+
+.table-row {
+    margin-bottom: unset;
+}
+
+.navbar-toggler {
+    color: $gray-700;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+
+input[type=number]{
+    -moz-appearance: textfield;
+}
+
+.react-grid-item.react-draggable-dragging,
+.react-grid-item.resizing  {
+    background-color: transparent;
+
+    div {
+        display: none;
+        visibility: hidden;
+    }
+}
+
+.MuiDataGrid-cell {
+    overflow: unset !important;
+}
+
+.rc-tabs-dropdown {
+    background-color: $white !important;
+    border: 1px solid $gray-100 !important;
+    border-radius: 5px;
+    width: 250px;
+
+    ul {
+        li {
+            span {
+                div {
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}
+
+.react-joyride__overlay {
+    height: unset !important;
+    overflow: unset !important;
+}
+
+.react-select--is-disabled {
+    .react-select__control--is-disabled {
+        .react-select__value-container,
+        .react-select__indicators {
+            background-color: #AAA2;
+        }
+    }
+}
+
+input {
+    &:disabled {
+        background-color: #AAA2 !important;
+    }
+}

@@ -1,0 +1,32 @@
+@import '../../../../../assets/scss/theme/variables';
+// @import '../../../../../assets/scss/dark/variables';
+
+.container {
+  background-color: #7771;
+  display: flex;
+  margin: 6px 4px;
+  padding: 6px;
+}
+
+.field {
+  flex: 1 0 0;
+  margin: 2px 0 0 4px;
+}
+
+.dynamic {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8px;
+
+  label {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-bottom: 0;
+
+    input {
+      margin: unset;
+      position: unset;
+    }
+  }
+}

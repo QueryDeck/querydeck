@@ -1,0 +1,82 @@
+// Place your own theme CSS or SCSS rules below this line, these rules will override any Bootstrap and theme variables.
+
+@import 'modules/common';
+@import 'modules/overrides';
+@import 'modules/interface/filters';
+@import 'modules/interface/menu';
+@import 'modules/interface/navbar';
+@import 'modules/interface/query-builder';
+@import 'modules/interface/create';
+@import 'modules/interface/schema';
+@import 'modules/interface/embedded';
+@import 'modules/interface/api-query';
+@import 'modules/interface/api-test-query';
+@import 'modules/interface/security';
+@import 'modules/interface/overview';
+@import 'modules/interface/deploy';
+
+////////////////////////////////////////////////////////////
+// MEDIA QUERIES
+////////////////////////////////////////////////////////////
+  @media screen and (max-width: 1000px) {
+
+      // column modal 
+      .modal-table-col .modal-content {
+       
+          width: 120%;
+          margin-left: calc(0px - 10%);
+
+      }
+  }
+
+@media screen and (max-width: 831px) {
+    .databases,
+    .dashboards,
+    .enums,
+    .queries {
+        &-list {
+            width: unset;
+            align-self: unset;
+        }
+    }
+
+    .modal-table-col .modal-content {
+        width: 100%;
+        margin-left: 0px;
+
+    }
+}
+
+@media screen and (max-width: 767px) { 
+    .navbar {
+        &-toggler {
+            display: unset;
+            visibility: unset;
+        }
+
+        &-search {
+            padding: 0 8px;
+            margin: 4px auto;
+        }
+
+        &-switcher {
+            margin: 8px;
+
+            &-heading {
+                display: unset;
+                visibility: unset;
+            }
+        }
+
+        &-logout {
+            margin: 4px;
+        }
+    }
+
+    .apps {
+        &-list {
+            width: unset;
+            align-self: unset;
+        }
+    }
+}

@@ -1,0 +1,22 @@
+@import '../../../../../assets/scss/theme/variables';
+// @import '../../../../../assets/scss/dark/variables';
+
+.toolbar {
+  &_dynamic {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 8px;
+
+    label {
+      display: flex;
+      flex-direction: row-reverse;
+      margin-bottom: 0;
+
+      input {
+        margin: unset;
+        position: unset;
+      }
+    }
+  }
+}

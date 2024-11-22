@@ -1,0 +1,101 @@
+{
+
+  "express": {
+      "view cache": false,
+      "view engine": "html",
+      "x-powered-by": false,
+      "trust proxy": true,
+      "etag": false,
+      "views": "path:./public"
+  },
+
+  "view engines": {
+    "html": {
+        "name": "ejs",
+        "module": "ejs",
+        "renderer": "renderFile"
+    }
+  },
+
+  "PG": {
+
+    "sessions": "env:ZAS_SESSIONS",
+    "main": "env:ZAS_ADMIN",
+    "zas_client_nodb": "env:ZAS_CLIENT"
+
+  },
+
+    "middleware": {
+
+      "appsec": {
+        "enabled": false
+      },
+
+      "cookieParser": {
+        "enabled": false
+      },
+
+        "devtools": {
+            "enabled": true,
+            "priority": 35,
+            "module": {
+                "name": "construx",
+                "arguments": [
+                    "path:./public",
+                    "path:./.build",
+                    {
+                        "copier": {
+                            "module": "construx-copier",
+                            "files": "**/*"
+                        }
+                    }
+                ]
+            }
+        },
+
+        "refreshModeladder": {
+          "enabled": true,
+          "priority": 114,
+          "module": {
+            "name": "path:./middlewares/refreshModeladder.js"
+          }
+        },
+
+        "cors": {
+          "enabled": true,
+          "priority": 115,
+          "module": {
+            "name": "path:./middlewares/cors.js"
+          }
+        },
+
+        "catchClientRequest": {
+          "enabled": true,
+          "priority": 116,
+          "module": {
+            "name": "path:./middlewares/catchClientRequest.js"
+          }
+        },
+
+        "modeladder": {
+          "enabled": true,
+          "priority": 118,
+          "module": {
+            "name": "path:./middlewares/modeladder.js"
+          }
+        },
+
+        "router": {
+          "priority": 120,
+          "enabled": true,
+            "module": {
+                "arguments": [
+                  {
+                    "directory": "path:./controllers"
+                  }
+                ]
+            }
+        }
+        
+    }
+}

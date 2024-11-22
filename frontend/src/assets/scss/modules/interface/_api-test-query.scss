@@ -1,0 +1,16 @@
+////////////////////////////////////////////////////////////
+// API-test section rules
+// Present in all routes once the user is logged in
+////////////////////////////////////////////////////////////
+.api-test{
+  
+
+   &-viewtojson-step-bx{
+      height: calc(100vh - 61.283px - 50px - 28px - 60px) ; 
+      z-index: 0;
+      position: relative;
+    }
+    &-right-tab-response-pre{
+       height: 100%;
+    }
+}

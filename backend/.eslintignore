@@ -1,0 +1,17 @@
+views/
+node_modules/
+temp/
+public/
+sockets/
+shell/
+oldfiles/
+
+.build/
+.build/
+where_ui_test.js
+convertselcolumns_agg_draft.js
+Gruntfile.js
+condplay.js
+
+
+ 

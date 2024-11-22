@@ -1,0 +1,110 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true,
+        "jest": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "impliedStrict": true
+    },
+    "rules": {
+        "indent": [
+            "warn",
+            2
+        ],
+        "semi": [
+            "warn",
+            "always"
+        ],
+        "no-unused-vars": [
+            "warn",
+            {
+                "vars": "all",
+                "args": "after-used",
+                "ignoreRestSiblings": false
+            }
+        ],
+        "no-multiple-empty-lines": [
+            1,
+            {
+                "max": 1,
+                "maxEOF": 0
+            }
+        ],
+        "no-multi-spaces": [
+            1,
+            {
+                "ignoreEOLComments": false
+            }
+        ],
+        "comma-spacing": [
+            1,
+            {
+                "before": false,
+                "after": true
+            }
+        ],
+        "key-spacing": [
+            "warn",
+            {
+                "beforeColon": false
+            }
+        ],
+        "semi-spacing": [
+            "warn",
+            {
+                "before": false,
+                "after": true
+            }
+        ],
+        "space-in-parens": [
+            "warn",
+            "never"
+        ]
+    },
+    "overrides": [
+        {
+            "files": [
+                "public/js/*.js"
+            ], // Or *.test.js
+            "rules": {
+                "no-console": [
+                    "warn",
+                    {
+                        "allow": [
+                            "clear",
+                            "info",
+                            "error",
+                            "dir",
+                            "trace",
+                            "warn"
+                        ]
+                    }
+                ],
+                "no-unused-vars": "off",
+                "no-undef": "off"
+            },
+            "env": {
+                "es6": true
+            }
+        }
+    ]
+}
+/*  "no-console": [
+            "warn",
+            {
+                "allow": [
+                    "clear",
+                    "info",
+                    "error",
+                    "dir",
+                    "trace",
+                    "warn"
+                ]
+            }
+        ]
+     */

@@ -1,0 +1,94 @@
+////////////////////////////////////////////////////////////
+// Navbar Rules
+// Present in all routes once the user is logged in
+////////////////////////////////////////////////////////////
+.navbar {
+    &-main {
+        border-radius: 5px;
+        margin-bottom: 4px;
+    }
+
+    &-heading {
+        display: flex;
+
+        &-link {
+            border-radius: 5px;
+            height: 32px;
+            margin-right: 8px;
+            overflow: hidden;
+            // width: 90px;
+
+            img {
+                border-radius: 5px;
+                cursor: pointer;
+                height: 32px;
+                width: 120px;
+                object-fit: contain;
+                transform: scale(1);
+                -moz-transform: scale(1);
+                -ms-transform: scale(1);
+                -o-transform: scale(1);
+                -webkit-transform: scale(1);
+                transition: all .15s;
+                
+                &:hover {
+                    -moz-transform: scale(1.2);
+                    -ms-transform: scale(1.2);
+                    -o-transform: scale(1.2);
+                    -webkit-transform: scale(1.2);
+                    transform: scale(1.2);
+                }
+            }
+        }
+    }
+
+    &-toggler {
+        display: none;
+        visibility: hidden;
+    }
+
+    &-search {
+        padding: 0 8px;
+        margin: 0 auto;
+
+        &-input {
+            max-height: 40px;
+        }
+    }
+
+    &-switcher {
+        margin: 4px 8px;
+        display: flex;
+        justify-content: space-between;
+
+        &-heading {
+            display: none;
+            visibility: hidden;
+        }
+
+        &-checked {
+            color: #AAA;
+            margin: 5px;
+        }
+
+        &-unchecked {
+            color: #FB0;
+            margin: 5px
+        }
+    }
+
+    &-logout {
+        padding: 0 8px;
+
+        .btn {
+            text-align: right;
+            width: 44px;
+            transition: width .15s;
+
+            &:hover {
+                width: 109px;
+            }
+        }
+        
+    }
+}

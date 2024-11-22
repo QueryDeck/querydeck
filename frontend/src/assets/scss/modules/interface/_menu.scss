@@ -1,0 +1,112 @@
+////////////////////////////////////////////////////////////
+// Menu Rules
+// Present in all routes inside /apps/:app_id
+////////////////////////////////////////////////////////////
+.menu {
+    &-btn {
+        height: 48px;
+        width: 48px;
+        margin: 0 0 8px 0;
+        text-align: left;
+        transition: all .15s;
+
+        span {
+            display: none;
+            visibility: hidden;
+        }
+
+        // APIs
+        &:nth-of-type(1) {
+            padding: 4px 10px; // APIs
+        }
+
+        // Saved APIs
+        &:nth-of-type(2) {
+            padding: 4px 18px; // Saved APIs
+        }
+
+        // Data Sources
+        &:nth-of-type(3) {
+            padding: 4px 16px; // Data Sources
+        }
+
+        // Security
+        &:nth-of-type(4) {
+            padding: 4px 16px; // Security
+        }
+
+        // Deployments
+        &:nth-of-type(5) {
+            padding: 4px 16px; // Deployments
+        }
+
+        &:only-of-type {
+            padding: 4px 15px; // Single buttons
+        }
+
+        &-apps {
+            height: 48px;
+            width: 48px;
+            margin: 0 0 8px 0 !important;
+            text-align: left;
+            transition: all .15s;
+        }
+        &-apps:hover  {
+            width: 166px !important; // back to apps
+        }
+
+        &:hover {
+            // APIs 
+            &:nth-of-type(1) {
+                width: 139px; // APIs 
+            }
+
+            // Saved APIs
+            &:nth-of-type(2) {
+                width: 171px; // Saved APIs
+            }
+
+            // Data Sources
+            &:nth-of-type(3) {
+                width: 160px; // Data Sources
+            }
+
+            // Security
+            &:nth-of-type(4) {
+                width: 126px; // Security
+            }
+
+            &:nth-of-type(5) {
+                width: 162px; // Deployments
+            }
+
+            span {
+                display: inline;
+                visibility: visible;
+            }
+        }
+
+        &:last-of-type {
+            margin: 0
+        }
+
+        &-exit {
+            padding: 4px 16px;
+
+            &:hover {
+                width: 100px !important; // User button
+            }
+
+            &-menu {
+                padding: 0;
+
+                &-item {
+                    padding: 8px;
+                }
+            }
+        }
+        &-badge{ 
+            margin-top: 8px;
+        }
+    }
+}

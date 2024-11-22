@@ -1,0 +1,9 @@
+{
+  "name": "querydeck-express",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "https://app.querydeck.io",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}

@@ -1,0 +1,55 @@
+# # Node docker image on which our code would run
+# im#age: node:8.9.0
+# image: node:latest
+# image: ubuntu:latest
+
+
+######## NOTE:  gitlab runner runs previous version of .gitlab-ci.yml #########
+ 
+
+variables:
+
+  RSA_FILE_PATH: /root/.ssh/qc_backend.pem
+  RSA_FILE_PATH_PROD: /root/.ssh/qc_backend_prod.pem
+
+ 
+
+
+
+
+#This command is run before actual stages start running
+before_script:
+  - mkdir -p ~/.ssh # mkdir if not exist 
+  - echo -e  "$SSH_PRIVATE_KEY"  >  $RSA_FILE_PATH 
+  - chmod 400 $RSA_FILE_PATH
+  - echo -e  "$SSH_PRIVATE_KEY_PROD"  >  $RSA_FILE_PATH_PROD 
+  - chmod 400 $RSA_FILE_PATH_PROD
+ 
+
+after_script:
+  - rm -f $RSA_FILE_PATH #remove ssh file 
+  - rm -f $RSA_FILE_PATH_PROD #remove ssh file 
+
+
+stages:
+  - deploy 
+
+# Job's name  
+Deploy to Production:
+  only:
+    - prod
+  stage: deploy
+  script:
+    - echo "Deploying in Production"
+    - bash shell/deploy/disable_host_key_checking.sh 
+    - ssh -i $RSA_FILE_PATH_PROD  $SERVER_ADDRESS_PROD 'cd /home/ubuntu/qd-backend; sh shell/deploy/update_n_restart_prod.sh;' 
+
+# Job's name  
+Deploy to Development:
+  only:
+    - dev
+  stage: deploy
+  script:
+    - echo "Deploying in Development"
+    - bash shell/deploy/disable_host_key_checking.sh 
+    - ssh  -i $RSA_FILE_PATH  $SERVER_ADDRESS 'cd /home/ubuntu/qd-backend; sh shell/deploy/update_n_restart.sh;' 

@@ -1,0 +1,51 @@
+node_modules
+.env
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+.build/
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode/
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+*temp.*
+/temp
+/deploy
+/.well-known
+/lib/request.js
+tester.js
+
+/repo-gen/repos

@@ -1,0 +1,9 @@
+{
+  "extends": ["react-app", "plugin:react/recommended"],
+  "rules": {
+    "prettier/prettier": 0,
+    "react/prop-types": "off",
+    "react-hooks/exhaustive-deps": 0,
+    "react/no-unescaped-entities": 0
+  }
+}

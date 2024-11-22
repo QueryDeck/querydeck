@@ -1,0 +1,105 @@
+////////////////////////////////////////////////////////////
+// Filters custom component rules
+// Present in all filter instances in api builder
+////////////////////////////////////////////////////////////
+.filters {
+  &-group {
+    border: 1px solid $gray-300;
+    border-radius: 4px;
+    flex: 1 0 0;
+    margin-bottom: 8px;
+    padding: 8px;
+
+    &:last-of-type {
+      margin-bottom: unset;
+    }
+    
+    &-toolbar {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    &-child {
+      display: flex;
+      margin-top: 8px;
+
+      &-tree {
+        background-color: #7774;
+        margin: -10px 0 2px 0;
+        width: 2px;
+      }
+
+      &-node {
+        border-top: 2px solid #7774;
+        margin-top: 20px;
+        width: 8px;
+      }
+    }
+  }
+
+  &-rule {
+    display: flex;
+    flex: 1 0 0;
+    margin-bottom: 8px;
+    padding: 0;
+
+    &:last-of-type {
+      margin-bottom: unset;
+    }
+
+    &-field,
+    &-exists-field,
+    &-operator,
+    &-exists-operator,
+    &-value,
+    &-method,
+    &-delete {
+      flex: 1 0 0;
+      padding-left: 8px;
+    }
+
+    &-field,
+    &-exists-field {
+      padding-left: 0;
+    }
+
+    &-exists-operator {
+      &-option {
+        display: flex;
+
+        &-table {
+          margin-right: 4px;
+
+          span {
+            background-color: $primary;
+          }
+        }
+
+        &-join {
+          margin-left: 4px;
+        }
+      }
+    }
+
+    &-exists-field,
+    &-operator,
+    &-method {
+      max-width: 200px;
+    }
+
+    &-value {
+      input {
+        height: 100%;
+
+        &:disabled {
+          background-color: #AAA2;
+        }
+      }
+    }
+
+    &-delete {
+      display: flex;
+      flex: unset;
+    }
+  }
+}

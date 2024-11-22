@@ -1,0 +1,146 @@
+////////////////////////////////////////////////////////////
+// Deploy  section  
+// Present in all routes once the user is logged in
+////////////////////////////////////////////////////////////
+
+.deploy {
+  &-repo {
+    &-modal {
+      &-instuction {
+
+        font-size: 17px;
+        // font-weight: 600;
+        display: flex;
+
+        // &-number{
+        //   margin-left: 10px;
+        //   border: 1px solid blue;
+        // }
+        &-text {
+          margin-left: 10px;
+          /* border: 1px solid #00f; */
+          padding: 3px 5px;
+          border-radius: 5px;
+          /* font-weight: 600; */
+          background-color: rgb(232 230 230 / 43%);
+        }
+      }
+
+
+      &-body {
+        padding: 20px 30px;
+        height: 50vh;
+      }
+    }
+
+    &-diff {
+      &-bx {
+        position: relative;
+        height: calc(100vh - 340px);
+        overflow: auto;
+        padding: 12px;
+        padding-bottom: 8px;
+        border: 1px solid #d2d2d2;
+        /* background-color: #fafafa; */
+        margin-bottom: 15px;
+        margin-top:15px;
+        border-radius: 5px;
+
+      }
+
+      &-footer {
+        position: absolute;
+        bottom: 8px;
+        right: 17px;
+
+      }
+    }
+
+    &-commit {
+
+      &-head {
+        &-bx {
+          height: 61px;
+          margin-bottom: 10px;
+          padding: 0px 10px 0px 10px;
+          justify-content: space-between;
+
+          &-left {
+            width: unset;
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            // padding: 9px;
+            align-items: center;
+
+            &-url {
+              font-weight: 600;
+              // font-size:17px;
+              white-space: nowrap;
+
+              margin: 0px 5px;
+
+
+              a {
+                color: rgba(31, 35, 40, .85);
+              }
+            }
+
+            &-message {
+
+              // color: #1F2328;
+              margin: 0px 5px;
+
+            }
+          }
+
+          &-right {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: unset;
+            // border : 1px solid blue
+          }
+
+        }
+      }
+
+      &-modal {
+        &-body {
+          height: 64vh;
+          overflow-y: auto;
+        }
+      }
+
+
+
+
+    }
+
+    &-allpushed {
+      &-bx {
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+        border: 1px solid rgba(0, 0, 0, .1098039216);
+        border-radius: 5px;
+        // background-color: rgba(198, 198, 198, .0509803922);
+        padding-top: 40px;
+        padding-bottom: 40px;
+        margin-top: 15px;
+        height: calc(100vh - 337px);
+      }
+
+      &-check-icon {
+        color: #87838a78;
+        border-radius: 50%;
+        box-shadow: 0 0 2px 1px rgba(94, 110, 130, .2588235294);
+        font-size: 100px;
+      }
+
+      &-title {
+        color: rgb(57 64 73 / 85%)
+      }
+    }
+  }
+}

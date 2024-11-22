@@ -1,0 +1,51 @@
+////////////////////////////////////////////////////////////
+// Data source overview
+////////////////////////////////////////////////////////////
+.overview {
+    &-details {
+        &-row {
+
+            &-bx {
+                border: 1px solid rgba(0,0,0,.1098039216);
+                border-radius: 5px;
+                background-color: rgba(198,198,198,.0509803922);
+                display: flex;
+                flex: .4;
+                height: 36px;
+                align-items: center;
+                margin: 5px 0;
+                padding: 7px;
+            }
+
+            &-label {
+                width: 30%;
+            }
+
+            &-value {
+                width: 70%;
+                font-weight: 600;
+                color: #000000c4;
+                margin-left:5px;
+
+            }
+        }
+    }
+
+
+        &-resync {
+            &-bx {
+                height: 60px;
+                // border: 1px solid blue;
+                display: flex;
+                align-items: center;
+
+       
+            }
+            &-btn-title{
+                white-space: nowrap;
+                // border:1px solid blue ; 
+             }
+    
+        }
+    
+}

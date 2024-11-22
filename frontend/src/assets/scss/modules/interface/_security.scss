@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////
+// Security section  ( cors + authentication  ) 
+// Present in all routes once the user is logged in
+////////////////////////////////////////////////////////////
+.security {
+  &-auth {
+    &-btn-bx {
+      display: flex;
+      justify-content: space-between;
+      padding: 0px;
+    }
+
+    &-dropdown-bx{
+      margin-bottom: 10px;
+      border:'1px solid blue';
+    }
+  }
+
+  &-tab-card {
+    height: calc(100vh - 57.667px - 12px - 45px);
+  }
+}

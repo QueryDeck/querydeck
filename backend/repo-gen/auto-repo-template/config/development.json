@@ -1,0 +1,69 @@
+{
+
+  "express": {
+      "view cache": false,
+      "view engine": "html",
+      "x-powered-by": false,
+      "trust proxy": true,
+      "etag": false,
+      "views": "path:./public"
+  },
+
+    "middleware": {
+
+      "appsec": {
+        "enabled": false
+      },
+
+      "cookieParser": {
+        "enabled": false
+      },
+
+        "devtools": {
+            "enabled": true,
+            "priority": 35,
+            "module": {
+                "name": "construx",
+                "arguments": [
+                    "path:./public",
+                    "path:./.build",
+                    {
+                        "copier": {
+                            "module": "construx-copier",
+                            "files": "**/*"
+                        }
+                    }
+                ]
+            }
+        },
+
+        "cors": {
+          "enabled": true,
+          "priority": 115,
+          "module": {
+            "name": "path:./middlewares/cors.js"
+          }
+        },
+
+        "catchClientRequest": {
+          "enabled": true,
+          "priority": 116,
+          "module": {
+            "name": "path:./middlewares/catchClientRequest.js"
+          }
+        },
+
+        "router": {
+          "priority": 120,
+          "enabled": true,
+            "module": {
+                "arguments": [
+                  {
+                    "directory": "path:./controllers"
+                  }
+                ]
+            }
+        }
+        
+    }
+}

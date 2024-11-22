@@ -1,0 +1,1618 @@
+
+////////////////////////////////////////////////////////////
+// Query Builder
+// apps/:app_id/queries/new & apps/:app_id/queries/:query_id
+// apps/:app_id/forms/new & apps/:app_id/forms/:form_id
+// apps/:app_id/tables/new & apps/:app_id/tables/:table_id
+////////////////////////////////////////////////////////////
+.query {
+    // Wizard
+    &-wizard {
+        flex: 1 0 0;
+        height: calc(100vh - 56px - 4px - 8px - 4px);
+        margin-top: 4px;
+
+        &-container {
+            align-self: center;
+            width: 768px;
+        }
+
+        &-header {
+            text-align: center;
+        }
+
+        &-body {
+            &-template {
+                cursor: pointer;
+                display: flex;
+                height: 120px;
+                margin-bottom: 16px;
+                transition: opacity ease 0.2s;
+
+                &:last-of-type {
+                    margin-bottom: unset;
+                }
+
+                &:hover {
+                    opacity: 0.8;
+                }
+
+                &-list {
+                    height: calc(100vh - 56px - 4px - 8px - 4px - 127.817px - 20px - 20px);
+                    overflow-y: auto;
+                }
+
+                &-image {
+                    background-color: #77777733;
+                    border-radius: 5px 0 0 5px;
+                    padding: 16px;
+                    width: 150px;
+                }
+
+                &-details {
+                    background-color: #AAAAAA11;
+                    border-radius: 0 5px 5px 0;
+                    display: flex;
+                    flex: 1 0 0;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: 0 16px;
+
+                    &-title {
+                        font-size: 20px;
+                        font-weight: 600;
+                        margin-bottom: 8px;
+                    }
+
+                    &-info {
+                        font-size: 14px;
+                        font-weight: 300;
+                    }
+                }
+            }
+
+            &-step {
+                height: calc(100vh - 56px - 4px - 8px - 4px - 127.817px - 20px - 20px - 40px - 20px);
+                margin-bottom: 20px;
+
+                &-database,
+                &-base {
+                    padding: 16px 0;
+                }
+
+                &-category {
+                    display: flex;
+                    margin-bottom: 4px;
+
+                    &:last-of-type {
+                        margin-bottom: unset;
+                    }
+
+                    &-alias {
+                        flex: 3 0 0;
+                        padding-right: 8px;
+                    }
+
+                    &-column {
+                        flex: 7 0 0;
+                        padding-right: 8px;
+                    }
+
+                    &-list {
+                        padding: 16px 0;
+                    }
+                }
+
+                &-metric {
+                    display: flex;
+                    margin-bottom: 4px;
+
+                    &:last-of-type {
+                        margin-bottom: unset;
+                    }
+
+                    &-option {
+                        padding-right: 8px;
+                        flex: 3 0 0;
+                    }
+
+                    &-column {
+                        flex: 7 0 0;
+                        padding-right: 8px;
+                    }
+
+                    &-list {
+                        padding: 16px 0;
+                    }
+                }
+
+                &-time {
+                    display: flex;
+
+                    &-stamp {
+                        flex: 1 0 0;
+                        padding-right: 8px;
+                    }
+
+                    &-granularity {
+                        width: 200px;
+                    }
+                }
+            }
+
+            &-navigation {
+                display: flex;
+
+                div {
+                    flex: 1 0 0;
+                    padding: 0 4px;
+
+                    &:first-of-type {
+                        padding-left: 0;
+                    }
+
+                    &:last-of-type {
+                        padding-right: 0;
+                    }
+                }
+            }
+        }
+    }
+
+    // LHS Section
+    &-left {
+        overflow: auto;
+        height: calc(100vh - 61.283px - 12px);
+        border-radius: 5px;
+        margin-top: 4px;
+
+        &-max {
+            margin-right: 0;
+        }
+        
+        &-min {
+            margin-right: 0;
+            display: none;
+            visibility: hidden;
+        }
+
+        &-builder {
+            height: calc(100vh - 61.283px - 12px);
+            overflow-y: auto;
+        }
+
+        &-btn {
+            display: flex;
+        }
+
+        &-dropdown {
+            flex: 1 0 0;
+            align-items: flex-end;
+            display: flex;
+
+            &-toggle {
+                flex: 1 0 0;
+                margin: 4px;
+            }
+
+            &-menu {
+                padding: 0;
+                width: calc(100% - 8px);
+
+                &-item {
+                    font-size: 18px;
+                    padding: 8px;
+                    text-align: center;
+                }
+            }
+        }
+
+        &-reset,
+        &-save,
+        &-share,
+        &-copy,
+        &-execute {
+            padding: 0 4px 2px 4px;
+        }
+
+        &-save {
+            flex: 1 0 0;
+        }
+
+        &-drag {
+            background-color: #77777733;
+        }
+
+        &-nav {
+            flex: 1 0 0;
+            text-align: center;
+
+            a {
+                padding: 4px;
+            }
+        }
+
+        section {
+            padding: 0;
+        }
+    }
+
+    // RHS Section
+    &-right {
+        overflow: auto;
+        height: calc(100vh - 61.283px - 12px);
+        border-radius: 5px;
+        margin-top: 4px;
+
+        &-max {
+            margin-left: 0;
+        }
+
+        &-min {
+            margin-left: 0;
+            display: none;
+            visibility: hidden;
+        }
+
+        &-nav {
+            flex: 1 0 0;
+            text-align: center;
+
+            a {
+                padding: 4px;
+            }
+        }
+
+        &-tab {
+            text-align: left;
+            height: calc(100vh - 61.283px - 50px);
+            padding: 4px;
+        }
+
+        &-drag {
+            background-color: #77777733;
+        }
+
+        &-raw {
+            &-pane {
+                display: flex;
+
+                &-title {
+                    display: inline-block;
+                    flex: 1 0 0;
+                }
+
+                &-delete {
+                    display: inline-block;
+                    margin: 0 8px;
+                }
+
+                &-add {
+                    padding: 4px 20px;
+                }
+            }
+        }
+    }
+
+    // Modals
+    &-modal {
+        // Join Modal
+        &-join {
+            min-width: 1200px;
+
+            &-body {
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 66px - 65px - 58px);
+                justify-content: space-between;
+            }
+
+            &-tip {
+                margin: 16px 0 0 0;
+
+                h5 {
+                    margin-bottom: 16px;
+                }
+
+                p {
+                    margin: 0;
+                }
+            }
+
+            &-switcher {
+                &-leaf {
+                    vertical-align: -0.125em;
+                }
+
+                &-node {
+                    cursor: pointer;
+                }
+            }
+
+            &-tree {
+                flex: 1 0 0;
+                overflow: auto;
+            }
+        }
+
+        // Filter Modal
+        &-filter {
+            min-width: 1200px;
+
+            &-body {
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 66px - 65px - 72px);
+                justify-content: space-between;
+
+                &-container {
+                    overflow: auto;
+                    height: 100%;
+
+                    .query-builder-container {
+                        .query-builder {
+                            .group-container {
+                                margin: 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            &-builder {
+                flex: 1 0 0;
+                height: 100%;
+                overflow: unset !important;
+                margin: 0 !important;
+            }
+
+            &-tip {
+                margin: 16px 0 0 0;
+
+                h5 {
+                    margin-bottom: 16px;
+                }
+
+                p {
+                    margin: 0;
+                }
+            }
+            &-footer {
+                display:flex; 
+                width: 100%;
+                align-items: flex-end;
+            }
+        }
+
+        // Sort Modal
+        &-sort {
+            min-width: 800px;
+
+            &-content {
+                display: flex;
+            }
+
+            &-columns {
+                flex: 1 0 0;
+            }
+
+            &-add {
+                width: 48px;
+                text-align: right;
+                transition: all .15s;
+    
+                span {
+                    display: none;
+                    visibility: hidden;
+                }
+    
+                &:hover {
+                    width: 86px;
+    
+                    span {
+                        display: inline;
+                        visibility: visible;
+                    }
+                }
+            }
+
+            &-list {
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 66px - 65px - 58px - 40px - 16px - 48px);
+                justify-content: space-between;
+
+                &-container {
+                    flex: 1 0 0;
+                    overflow-y: auto;
+
+                    &-item {
+                        margin: 8px 4px 8px 0;
+                        display: flex;
+                        flex-direction: row;
+    
+                        &-content {
+                            flex: 1 0 0;
+                            padding: 4px 12px;
+                            margin-right: 16px;
+                            border: 2px solid #77777733;
+                            background-color: #77777707;
+                            transition: background-color .15s;
+                            border-radius: 5px;
+                            display: flex;
+    
+                            &:hover {
+                                background-color: #77777733;
+                            }
+                        }
+    
+                        &-action {                            
+                            .btn {
+                                transition: all .15s;
+                                text-align: right;
+                                width: 46px;
+    
+                                span {
+                                    display: none;
+                                    visibility: hidden;
+                                }
+    
+                                &:hover {
+                                    width: 116px;
+    
+                                    span {
+                                        display: inline;
+                                        visibility: visible;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            &-table {
+
+                &-row {
+                    border-top: 1px solid #77777733;
+                }
+
+                &-cell {
+                    padding: 4px !important;
+                    border-top: none !important;
+                    vertical-align: middle !important;
+
+                    &-btn {
+                        text-align: right;
+                        width: 60px;
+                        margin: 0;
+                        margin-right: 1px !important;
+                    }
+                }
+            }
+        }
+
+        // Metrics Modal
+        &-metrics {
+            min-width: 800px;
+
+            &-body {
+                height: 80vh;
+                overflow-y: auto;
+            }
+
+            &-content {
+                display: flex;
+            }
+
+            &-columns {
+                flex: 2 0 0;
+            }
+
+            &-options {
+                flex: 1 0 0;
+            }
+
+            &-item {
+                cursor: pointer;
+            }
+
+            &-table {
+                &-row {
+                    border-top: 1px solid #77777733;
+                }
+
+                &-cell {
+                    padding: 4px !important;
+                    border-top: none !important;
+                    vertical-align: middle !important;
+
+                    &-btn {
+                        text-align: right;
+                        width: 60px;
+                        margin: 0;
+                        margin-right: 1px !important;
+                    }
+                }
+            }
+        }
+
+        // Dimensions Modal
+        &-dimensions {
+            min-width: 800px;
+
+            &-body {
+                height: 80vh;
+                overflow-y: auto;
+            }
+
+            &-content {
+                display: flex;
+            }
+
+            &-columns {
+                flex: 1 0 0;
+            }
+
+            &-item {
+                cursor: pointer;
+            }
+
+            &-table {
+                &-row {
+                    border-top: 1px solid #77777733;
+                }
+
+                &-cell {
+                    padding: 4px !important;
+                    border-top: none !important;
+                    vertical-align: middle !important;
+
+                    &-btn {
+                        text-align: right;
+                        width: 60px;
+                        margin: 0;
+                        margin-right: 1px !important;
+                    }
+                }
+            }
+        }
+
+        // Columns Modal
+        &-columns {
+            min-width: 1200px;
+
+            // Metrics Modal
+            &-metrics {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns {
+                    flex: 7 0 0;
+                }
+
+                &-options {
+                    flex: 3 0 0;
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+
+                    &:hover {
+                        width: 86px;
+
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(90vh - 65px - 66px - 16px - 16px - 36px - 16px - 16px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {                            
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+            }
+
+            // Dimensions Modal
+            &-dimensions {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns {
+                    flex: 7 0 0;
+                }
+
+                &-alias,
+                &-label {
+                    flex: 3 0 0;
+                }
+
+                &-label {
+                    input {
+                        height: 39px;
+                    }
+                }
+
+                &-required {
+                    display: flex;
+                    flex-direction: row-reverse;
+                    width: 100px;
+                    margin-top: 8px;
+
+                    label {
+                        font-size: 16px;
+                        width: 100px;
+                    }
+
+                    input {
+                        margin-top: 6px;
+                    }
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+        
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+        
+                    &:hover {
+                        width: 86px;
+        
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(90vh - 65px - 66px - 16px - 16px - 36px - 16px - 16px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+            }
+
+            // Columns section
+            &-vanilla {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns {
+                    flex: 7 0 0;
+                }
+
+                &-alias,
+                &-label {
+                    flex: 3 0 0;
+                }
+
+                &-label {
+                    input {
+                        height: 39px;
+                    }
+                }
+
+                &-required {
+                    display: flex;
+                    flex-direction: row-reverse;
+                    width: 100px;
+                    margin-top: 8px;
+
+                    label {
+                        font-size: 16px;
+                        width: 100px;
+                    }
+
+                    input {
+                        margin-top: 6px;
+                    }
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+        
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+        
+                    &:hover {
+                        width: 86px;
+        
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 66px - 65px - 58px - 40px - 16px - 62px - 34px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+
+                &-footer {
+                    display:flex; 
+                    width: 100%;
+                    align-items: flex-end;
+                }
+            }
+
+            // Conflict section
+            &-conflict {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns {
+                    flex: 7 0 0;
+                }
+
+                &-alias,
+                &-label {
+                    flex: 3 0 0;
+                }
+
+                &-label {
+                    input {
+                        height: 39px;
+                    }
+                }
+
+                &-required {
+                    display: flex;
+                    flex-direction: row-reverse;
+                    width: 100px;
+                    margin-top: 8px;
+
+                    label {
+                        font-size: 16px;
+                        width: 100px;
+                    }
+
+                    input {
+                        margin-top: 6px;
+                    }
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+        
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+        
+                    &:hover {
+                        width: 86px;
+        
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 66px - 65px - 58px - 40px - 16px - 62px - 34px - 55px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+
+                &-footer {
+                    display:flex; 
+                    width: 100%;
+                    align-items: flex-end;
+                }
+            }
+
+            // Return section
+            &-return {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns {
+                    flex: 7 0 0;
+                }
+
+                &-alias,
+                &-label {
+                    flex: 3 0 0;
+                }
+
+                &-label {
+                    input {
+                        height: 39px;
+                    }
+                }
+
+                &-required {
+                    display: flex;
+                    flex-direction: row-reverse;
+                    width: 100px;
+                    margin-top: 8px;
+
+                    label {
+                        font-size: 16px;
+                        width: 100px;
+                    }
+
+                    input {
+                        margin-top: 6px;
+                    }
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+        
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+        
+                    &:hover {
+                        width: 86px;
+        
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 66px - 65px - 58px - 40px - 16px - 62px - 34px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+
+                &-footer {
+                    display:flex; 
+                    width: 100%;
+                    align-items: flex-end;
+                }
+            }
+
+            // Custom Modal
+            &-custom {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns,
+                &-alias,
+                &-formula,
+                &-datatype,
+                &-column-alias {
+                    flex: 1 0 0;
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+        
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+        
+                    &:hover {
+                        width: 86px;
+        
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(90vh - 65px - 66px - 16px - 16px - 36px - 16px - 16px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {                            
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+            }
+
+            // Forms Modal
+            &-forms {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns,
+                &-enums,
+                &-enums-disabled {
+                    flex: 7 0 0;
+                }
+
+                &-alias,
+                &-label {
+                    flex: 3 0 0;
+                }
+
+                &-label,
+                &-enums-disabled {
+                    input {
+                        height: 39px;
+                    }
+                }
+
+                &-required {
+                    display: flex;
+                    flex-direction: row-reverse;
+                    width: 100px;
+                    margin-top: 8px;
+
+                    label {
+                        font-size: 16px;
+                        width: 100px;
+                    }
+
+                    input {
+                        margin-top: 6px;
+                    }
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+        
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+        
+                    &:hover {
+                        width: 86px;
+        
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(90vh - 65px - 66px - 16px - 16px - 36px - 16px - 16px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {                            
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+            }
+
+            // Editable Tables Modal
+            &-tables {
+                &-content {
+                    display: flex;
+                }
+
+                &-columns,
+                &-enums,
+                &-enums-disabled {
+                    flex: 7 0 0;
+                }
+
+                &-alias,
+                &-label {
+                    flex: 3 0 0;
+                }
+
+                &-label,
+                &-enums-disabled {
+                    input {
+                        height: 39px;
+                    }
+                }
+
+                &-editable {
+                    display: flex;
+                    flex-direction: row-reverse;
+                    width: 100px;
+                    margin-top: 8px;
+
+                    label {
+                        font-size: 16px;
+                        width: 100px;
+                    }
+
+                    input {
+                        margin-top: 6px;
+                    }
+                }
+
+                &-add {
+                    width: 48px;
+                    text-align: right;
+                    transition: all .15s;
+        
+                    span {
+                        display: none;
+                        visibility: hidden;
+                    }
+        
+                    &:hover {
+                        width: 86px;
+        
+                        span {
+                            display: inline;
+                            visibility: visible;
+                        }
+                    }
+                }
+
+                &-list {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(90vh - 65px - 66px - 16px - 16px - 36px - 16px - 16px);
+                    justify-content: space-between;
+
+                    &-container {
+                        flex: 1 0 0;
+                        overflow-y: auto;
+
+                        &-item {
+                            margin: 8px 4px 8px 0;
+                            display: flex;
+                            flex-direction: row;
+
+                            &-content {
+                                display: flex;
+                                flex: 1 0 0;
+                            }
+
+                            &-action {                            
+                                .btn {
+                                    transition: all .15s;
+                                    text-align: right;
+                                    width: 46px;
+
+                                    span {
+                                        display: none;
+                                        visibility: hidden;
+                                    }
+
+                                    &:hover {
+                                        width: 116px;
+
+                                        span {
+                                            display: inline;
+                                            visibility: visible;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &-tip {
+                    margin: 16px 0 0 0;
+
+                    h5 {
+                        margin-bottom: 16px;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+
+        &-save,
+        &-share {
+            min-width: 800px;
+
+            &-link {
+                margin-bottom: 8px;
+
+                &-container {
+                    display: flex;
+
+                    button {
+                        margin: 0 0 0 8px;
+                    }
+                }
+            }
+
+            &-name {
+                margin-top: 8px;
+            }
+
+            &-buttons {
+                display: flex;
+                width: 100%;
+            }
+
+            &-button {
+                flex: 1 0 0;
+                padding: 4px;
+
+                button {
+                    width: 100%;
+                }
+            }
+        }
+    }
+
+    // Query Builder LHS Steps
+    &-db, // Database (Step-0)
+    &-name, // Name (Step-1)
+    &-base, // Base (Step-2)
+    &-method, // API method
+    &-route, // API route
+    &-join, // Join (Step-3)
+    &-column, // API Column
+    &-metrics, // Metrics (Step-4a)
+    &-dimensions, // Dimensions (Step-4b)
+    &-columns, // Custom Columns (Step-4c)
+    &-timestamp, // Timestamp (Step-5a)
+    &-granularity,  // Granularity (Step-5b)
+    &-filter, // Filter (Step-6)
+    &-sort, // Sort (Step-7)
+    &-pagination, // API Pagination
+    &-limit, // Limit (Step-7/8)
+    &-offset, // Offset (Step-7/8)
+    &-settings {
+        // border: 1px solid #77777733;
+        background-color: #7771;
+        // border-radius: 5px;
+        padding: 6px;
+        margin: 6px 4px;
+
+        &-add {
+            width: 48px;
+            text-align: left;
+            transition: all .15s;
+
+            span {
+                display: none;
+                visibility: hidden;
+            }
+
+            &:hover {
+                width: 86px;
+
+                span {
+                    display: inline;
+                    visibility: visible;
+                }
+            }
+        }
+    }
+
+    &-selector {
+        border: 1px dashed #77777733;
+        border-radius: 5px;
+        padding: 8px;
+        margin: 4px;
+    }
+
+    // Input steps
+    &-db,
+    &-name,
+    &-base,
+    &-method,
+    &-route,
+    &-join,
+    &-column,
+    &-pagination,
+    &-limit,
+    &-offset {
+        display: flex;
+
+        &-input,
+        &-select {
+            margin-top: 2px;
+            flex: 1 0 0;
+        }
+    }
+
+    // Timestamp Step
+    &-timestamp {
+        display: flex;
+
+        &-select {
+            flex: 1 0 0;
+        }
+    }
+
+    // Granularity Step
+    &-granularity {
+        display: flex;
+
+        &-select {
+            flex: 1 0 0;
+        }
+    }
+
+    // Query Results Table
+    &-table {
+        &-search {
+            margin-left: auto !important;
+        }
+    }
+}

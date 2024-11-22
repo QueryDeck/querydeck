@@ -1,0 +1,44 @@
+{
+  "name": "zas",
+  "version": "0.1.0",
+  "description": "zouk",
+  "author": "zouk",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test",
+    "build": "grunt build",
+    "dev": "nodemon  server.js",
+    "devclear": "nodemon --exec 'clear; node server.js';",
+    "dc": "npm run devclear",
+    "all": "npm run build && npm run test",
+    "deploy": "pm2 start server.js",
+    "prod_update": "sh shell/deploy/update_n_restart_prod.sh",
+    "dev_update": "sh shell/deploy/update_n_restart.sh",
+    "lint": "eslint ./models/**/*.js ",
+    "lint:fix": "eslint ./models/**/*.js --fix "
+  },
+  "dependencies": {
+    "connect-pg-simple": "^7.0.0",
+    "construx": "^1.0.1",
+    "construx-copier": "^1.0.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "eslint": "^8.0.1",
+    "express": "^4.17.1",
+    "http-proxy": "^1.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "kraken-js": "^2.3.0",
+    "lodash": "^4.17.21",
+    "node-uuid": "^1.4.8",
+    "npm": "^8.1.1",
+    "pg": "^8.7.1",
+    "postgres": "^3.3.2",
+    "request": "^2.88.2",
+    "sql-formatter": "^12.0.3",
+    "validator": "^13.9.0"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^15.0.0"
+  }
+}

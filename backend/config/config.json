@@ -1,0 +1,29 @@
+{
+
+    
+
+    
+
+    
+
+    "specialization": {
+    },
+
+    "middleware": {
+
+        
+
+        "static": {
+            "module": {
+                "arguments": [ "path:./.build" ]
+            }
+        },
+
+        "router": {
+            "module": {
+                "arguments": [{ "directory": "path:./controllers" }]
+            }
+        }
+
+    }
+}
