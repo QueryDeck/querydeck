@@ -4,7 +4,7 @@ ADD . /app/backend
 WORKDIR /app/backend
 RUN npm install
 
-# ENV PORT=3000
+ENV PORT=3000
 # ENV NODE_ENV=production
 
 EXPOSE 3000
