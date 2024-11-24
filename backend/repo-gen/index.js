@@ -43,14 +43,19 @@ function generateRepoFirstTime(params, callback) {
                     overwriteRepo({subdomain: params.subdomain}).then(() => {
 
                         // return callback(null);
+                        copyModelFiles({subdomain: params.subdomain, directoryName: directoryName}).then(() => {
 
-                        gitHelper.initRepo({directoryName: directoryName, gitUrl: params.gitUrl, username: params.username, password: params.password}).then(() => {    
-                            gitHelper.commitAndPush({directoryName: directoryName, commitMessage: 'Initial commit'}).then(() => {
-                                callback();
+                            gitHelper.initRepo({directoryName: directoryName, gitUrl: params.gitUrl, username: params.username, password: params.password}).then(() => {    
+                                gitHelper.commitAndPush({directoryName: directoryName, commitMessage: 'Initial commit'}).then(() => {
+                                    callback();
+                                }).catch((error) => {
+                                    callback(error);
+                                });
+                                
                             }).catch((error) => {
                                 callback(error);
                             });
-                            
+
                         }).catch((error) => {
                             callback(error);
                         });

@@ -27,8 +27,6 @@ var mysql_types = require.main.require('./models/utils.js').mysql_types;
 var chart_agg_fn = require.main.require('./models/utils.js').pg_chart_agg_fn;
 var qutils = require.main.require('./models/utils.js');
 var refreshModeladder = require('../middlewares/refreshModeladder.js')();
-const { MYSQL, POSTGRES, DASHBOARD_SALT, DASHBOARD_ALOG_NAME, DASHBOARD_ALOG_SECRET } = require('../envconfig.js').constant;
-var dashboardCipher = new (require("../lib/cipher.js"))(DASHBOARD_ALOG_SECRET, DASHBOARD_ALOG_NAME);
 
 
 module.exports = function (router) {

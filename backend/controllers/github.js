@@ -20,8 +20,6 @@ module.exports = function(router) {
 
         if(path.indexOf('app.querydeck') > -1 || path.indexOf('api.querydeck.io') > -1 || path.indexOf('dev-api.querydeck.io') > -1) {
             redir = 'https://api.querydeck.io/github/auth-callback';
-        } else if(path.indexOf('app.querycharts') > -1 || path.indexOf('dev-api.querycharts.com') > -1) {
-            redir = 'https://dev-api.querycharts.com/github/auth-callback'
         } else {
             redir = 'http://localhost:3000/github/auth-callback'
         }

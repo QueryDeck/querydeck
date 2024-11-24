@@ -81,7 +81,7 @@ module.exports = function (req, res, next) {
       subdomain = ModelManager.domainToSubdomain[host];
     }
 
-    if(host.indexOf('querycharts') == -1 && host.indexOf('querydeck') == -1 && host.indexOf('localhost') == -1 && !ModelManager.domainToSubdomain[host]) {
+    if(host.indexOf('querydeck') == -1 && host.indexOf('localhost') == -1 && !ModelManager.domainToSubdomain[host]) {
       // this is just for custom domains on app restart since we are lazy loading ModelManager.domainToSubdomain
       // TODO: redesign this in a better way. this is too ugly
 

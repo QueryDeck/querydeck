@@ -44,14 +44,4 @@ class Cipher {
  
   }
 }
-module.exports = Cipher; 
-
-// var envar = require.main.require('./envconfig.js').vars;
-// let data = 'taverntestpass' ; 
-//  //let kg = new Cipher('some-secret-key','aes-256-ctr' ); 
-// let kg = new Cipher(envar.cipher.secret,envar.cipher.algorithm);
-// require.main.require('./models/modelManager');
-// let enc = kg.encrypt(data);
-// let dec = kg.decrypt(enc);
-// console.log("enc =", enc , enc.length ); // 'F6NR6AeK475VsnH874uj2P9bxRCk8mO14gWqDXpAg5o='
-// console.log( "dec =" , dec , dec.length  ); // 'what is your name'
+module.exports = Cipher;

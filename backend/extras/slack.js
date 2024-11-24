@@ -23,7 +23,7 @@ async function sendNewUserNotification(notificationData) {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `:man_with_gua_pi_mao: *${notificationData.name}* (${notificationData.email})  has registered on  ${notificationData.isApiProject ? 'QueryDeck' : '*QueryCharts*'}`
+        text: `:man_with_gua_pi_mao: *${notificationData.name}* (${notificationData.email})  has registered on QueryDeck`
 
       },
     },
