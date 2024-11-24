@@ -11,7 +11,7 @@ const { MYSQL, POSTGRES, MAX_CONNECTION_POOL} = require('../envconfig.js').const
 var asyncloop = require.main.require('./lib/asyncloop.js').asyncloop;
 var Sentry = require('../sentry.js');
 var modelutils = require.main.require('./models/utils');
-// var postgres = require('postgres');
+var repoManager = require.main.require('./repo-gen/index.js');
 
 function compare(a, b) {
   if (a.last_nom < b.last_nom) {
@@ -422,6 +422,8 @@ var ModelManager = {
               auth_details.user_id_session_key as user_id_session_key,
               auth_details.user_id_column_id as user_id_column_id,
               auth_details.role_session_key as role_session_key,
+              git_deployment.github_details as github_details,
+              users.github_ob as github_ob,
               (
                 select 
                   json_agg(d.*) as databases 
@@ -512,6 +514,12 @@ var ModelManager = {
               )
               left join auth_details on (
                 auth_details.app_id = apps.app_id
+              )
+              left join git_deployment on (
+                git_deployment.app_id = apps.app_id
+              )
+              left join users on (
+                users.user_id = apps.created_by
               )
           ;`,
 
@@ -654,7 +662,30 @@ var ModelManager = {
         }
 
       }, function(){
+        // console.log('APP LOADED **************************************', row.github_details)
         callback()
+        if(row.github_details && row.github_details.repo_url) {
+          repoManager.checkIfLocalRepoExists({
+            subdomain: subdomain,
+            gitUrl: row.github_details.repo_url,
+            username: 'x-access-token',
+            password: row.github_ob.token.access_token
+          }).then((cloneNeeded) => {
+            // console.log('local repo exists')
+            if(cloneNeeded) {
+              repoManager.overwriteRepo({
+                subdomain: subdomain
+              }).then(() => {
+  
+              }).catch((err) => {
+                console.log('err', err)
+              })
+            }
+            
+          }).catch((err) => {
+            console.log('err', err)
+          })
+        }
       })
 
     });

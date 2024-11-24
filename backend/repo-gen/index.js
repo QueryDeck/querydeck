@@ -1,10 +1,7 @@
 
 const fs = require("fs/promises");
-var ModelManager = require.main.require('./models/modelManager');
 const path = require("path")
 var fs_extra = require("fs-extra");
-const git = require('isomorphic-git')
-const http = require('isomorphic-git/http/node')
 const gitHelper = require('./gitHelper');
 const directoryExists = require('directory-exists');
 const logger = require.main.require('./lib/logs');
@@ -17,6 +14,7 @@ exports.diff = diff;
 exports.push = push;
 exports.getDiffFiles = getDiffFiles;
 exports.readApiIndex = readApiIndex;
+exports.checkIfLocalRepoExists = checkIfLocalRepoExists;
 
 // generate app, connect git, init, commit and push
 function generateRepoFirstTime(params, callback) {
@@ -24,6 +22,8 @@ function generateRepoFirstTime(params, callback) {
     if(!params.subdomain || !params.gitUrl || !params.username || !params.password) {
         return callback({error: '!params.subdomain || !params.gitUrl || !params.directoryName || !params.username || !params.password'})
     }
+
+    var ModelManager = require.main.require('./models/modelManager')
 
     ModelManager.loadApp(params.subdomain, function(err){
         if(err) return callback(err);
@@ -82,6 +82,8 @@ function generateRepoFirstTime(params, callback) {
 
 // regenerate api, routes, models, app
 async function overwriteRepo(params) {
+
+    var ModelManager = require.main.require('./models/modelManager')
 
     if(!params.subdomain) {
         throw {error: '!params.subdomain'}
@@ -163,6 +165,40 @@ async function diff(params) {
         throw error
     }
 
+}
+
+var loading_apps = {}
+
+async function checkIfLocalRepoExists(params) {
+
+    console.log('checkIfLocalRepoExists')
+
+    // this functions will check if the directory exists, if not it will pull it 
+    const directoryName = "repo-gen/repos/" + params.subdomain;
+
+    if(!await directoryExists(directoryName) && !loading_apps[params.subdomain]) {
+        loading_apps[params.subdomain] = true
+        // console.log('directory does not exist, pulling from remote', params)
+        console.log('Directory does not exist, pulling from remote', directoryName);
+        try {
+            await gitHelper.cloneRepo({
+                directoryName: directoryName,
+                gitUrl: params.gitUrl,
+                username: params.username,
+                password: params.password
+            });
+            console.log('Repository cloned successfully');
+            loading_apps[params.subdomain] = false
+        } catch (error) {
+            console.error('Error cloning repository:', error);
+            loading_apps[params.subdomain] = false
+            throw error;
+        }
+        return true
+    }
+
+    return false
+    
 }
 
 async function readApiIndex(params) {
