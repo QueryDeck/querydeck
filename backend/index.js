@@ -17,7 +17,6 @@ app.on('start', function () {
   refreshGithub.start();
 });
 
-
 app.use('/.well-known', express.static('.well-known')); //###  for ssl certificate genration 
 app.use(sessions())
 
