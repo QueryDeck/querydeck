@@ -86,10 +86,18 @@ function executeClientRequest(params, callback) {
             })
         }
 
-        var query = new json2sql(
-            modelob.models,
-            params.currentModel, {}
-        ).generate();
+        var query;
+        try {
+            query = new json2sql(
+                modelob.models,
+                params.currentModel, {useDynamicValues: true}
+            ).generate();
+        } catch(err) {
+            return callback({
+                response_code: 400,
+                error: err
+            });
+        }
 
         // return callback(null, {
         //     data: {
@@ -248,10 +256,18 @@ function executeClientRequest(params, callback) {
             params.query_model.query_json.where = where_condition
         }
 
-        var query = new json2sql(
-            [params.query_model.query_json],
-            params.currentModel, {}, params.request
-        ).generate();
+        var query;
+        try {
+            query = new json2sql(
+                [params.query_model.query_json],
+                params.currentModel, {useDynamicValues: true}, params.request
+            ).generate();
+        } catch(err) {
+            return callback({
+                response_code: 400,
+                error: err
+            });
+        }
 
         // return callback(null, {
         //     data: {

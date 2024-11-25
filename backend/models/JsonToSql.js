@@ -24,6 +24,7 @@ module.exports = class builder {
 		this.quotes = otherOpts && otherOpts.db_type == 'MySQL' ? '`' : '"'
 		this.otherOpts = otherOpts;
 		this.dynamicValues = dynamicValues || {session: {}, query: {}};
+		this.useDynamicValues = otherOpts && otherOpts.useDynamicValues || false;
 		if (otherOpts && otherOpts.whereOnly) this.whereOnly = true;
 
 		this.depthmap = this.depthmap || [];
@@ -891,21 +892,24 @@ module.exports = class builder {
 						
 						if(conditions.rules[i].input_key.indexOf('SESSION') > -1) {
 
-							if(_.get(this.dynamicValues.session, key)) {
+							if(this.useDynamicValues) {
 
-								val = _.get(this.dynamicValues.session, key)
+								if(_.get(this.dynamicValues.session, key)) val = _.get(this.dynamicValues.session, key)
+									else throw new Error(`Session variable ${key} not found`)
 
 							}
 
 							this.session_vars_used.push(key)
 
-						} else if (conditions.rules[i].input_key.indexOf('QUERY') > -1 && this.dynamicValues.query[key]) {
+						} else if (conditions.rules[i].input_key.indexOf('QUERY') > -1 && this.useDynamicValues) {
 
-							val = this.dynamicValues.query[key]
+							if(this.dynamicValues.query[key]) val = this.dynamicValues.query[key]
+								else throw new Error(`Query variable ${key} not found`)
 
-						} else if (conditions.rules[i].input_key.indexOf('URL') > -1 && this.dynamicValues.url_param_value) {
+						} else if (conditions.rules[i].input_key.indexOf('URL') > -1 && this.useDynamicValues) {
 
-							val = this.dynamicValues.url_param_value
+							if(this.dynamicValues.url_param_value) val = this.dynamicValues.url_param_value
+								else throw new Error(`URL variable ${key} not found`)
 
 						}
 

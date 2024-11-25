@@ -662,7 +662,6 @@ var ModelManager = {
         }
 
       }, function(){
-        // console.log('APP LOADED **************************************', row.github_details)
         callback()
         if(row.github_details && row.github_details.repo_url) {
           repoManager.checkIfLocalRepoExists({
