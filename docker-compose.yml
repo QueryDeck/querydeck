@@ -1,7 +1,7 @@
 services:
   frontend:
     build: './frontend'
-    # env_file: "./frontend/.env"
+    env_file: "./frontend/.env"
     ports:
       - "5051:5051"
   backend:
