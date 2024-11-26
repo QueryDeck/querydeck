@@ -18,7 +18,7 @@ else if(window.location.hostname.split('.').length === 2) {
             apiBase = 'querydeck.io'
             break
         default:
-            console.error('Incorrect API Address')
+            console.error('Incorrect API Address!')
             break
     }
 }
