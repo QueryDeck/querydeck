@@ -2,10 +2,12 @@ services:
   frontend:
     build: './frontend'
     env_file: "./frontend/.env"
+    restart: always
     ports:
       - "5051:5051"
   backend:
     build: './backend'
     env_file: "./backend/.env"
+    restart: always
     ports:
       - "3000:3000"
