@@ -6,7 +6,23 @@ let apiBase
 if(window.location.hostname === 'localhost') {
     apiurl = 'http://localhost:3000'
     apiBase = 'http://localhost:3000'
-} else if(window.location.hostname.split('.').length === 3) {
+} 
+else if(window.location.hostname.split('.').length === 2) {
+    switch (window.location.hostname) {
+        case 'querydeck-dev.com':
+            apiurl = 'https://api.querydeck-dev.com'
+            apiBase = 'api.querydeck-dev.com'
+            break
+        case 'app.querydeck.io':
+            apiurl = 'https://api.querydeck.io'
+            apiBase = 'querydeck.io'
+            break
+        default:
+            console.error('Incorrect API Address')
+            break
+    }
+}
+else if(window.location.hostname.split('.').length === 3) {
     switch (window.location.hostname) {
         case 'dev.querydeck.io':
             apiurl = 'https://dev-api.querydeck.io'
