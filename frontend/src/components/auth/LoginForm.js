@@ -1,5 +1,4 @@
 import React, {
-  useContext,
   useEffect,
   useState,
 } from 'react'
@@ -9,7 +8,6 @@ import { Link, useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Button, Form, Row, Col, FormGroup, Input, CustomInput, Label } from 'reactstrap'
 import withRedirect from '../../hoc/withRedirect'
-import AppContext from '../../context/Context'
 
 // Redux
 import { useDispatch } from 'react-redux'
@@ -35,8 +33,6 @@ const LoginForm = ({ setRedirect, hasLabel, layout }) => {
 
   let history = useHistory()
 
-  const { setIsDark } = useContext(AppContext)
-
   // State 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -61,7 +57,6 @@ const LoginForm = ({ setRedirect, hasLabel, layout }) => {
         history.replace('/apps')
       }
       toast.success(`Logged in as ${email}`)
-      setIsDark(systemDarkTheme)
       Cookies.set('session', CryptoJS.AES.encrypt(JSON.stringify({
         user: {
           email,

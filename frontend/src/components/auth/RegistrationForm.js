@@ -56,15 +56,13 @@ const RegistrationForm = ({ setRedirect, setRedirectUrl, layout, hasLabel }) => 
           user: res.data.data.details.user_id
         },
         preferences: {
-          ...res.data.data.preferences,
-          theme: systemDarkTheme ? 'dark' : 'light',
-          tour: res.data.data.tour,
+          ...res.data.data.preferences
         }
       }), secret), { expires: 7 }, { sameSite: 'strict' })
       toast.success(`Please verify your email by clicking on the link in the email we just sent you`);
 
       // setIsDark( theme)
-      tracker.setUserID(res.data.data.user_id)
+      tracker.setUserID(res.data.data.details.user_id)
       tracker.setMetadata('Email', email)
 
       posthog.identify(
