@@ -2,8 +2,7 @@
 exports.vars = {
 
   PG: {
-    Admin: process.env.zasuserdb_prefix + 'pgtadmin',
-    ZASPrefix: 'pg://kabirnarain:@localhost:5432/'
+    Admin: process.env.pg_querydeck_url
   },
 
   jwt: {
