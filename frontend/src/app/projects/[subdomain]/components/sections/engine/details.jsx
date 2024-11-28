@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux'
 
 // Library imports
 import {
+  faCopy,
   faMinus,
   faPlus
 } from '@fortawesome/free-solid-svg-icons'
@@ -16,6 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Alert,
   Badge,
+  Button,
   Card
 } from 'reactstrap'
 import ReactJson from 'react-json-view'
@@ -49,6 +51,31 @@ const Documentation = props => {
   const copyCommand = () => {
     navigator.clipboard.writeText(command).then(() => {
       toast.success('API copied!')
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+
+  const copyRequest = () => {
+    navigator.clipboard.writeText(state?.base?.value ? JSON.stringify(state.request) : '{}').then(() => {
+      toast.success('Sample request copied!')
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const copyResponse = () => {
+    navigator.clipboard.writeText(state?.base?.value ? JSON.stringify(state.response) : '{}').then(() => {
+      toast.success('Sample response copied!')
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const copyQuery = () => {
+    navigator.clipboard.writeText(state.text).then(() => {
+      toast.success('Query copied!')
     }).catch(err => {
       console.error(err)
     })
@@ -377,12 +404,21 @@ const Documentation = props => {
         </div>}
         {JSON.stringify(state?.request).length > 2 && <div className={styles.request}>
           <div className={styles.request_heading}>
-            Request
+            <span>
+              Request
+            </span>
+            <Button
+              color='falcon-primary'
+              onClick={copyRequest}
+              size='sm'
+            >
+              <FontAwesomeIcon icon={faCopy} />
+            </Button>
           </div>
           <div className={styles.request_body}>
             <ReactJson
-              collapsed={state.request.length <= 25 ? 3 : 2}
-              collapseStringsAfterLength={50}
+              // collapsed={state.request.length <= 25 ? 3 : 2}
+              // collapseStringsAfterLength={50}
               displayDataTypes={false}
               name={null}
               src={state?.base?.value ? state.request : {}}
@@ -391,7 +427,16 @@ const Documentation = props => {
         </div>}
         {JSON.stringify(state?.response).length > 2 && <div className={styles.response}>
           <div className={styles.response_heading}>
-            Response
+            <span>
+              Response
+            </span>
+            <Button
+              color='falcon-primary'
+              onClick={copyResponse}
+              size='sm'
+            >
+              <FontAwesomeIcon icon={faCopy} />
+            </Button>
           </div>
           <div className={styles.response_body}>
             <Alert
@@ -401,8 +446,8 @@ const Documentation = props => {
               This is a sample response. The actual response will differ depending on the parameters selected.
             </Alert>
             <ReactJson
-              collapsed={state.response.length <= 25 ? 4 : 3}
-              collapseStringsAfterLength={50}
+              // collapsed={state.response.length <= 25 ? 4 : 3}
+              // collapseStringsAfterLength={50}
               displayDataTypes={false}
               name={null}
               src={state?.base?.value ? state.response : {}}
@@ -411,7 +456,16 @@ const Documentation = props => {
         </div>}
         {state?.text.length ? <div className={styles.query}>
           <div className={styles.query_heading}>
-            Query
+            <span>
+              Query
+            </span>
+            <Button
+              color='falcon-primary'
+              onClick={copyQuery}
+              size='sm'
+            >
+              <FontAwesomeIcon icon={faCopy} />
+            </Button>
           </div>
           <div className={styles.query_body}>
             {state.text}

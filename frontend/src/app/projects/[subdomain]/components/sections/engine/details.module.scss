@@ -252,10 +252,17 @@
     border: 1px solid $gray-300;
     border-bottom: none;
     border-radius: 5px 5px 0 0;
+    display: flex;
     font-weight: bold;
+    justify-content: space-between;
     overflow: auto;
     padding: 2px 6px;
     white-space: pre;
+
+    button {
+      font-size: 12px;
+      padding: 0 6px;
+    }
   }
 
   &_body {
@@ -275,10 +282,17 @@
     border: 1px solid $gray-300;
     border-bottom: none;
     border-radius: 5px 5px 0 0;
+    display: flex;
     font-weight: bold;
+    justify-content: space-between;
     overflow: auto;
     padding: 2px 6px;
     white-space: pre;
+
+    button {
+      font-size: 12px;
+      padding: 0 6px;
+    }
   }
 
   &_body {
@@ -298,10 +312,17 @@
     border: 1px solid $gray-300;
     border-bottom: none;
     border-radius: 5px 5px 0 0;
+    display: flex;
     font-weight: bold;
+    justify-content: space-between;
     overflow: auto;
     padding: 2px 6px;
     white-space: pre;
+
+    button {
+      font-size: 12px;
+      padding: 0 6px;
+    }
   }
 
   &_body {
