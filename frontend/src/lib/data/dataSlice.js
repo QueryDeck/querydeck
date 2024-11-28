@@ -205,7 +205,6 @@ const dataSlice = createSlice({
         const list_filtered = state.api[action.payload.subdomain].list.filter(item => (
           item.name.toLowerCase().includes(lowerCaseVal) ||
           item.apiRoute.toLowerCase().includes(lowerCaseVal) ||
-          item.db_name.toLowerCase().includes(lowerCaseVal) ||
           item.schema.toLowerCase().includes(lowerCaseVal) ||
           item.table.toLowerCase().includes(lowerCaseVal)
         ))
