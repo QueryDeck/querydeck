@@ -15,11 +15,11 @@ var s = session({
   },
   "resave": false,
   "saveUninitialized": false,
-  // "store": new MongoStore({
-  //   mongoUrl: envconfig.vars.mongoStore.connString,
-  //   collection: 'sessions',
-  //   autoRemove: 'disabled'
-  // })
+  "store": new MongoStore({
+    mongoUrl: 'mongodb://mongo:27017/qd_session',
+    collection: 'sessions',
+    autoRemove: 'disabled'
+  })
 });
 
 

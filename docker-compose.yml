@@ -5,9 +5,31 @@ services:
     restart: always
     ports:
       - "5051:5051"
+
+  mongo: # container name 
+    image: mongo # On which image container will build
+    # ports:
+    #   - "27017:27017"
+    networks: # adding network
+      - backend_db
+    volumes:
+      - mongo-data:/data/db
+
   backend:
     build: './backend'
     env_file: "./backend/.env"
     restart: always
     ports:
       - "3000:3000"
+    networks: # adding network
+      - backend_db
+    depends_on:
+    - mongo
+
+networks: # allow services to talk to each other while providing isolation from other docker container, running on the same host
+  backend_db:
+    driver: bridge
+
+volumes: # enable persistence of database data across container restart
+  mongo-data:
+    driver: local
