@@ -1,0 +1,7 @@
+# Development overrides (docker-compose.dev.yml)
+services:
+  frontend:
+    image: querydeckio/querydeck-dev:frontend-latest
+
+  backend:
+    image: querydeckio/querydeck-dev:backend-latest

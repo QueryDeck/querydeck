@@ -1,0 +1,7 @@
+# Production overrides (docker-compose.prod.yml)
+services:
+  frontend:
+    image: querydeckio/querydeck:frontend-latest
+
+  backend:
+    image: querydeckio/querydeck:backend-latest

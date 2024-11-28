@@ -1,6 +1,5 @@
 services:
   frontend:
-    image : querydeckio/querydeck:frontend-latest
     build: './frontend'
     env_file: "./frontend/.env"
     restart: always
@@ -17,7 +16,6 @@ services:
       - mongo-data:/data/db
 
   backend:
-    image : querydeckio/querydeck:backend-latest
     build: './backend'
     env_file: "./backend/.env"
     restart: always
