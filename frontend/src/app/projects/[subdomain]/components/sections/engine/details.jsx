@@ -31,6 +31,7 @@ import styles from './details.module.scss'
 
 const Documentation = props => {
   // Redux
+  const listState = useSelector(state => state.data[props.mode][props.subdomain])
   const state = useSelector(state => state.data[props.mode][props.subdomain]?.[props.query_id])
 
   const [docState, setDocState] = useState({
@@ -338,6 +339,22 @@ const Documentation = props => {
     }
   }
 
+  const renderUnsavedWarning = () => {
+    if (props.query_id === 'new') {
+      if (state?.text?.length) {
+        return true
+      }
+    } else {
+      const savedDocs = listState?.list?.filter(element => element.query_id === props.query_id)[0]
+      // console.log('text1', savedDocs.docs.sql_query.text.replace(/\s\s+/g, ' '))
+      // console.log('text2', state?.text.replace(/\n/gm, '').replace(/\s\s+/g, ' '))
+      if (savedDocs) {
+        return savedDocs.docs.sql_query.text.replace(/\s\s+/g, ' ') !== state?.text.replace(/\s\s+/g, ' ')
+      }
+    }
+    return false
+  }
+
   const renderBodyParameters = () => {
     if (JSON.stringify(state?.request_detailed).length > 2) {
       return (
@@ -489,6 +506,7 @@ const Documentation = props => {
       <Card style={{ width: props.width }}>
         <div className={styles.title}>
           {state?.name || 'Untitled'}
+          {renderUnsavedWarning() && <span className={styles.title_warning}>*</span>}
         </div>
         <div className={styles.details}>
           {renderParameters()}

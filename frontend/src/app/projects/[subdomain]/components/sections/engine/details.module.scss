@@ -7,6 +7,10 @@
   font-weight: bold;
   padding: 6px;
   text-align: center;
+
+  &_warning {
+    color: #e63757;
+  }
 }
 
 .details {
