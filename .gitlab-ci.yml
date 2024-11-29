@@ -1,0 +1,36 @@
+stages:
+  - deploy
+
+deploy_dev:
+  image: node:14.17.4-alpine
+  stage: deploy
+  only:
+    - dev
+  environment:
+    name: Development
+    url: https://querydeck-dev.com
+  before_script:
+    - apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$DEV_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - ssh -o StrictHostKeyChecking=no $DEV_SERVER_ADDRESS "cd querydeck; docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
+
+deploy_prod:
+  image: node:14.17.4-alpine
+  stage: deploy
+  only:
+    - main
+  environment:
+    name: Production
+    url: https://app.querydeck.io
+  before_script:
+    - apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$MAIN_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - ssh -o StrictHostKeyChecking=no $MAIN_SERVER_ADDRESS "cd querydeck; docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
