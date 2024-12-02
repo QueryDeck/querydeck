@@ -22,7 +22,6 @@ import {
     // faMoon,
     // faSun
 } from '@fortawesome/free-solid-svg-icons'
-// import logo from '../../../assets/img/logo-brand.png' 
 import AppNameLogo from './AppNameLogo' 
 
 // import secret from '../../../secret';

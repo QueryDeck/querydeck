@@ -8,7 +8,7 @@ deploy_dev:
     - dev
   environment:
     name: Development
-    url: https://querydeck-dev.com
+    url: https://app.querydeck-dev.com
   before_script:
     - apk add openssh-client
     - eval $(ssh-agent -s)
