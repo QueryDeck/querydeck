@@ -1,7 +1,8 @@
 'use strict';
 var catchError = require.main.require('./middlewares/catchError');
 var request = require('request');
-var repoManager = require.main.require('./repo-gen/index.js')
+var repoManager = require.main.require('./repo-gen/index.js');
+var cipher = require.main.require('./lib/cipher2.js');
 
 module.exports = function(router) {
 
@@ -21,6 +22,11 @@ module.exports = function(router) {
             var user = result.users[0];
 
             var status = 0;
+
+            if(user.github_ob && user.github_ob.token_encrypted){
+                var token_ob = cipher.decrypt(user.github_ob.token_encrypted);
+                user.github_ob.token = JSON.parse(token_ob);
+            }
             
             if (!user.github_ob || !user.github_ob.token.access_token) {
                 return res.zend({
@@ -85,7 +91,9 @@ module.exports = function(router) {
                 console.log(err);
                 return res.zend(err, 500, "Internal Server Error");
             }
-            if(!result.u || !result.u[0] || !result.u[0].github_ob || !result.u[0].github_ob.token) return res.zend([]);
+            if(!result.u || !result.u[0] || !result.u[0].github_ob || !result.u[0].github_ob.token_encrypted) return res.zend([]);
+            var token_ob = cipher.decrypt(result.u[0].github_ob.token_encrypted);
+            result.u[0].github_ob.token = JSON.parse(token_ob);
             request({
                 url:  `https://api.github.com/user/installations`,
                 method: 'GET',
@@ -199,6 +207,15 @@ module.exports = function(router) {
                 if (err) {
                     console.log(err);
                     return res.zend(err, 500, "Internal Server Error");
+                }
+
+                var token_ob;
+
+                if(result.u && result.u[0] && result.u[0].github_ob && result.u[0].github_ob.token_encrypted){
+                    token_ob = cipher.decrypt(result.u[0].github_ob.token_encrypted);
+                    result.u[0].github_ob.token = JSON.parse(token_ob);
+                } else {
+                    return res.zend(null, 400, "Unauthorized");
                 }
 
                 repoManager.generateRepoFirstTime({
@@ -339,8 +356,11 @@ module.exports = function(router) {
                         console.log(err);
                         return res.zend(err, 500, "Internal Server Error");
                     }
-                    if(!result.u || !result.u[0] || !result.u[0].github_ob || !result.u[0].github_ob.token) return res.zend([]);
+                    if(!result.u || !result.u[0] || !result.u[0].github_ob || !result.u[0].github_ob.token_encrypted) return res.zend([]);
                     if(!result.git_d || !result.git_d[0] || !result.git_d[0].github_repo_name) return res.zend([]);
+
+                    var token_ob = cipher.decrypt(result.u[0].github_ob.token_encrypted);
+                    result.u[0].github_ob.token = JSON.parse(token_ob);
         
                     request({
                         url:  `https://api.github.com/repos/` + result.git_d[0].github_repo_name + '/contents/lib/api-index.js',
@@ -413,6 +433,11 @@ module.exports = function(router) {
                         return res.zend(err, 500, "Internal Server Error");
                     }
 
+                    if(!result.u || !result.u[0] || !result.u[0].github_ob || !result.u[0].github_ob.token_encrypted) return res.zend([]);
+
+                    var token_ob = cipher.decrypt(result.u[0].github_ob.token_encrypted);
+                    result.u[0].github_ob.token = JSON.parse(token_ob);
+
                     repoManager.push({
                         subdomain: req.body.subdomain,
                         commitMessage: (req.body.commitMessage || diff.text),
@@ -463,8 +488,11 @@ module.exports = function(router) {
                 console.log(err);
                 return res.zend(err, 500, "Internal Server Error");
             }
-            if(!result.u || !result.u[0] || !result.u[0].github_ob || !result.u[0].github_ob.token) return res.zend([]);
+            if(!result.u || !result.u[0] || !result.u[0].github_ob || !result.u[0].github_ob.token_encrypted) return res.zend([]);
             if(!result.git_d || !result.git_d[0] || !result.git_d[0].github_repo_name) return res.zend([]);
+
+            var token_ob = cipher.decrypt(result.u[0].github_ob.token_encrypted);
+            result.u[0].github_ob.token = JSON.parse(token_ob);
 
             request({
                 url:  `https://api.github.com/repos/` + result.git_d[0].github_repo_name + '/commits',

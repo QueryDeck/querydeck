@@ -1,12 +1,7 @@
 'use strict';
-var envconfig = require.main.require('./envconfig.js').vars;
 var DB = require.main.require('./models/index.js').db;
-var ErrorHandler = require.main.require('./lib/errors.js');
 var ModelManager = require('../models/modelManager');
 var jwt = require('jsonwebtoken');
-var db = require.main.require('./lib/maindb.js');
-var cipher = new (require("../lib/cipher.js"))(envconfig.cipher.secret, envconfig.cipher.algorithm);
-// const  { MYSQL, POSTGRES,MYSQL_ID, POSTGRES_ID} =  require('../envconfig.js').constant;
 const requestIp = require('request-ip');
 const _ = require('lodash');
 var allModels = require.main.require('./models/modelManager').models;

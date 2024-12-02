@@ -1,6 +1,7 @@
 'use strict';
 var catchError = require('../middlewares/catchError');
 var github_keys = require.main.require('./envconfig.js').vars.github;
+var cipher = require.main.require('./lib/cipher2.js');
 
 var request = require('request');
 
@@ -100,7 +101,7 @@ module.exports = function(router) {
                     new req.models.public.users().update({
                         github_ob: {
                             profile: body,
-                            token: token_ob,
+                            token_encrypted: cipher.encrypt(JSON.stringify(token_ob)),
                             installation: installation
                         }
                     }).where(where)

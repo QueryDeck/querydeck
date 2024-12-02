@@ -1,11 +1,11 @@
 'use strict';
 var ModelManager = require.main.require('./models/modelManager');
 var envar = require.main.require('./envconfig.js').vars;
-var cipher = new (require.main.require("./lib/cipher.js"))(envar.cipher.secret, envar.cipher.algorithm);
 const { MYSQL, POSTGRES } = require('../../envconfig.js').constant;
 var catchError = require('../../middlewares/catchError');
 var utils = require('../../extras/utils.js');
 var ModelManager = require.main.require('./models/modelManager');
+var cipher = require.main.require('./lib/cipher2.js');
 
 module.exports = function (router) {
 
@@ -433,7 +433,7 @@ module.exports = function (router) {
     //     })
     //   }
     // })
-    console.log( 'reqr.db',req)
+    // console.log( 'reqr.db',req)
     // --  db_type_id,
     new req.DB({}).executeRaw({
       text: `  

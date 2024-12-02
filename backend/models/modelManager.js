@@ -2,9 +2,7 @@
 var pg = require('pg');
 var mysql = require('mysql2');
 var base = require.main.require('./models/baseModel.js');
-var envconfig = require.main.require('./envconfig.js').vars;
-var cipher = new (require("../lib/cipher.js"))(envconfig.cipher.secret, envconfig.cipher.algorithm);
-var authCipher = new (require("../lib/cipher.js"))(envconfig.auth.secret, envconfig.auth.algorithm );
+var cipher = require.main.require('./lib/cipher2.js');
 var execCommand = require("../lib/execCommand.js"); 
 var db = require.main.require('./lib/maindb.js');
 const { MYSQL, POSTGRES, MAX_CONNECTION_POOL} = require('../envconfig.js').constant;
@@ -382,9 +380,13 @@ var ModelManager = {
     
     ModelManager.extractSchema(db, function(err, rows){
       if(err) return callback(err);
-      // console.log( JSON.stringify(  rows,null ,0))
+
       ModelManager.pgtmodels = ModelManager.makeModelFromSchema(rows);  
-      //  console.log( JSON.stringify(  ModelManager.pgtmodels,null ,0))
+
+      if(!ModelManager.pgtmodels || !ModelManager.pgtmodels.models || !ModelManager.pgtmodels.models.public || !ModelManager.pgtmodels.models.public.schema_defs) {
+        return callback({error: 'Incomplete schema', models: ModelManager.pgtmodels}); 
+      }
+
       callback(); 
  
     });
@@ -557,7 +559,7 @@ var ModelManager = {
         subdomain: row.subdomain,
         cors: row.cors,
         auth: {
-          jwt_key: row.jwt_key ? authCipher.decrypt(row.jwt_key) : null,
+          jwt_key: row.jwt_key ? cipher.decrypt(row.jwt_key) : null,
           jwt_type: row.jwt_type,
           token_header: row.token_header,
           session_key_values: row.session_key_values || {},
@@ -664,6 +666,11 @@ var ModelManager = {
       }, function(){
         callback()
         if(row.github_details && row.github_details.repo_url) {
+          var token_ob = cipher.decrypt(row.github_ob.token_encrypted);
+          // console.log(row.github_ob)
+          // console.log(token_ob)
+          // return;
+          row.github_ob.token = JSON.parse(token_ob);
           repoManager.checkIfLocalRepoExists({
             subdomain: subdomain,
             gitUrl: row.github_details.repo_url,

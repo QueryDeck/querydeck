@@ -14,7 +14,7 @@ module.exports = function (router) {
     if (req.user_id !== req.clientModels[req.query.subdomain].appDetails.created_by) return res.zend(null, 401, "Login Required");
 
     let currentModel = req.clientModels[req.query.subdomain].databases[req.query.db_id];
-    console.file(currentModel)
+    // console.file(currentModel)
     var schemas = Object.keys(currentModel.models);
     var all_tabs = [];
     var all_rels = [];

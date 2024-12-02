@@ -18,6 +18,7 @@
     "lint:fix": "eslint ./models/**/*.js --fix "
   },
   "dependencies": {
+    "@aws-sdk/client-kms": "^3.699.0",
     "@sendgrid/mail": "^7.7.0",
     "@sentry/node": "^7.42.0",
     "@sentry/tracing": "^7.42.0",

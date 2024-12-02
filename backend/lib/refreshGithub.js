@@ -20,6 +20,8 @@ function start() {
     );
 }
 
+var cipher = require.main.require('./lib/cipher2.js');
+
 function refreshGithubTokens() {
 
     db.query({
@@ -33,6 +35,10 @@ function refreshGithubTokens() {
         result.rows = result.rows || []
 
         asyncloop(result.rows, function(user, success) {
+
+            if(!user.github_ob || !user.github_ob.token_encrypted) return success();
+
+            user.github_ob.token = JSON.parse(cipher.decrypt(user.github_ob.token_encrypted));
 
             var refresh_token = user.github_ob.token.refresh_token;
 
@@ -65,7 +71,8 @@ function refreshGithubTokens() {
 
                 token_ob.unix = Date.now()
 
-                user.github_ob.token = token_ob;
+                delete user.github_ob.token;
+                user.github_ob.token_encrypted = cipher.encrypt(JSON.stringify(token_ob));
 
                 db.query({
                     text: `update users set github_ob = $1 where user_id = $2`,

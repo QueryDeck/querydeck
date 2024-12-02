@@ -244,3 +244,10 @@ create table roles (
     custom_permissions jsonb,
     created_at int default extract(epoch from now())::int
 );
+
+create table kms_keys (
+    kms_key_id text primary key default gen_random_uuid(),
+    cipher_text_encrypted text not null,
+    arn text not null,
+    created_at int default extract(epoch from now())::int
+);

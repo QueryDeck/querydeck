@@ -1,11 +1,7 @@
 'use strict';
 var ModelManager = require.main.require('./models/modelManager');
-var envar = require.main.require('./envconfig.js').vars;
-var cipher = new (require.main.require("./lib/cipher.js"))(envar.cipher.secret, envar.cipher.algorithm);
-const { MYSQL, POSTGRES, } = require('../envconfig.js').constant;
-var reSyncSchema = require('../lib/reSyncSchema.js');
+var cipher = require.main.require('./lib/cipher2.js');
 var catchError = require('../middlewares/catchError');
-
 
 module.exports = function (router) {
 

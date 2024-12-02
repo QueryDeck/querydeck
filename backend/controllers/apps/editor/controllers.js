@@ -30,9 +30,9 @@ const { defaultsDeep, isArray } = require('lodash');
 const { query } = require('express');
 var refreshModeladder = require('../../../middlewares/refreshModeladder.js')();
 const { MYSQL} = require('../../../envconfig.js').constant;
-var cipher = new (require("../../../lib/cipher.js"))(envconfig.vars.cipher.secret, envconfig.vars.cipher.algorithm);
-var authCipher = new (require("../../../lib/cipher.js"))(envconfig.vars.auth.secret, envconfig.vars.auth.algorithm);
-var repoManager = require.main.require('./repo-gen/index.js')
+var repoManager = require.main.require('./repo-gen/index.js');
+
+var cipher = require.main.require('./lib/cipher2.js');
 
 // var tab_sample = [
 //   {id: 'req', title: 'Request', content: ''},
@@ -1604,7 +1604,7 @@ module.exports = function (router) {
       result.auth = result.auth || [];
       if(result.auth[0]) {
         result.auth[0].role_types = result.role_types || [];
-        result.auth[0].client_secret = authCipher.decrypt(result.auth[0].client_secret)
+        result.auth[0].client_secret = cipher.decrypt(result.auth[0].client_secret)
       }
       
       
@@ -1725,7 +1725,7 @@ module.exports = function (router) {
       if (!req.ErrorHandler({ err: err, line: 0, file: __filename })) return res.zend(null, 500, '');
       if (!result || !result.rows) return res.zend(null, 400, "Invalid value of 'subdomain'");
       if (!result.rows.length) return res.zend({});
-      result.rows[0].client_secret = authCipher.decrypt(result.rows[0].client_secret)
+      result.rows[0].client_secret = cipher.decrypt(result.rows[0].client_secret)
       if(result.rows[0].user_id_column_id) {
         var db_key = Object.keys(req.clientModels[req.query.subdomain].databases)[0];
         result.rows[0].user_id_column_name = req.clientModels[req.query.subdomain].databases[db_key].idToName[result.rows[0].user_id_column_id];
@@ -1754,7 +1754,7 @@ module.exports = function (router) {
       !req.body.subdomain ||
       !req.body.client_secret
     ) return res.zend(null, 400, "Must have valid values of 'subdomain' and 'client_secret' ");
-    // req.body.client_secret = authCipher.encrypt(req.body.client_secret)
+    // req.body.client_secret = cipher.encrypt(req.body.client_secret)
 
 
     const JWT_TYPES = constant.JWT_TYPES;
@@ -1773,7 +1773,7 @@ module.exports = function (router) {
           created_by: req.user_id
         }),
         jwt_type: req.body.jwt_type,
-        client_secret_encrypted: authCipher.encrypt(req.body.client_secret),
+        client_secret_encrypted: cipher.encrypt(req.body.client_secret),
         token_header: req.body.token_header,
         user_id_session_key: req.body.user_id_session_key,
         user_id_column_id: req.body.user_id_column_id,
@@ -1805,7 +1805,7 @@ module.exports = function (router) {
       !req.body.subdomain ||
       !req.body.client_secret
     ) return res.zend(null, 400, "Must have valid values of 'subdomain' and 'client_secret' ");
-    // req.body.client_secret = authCipher.encrypt(req.body.client_secret)
+    // req.body.client_secret = cipher.encrypt(req.body.client_secret)
 
     const JWT_TYPES = constant.JWT_TYPES
     if (req.body.jwt_type && !JWT_TYPES.includes(req.body.jwt_type)) {
@@ -1815,7 +1815,7 @@ module.exports = function (router) {
     new req.DB({}).execute([
       new req.models.public.auth_details().update({
         jwt_type: req.body.jwt_type,
-        client_secret_encrypted: authCipher.encrypt(req.body.client_secret),
+        client_secret_encrypted: cipher.encrypt(req.body.client_secret),
         token_header: req.body.token_header,
         user_id_session_key: req.body.user_id_session_key,
         user_id_column_id: req.body.user_id_column_id,
