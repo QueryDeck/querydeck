@@ -8,17 +8,19 @@ var s = session({
   "secret": envconfig.vars.mongoStore.secret,
   "cookie": {
     "httpOnly": true,
-    "maxAge": envconfig.vars.jwt.expiry_time * 1000 , 
+    "maxAge": 7 * 24 * 60 * 60 , 
     // "secure": process.env.PROJECT_ENV == 'prod' ? true :  false
      "secure":    false,
     //  "domain":'https://app.querydeck.io'
   },
   "resave": false,
   "saveUninitialized": false,
+  "rolling": true,
   "store": new MongoStore({
     mongoUrl: 'mongodb://mongo:27017/qd_session',
     collection: 'sessions',
-    autoRemove: 'disabled'
+    autoRemove: 'native',
+    autoRemoveInterval: 1440
   })
 });
 

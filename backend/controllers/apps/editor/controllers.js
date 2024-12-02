@@ -1142,7 +1142,14 @@ module.exports = function (router) {
         "title": "View to Json",
         "content": q
       },
-
+      {
+        "id": "test",
+        "title": "test"
+      },
+      {
+        "id": "test2",
+        "title": "test2"
+      },
 
     ];
 

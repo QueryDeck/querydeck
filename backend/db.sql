@@ -1,7 +1,6 @@
 CREATE EXTENSION if not exists pgcrypto;
 CREATE EXTENSION if not exists citext;
 
-
 create table users (
     user_id text primary key default gen_random_uuid(),
     name text,
@@ -12,7 +11,6 @@ create table users (
     tour text default '',
     passhash text,
     jwt_lookup_token text,
-    -- {profile: {}, token: {}}
     github_ob jsonb,
     created_at int default extract(epoch from now())::int
 );
@@ -20,8 +18,8 @@ create table users (
 create table apps (
     app_id text primary key default gen_random_uuid(),
     name text not null,
-    cors text[],   -- cors domains 
-    api_app boolean default false,  -- if app is created for api's
+    cors text[],
+    api_app boolean default false,
     created_by text not null references users(user_id),
     created_at int default extract(epoch from now())::int
 );
@@ -55,17 +53,17 @@ create table db_types (
 
 insert into db_types (name) values ('Postgres');
 insert into db_types (name) values ('MySQL');
+insert into db_types (name) values ('MSSQL');
 
 create table databases (
     db_id text primary key default gen_random_uuid(),
     app_id text not null references apps(app_id),
-    alias_name text  default '',  --make it not null
-    auto_gen boolean default false , -- is auto generated or users created database
+    alias_name text  default '',
+    auto_gen boolean default false ,
     name text not null,
     db_type citext not null references db_types(db_type_id),  
     host citext not null,
     username citext not null,
-  --  unique(app_id, db_type, host, name, username),
     password text,
     port_num smallint not null,
     manual_introspection boolean default false,
@@ -110,7 +108,6 @@ create table queries (
 create table api_queries (
     query_id text primary key default gen_random_uuid(),
     db_id text not null references databases(db_id),
-    -- app_id only for constraint
     app_id text not null references apps(app_id),
     route citext not null,
     method citext not null CHECK (method IN ('GET', 'POST', 'PUT', 'DELETE')),
@@ -187,7 +184,7 @@ create table api_query_metrics (
 create table enum_options (
     name text,
     enum_id text primary key default gen_random_uuid(),
-    query_id text not null references queries(query_id)
+    query_id text not null references queries(query_id),
     enum_def jsonb not null,
     created_at int default extract(epoch from now())::int
 );
@@ -198,9 +195,9 @@ create table rawtabs (
     rawtabs jsonb ,
     tab_order text[],
     created_at int default extract(epoch from now())::int
-)
+);
 
-create table query_run_history ( -- raw query run history
+create table query_run_history (
     name text default '',
     query_run_history_id text primary key default gen_random_uuid(),
     query text not null,
@@ -209,7 +206,7 @@ create table query_run_history ( -- raw query run history
     query_result jsonb,
     json_view boolean default false,
     created_at int default extract(epoch from now())::int
-)
+);
 
 create table auth_details (
     auth_detail_id text primary key default gen_random_uuid(),
@@ -250,4 +247,10 @@ create table kms_keys (
     cipher_text_encrypted text not null,
     arn text not null,
     created_at int default extract(epoch from now())::int
+);
+
+create table be_logs (
+    id serial primary key,
+    log_text text not null,
+    log_time int default extract(epoch from now())::int
 );

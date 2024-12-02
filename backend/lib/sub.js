@@ -5,11 +5,10 @@ var nouns = ['waterfall', 'river', 'breeze', 'moon', 'rain', 'wind', 'sea', 'mor
 
 exports.gen = gen;
 
-var asyncloop = require('./asyncloop.js').asyncloop;
-var DB = require.main.require('./models/index.js').db;
-var models = require.main.require('./models/modelManager').pgtmodels;
+function gen (callback) {
 
-function gen () {
+  var DB = require.main.require('./models/index.js').db;
+  var models = require.main.require('./models/modelManager').pgtmodels.models;
 
   var pairs = [];
 
@@ -20,9 +19,10 @@ function gen () {
     // const element = adv[i];
     for (let j = 0; j < nouns.length; j++) {
       // const element = nouns[j];
-      for (let k = 0; k < 10; k++) {
+
+      for (let k = 0; k < 1; k++) {
         // const element = array[k];
-        pairs.push({name: adv[i].toLowerCase() + '-' + nouns[j].toLowerCase() + '-' + (k + 1)});
+        pairs.push({name: adv[i].toLowerCase() + '-' + nouns[j].toLowerCase() + '-' + (k + 1), auto: true});
         // if(k == 0) pairs.push({name : adv[i] + '-' + nouns[j]})
         // else pairs.push({name : adv[i] + '-' + nouns[j] + '-' + k})
       }
@@ -30,16 +30,10 @@ function gen () {
     }
   }
 
-  // return console.log(pairs.length)
-  asyncloop(pairs, function(pair, success){
-    new DB({}).execute([
-      new models.public.subdomain_gen().insert({name: pair.name, auto: true})
-    ], function(err, r){
-      if(err) return console.log(err);
-      success();
-    });
-  }, function(){
-    console.log('done');
+  new DB({}).execute([
+    new models.public.subdomain_gen().insert(pairs)
+  ], function(err, r){
+    callback(err)
   });
 
 }

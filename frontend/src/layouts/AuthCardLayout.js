@@ -33,7 +33,7 @@ const AuthCardLayout = ({ leftSideContent, children }) => {
                         QueryDeck
                       </Link>
                       <p className={isDark ? 'text-800' : 'text-100'}>
-                        REST API gateway for PostgreSQL. Build and deploy SQL APIs without writing code or managing servers.`
+                        REST API gateway for PostgreSQL. Build and deploy SQL APIs without writing code or managing servers.
                       </p>
                     </div>
                   </div>
