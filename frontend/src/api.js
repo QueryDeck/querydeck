@@ -9,7 +9,7 @@ if(window.location.hostname === 'localhost') {
 } 
 else if(window.location.hostname.split('.').length === 2) {
     switch (window.location.hostname) {
-        case 'querydeck-dev.com':
+        case 'app.querydeck-dev.com':
             apiurl = 'https://api.querydeck-dev.com'
             apiBase = 'api.querydeck-dev.com'
             break
