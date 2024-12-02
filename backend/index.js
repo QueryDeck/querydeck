@@ -8,7 +8,7 @@ var responseEnd = require('./middlewares/responseEnd.js');
 const bodyParser = require('body-parser');
 const { MYSQL  , REQUEST_BODY_SIZE } = require('./envconfig.js').constant;
 var reSyncSchema = require('./lib/reSyncSchema.js');   
-var refreshGithub = require('./lib/refreshGithub.js');
+var refreshGithub = require('./lib/refreshGithub.js');  
 
 app.on('start', function () {
   console.log('Application ready to serve requests.');
