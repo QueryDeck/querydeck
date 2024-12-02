@@ -10,6 +10,7 @@ var asyncloop = require.main.require('./lib/asyncloop.js').asyncloop;
 var Sentry = require('../sentry.js');
 var modelutils = require.main.require('./models/utils');
 var repoManager = require.main.require('./repo-gen/index.js');
+var subdomain_gen = require.main.require('./lib/sub.js').gen;
 
 function compare(a, b) {
   if (a.last_nom < b.last_nom) {
@@ -384,10 +385,50 @@ var ModelManager = {
       ModelManager.pgtmodels = ModelManager.makeModelFromSchema(rows);  
 
       if(!ModelManager.pgtmodels || !ModelManager.pgtmodels.models || !ModelManager.pgtmodels.models.public || !ModelManager.pgtmodels.models.public.schema_defs) {
-        return callback({error: 'Incomplete schema', models: ModelManager.pgtmodels}); 
-      }
+        // create schema
+        const fs = require('fs');
+        const path = require('path');
+        const dbSqlPath = path.join(__dirname, '..', 'db.sql');
 
-      callback(); 
+        fs.readFile(dbSqlPath, 'utf8', (err, sql) => {
+          if (err) {
+              console.error('Error reading db.sql:', err);
+              return callback(err);
+          }
+  
+          // Execute the SQL schema
+          db.query({text: sql}, (err) => {
+              if (err) {
+                  console.error('Error executing schema:', err);
+                  return callback(err);
+              }
+  
+              // Call loadMain again after executing the schema
+              ModelManager.loadMain(callback);
+          });
+        });
+
+      } else {
+        // check subdomain_gen table
+        db.query({
+          text: "select count(*) from subdomain_gen",
+        }, function(err, result) {
+          if (err) {
+            console.error('Error checking subdomain_gen count:', err);
+            return callback(err);
+          }
+
+          if (!result.rows[0].count || result.rows[0].count == 0) {
+            console.log('Generating subdomains...');
+            // Generate subdomains if none exist
+            subdomain_gen(function(err) {
+              callback(err);
+            });
+          } else {
+            callback();
+          }
+        });
+      }
  
     });
   },
