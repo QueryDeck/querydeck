@@ -10,7 +10,7 @@ module.exports = function (router) {
   router.get('/', function (req, res) {
     // return res.zend(undefined, 200, "API is Running !!!");
     let resposne = {
-      name: "QuyerDeck !-!",
+      name: "QuyerDeck !--!",
       session_id: req.sessionID,
       session_sid: req.sessionToken,
       method: req.method,

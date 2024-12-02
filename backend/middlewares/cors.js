@@ -42,7 +42,7 @@ module.exports = function() {
 				'http://test.localhost:5051', 'http://test.localhost:5051/',
 				'http://137.184.29.89', 'http://137.184.29.89/',
 
-				"https://querydeck-dev.com", 
+				"https://app.querydeck-dev.com", 
 				"https://app.querydeck.io", 
 				"https://dev.querydeck.io",
 				"https://querydeck.io",
