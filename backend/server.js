@@ -4,7 +4,7 @@ var init = require('./init.js');
 var app = require('./index');
 var http = require('http').Server(app);
 var https = require('https');
-var PORT = process.env.PORT || process.env.port || 3000;
+var PORT = 3000;
 var fs = require('fs');
 var Sentry = require('./sentry.js');
 
