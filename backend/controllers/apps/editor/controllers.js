@@ -1146,6 +1146,10 @@ module.exports = function (router) {
         "id": "test",
         "title": "test"
       },
+      {
+        "id": "test2",
+        "title": "test2"
+      },
 
     ];
 
