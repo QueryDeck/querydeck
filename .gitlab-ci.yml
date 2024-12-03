@@ -22,7 +22,7 @@ deploy_prod:
   image: node:14.17.4-alpine
   stage: deploy
   only:
-    - main
+    - prod
   environment:
     name: Production
     url: https://app.querydeck.io
