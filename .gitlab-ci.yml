@@ -16,7 +16,7 @@ deploy_dev:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
   script:
-    - ssh -o StrictHostKeyChecking=no $DEV_SERVER_ADDRESS "cd querydeck; git pull; sudo docker-compose down; sudo docker pull querydeckio/querydeck-dev:backend-latest; sudo docker pull querydeckio/querydeck-dev:frontend-latest; sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
+    - ssh -o StrictHostKeyChecking=no $DEV_SERVER_ADDRESS "cd querydeck; git pull; sudo docker pull querydeckio/querydeck-dev:backend-latest; sudo docker pull querydeckio/querydeck-dev:frontend-latest; sudo docker-compose down; sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
 
 deploy_prod:
   image: node:14.17.4-alpine
@@ -33,4 +33,4 @@ deploy_prod:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
   script:
-    - ssh -o StrictHostKeyChecking=no $MAIN_SERVER_ADDRESS "cd querydeck; git pull; sudo docker-compose down; sudo docker pull querydeckio/querydeck:backend-latest; sudo docker pull querydeckio/querydeck:frontend-latest; sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
+    - ssh -o StrictHostKeyChecking=no $MAIN_SERVER_ADDRESS "cd querydeck; git pull; sudo docker pull querydeckio/querydeck:backend-latest; sudo docker pull querydeckio/querydeck:frontend-latest; sudo docker-compose down; sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
