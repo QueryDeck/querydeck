@@ -70,7 +70,7 @@ const NavbarTop = () => {
                             <img
                                 alt='Logo'
                                 src='https://res.cloudinary.com/marquee/image/upload/v1712577580/querycharts/email/querydeck_logo_full_ehyxdu.png'
-                            />
+                            />A
                         </Link>
                         <Badge
                             className='badge-nav'
