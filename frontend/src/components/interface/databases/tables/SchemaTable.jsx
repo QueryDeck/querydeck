@@ -9,14 +9,10 @@ import schemaTableReducer from '../../../reducers/databases/schema/schemaTableRe
 import { Box, Paper, Stack, Typography } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { DataGridPro, useGridApiContext } from '@mui/x-data-grid-pro'
-import { LicenseInfo } from '@mui/x-license-pro'
 
 // App config
 import AppContext from '../../../../context/Context'
 
-if(!process.env.REACT_APP_IS_LOCALHOST){
-LicenseInfo.setLicenseKey('628b9272df2de2bf85d6beb490f96a3aTz02Njk4MSxFPTE3MTYzNjk4MjUwMzcsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI=')
-}
 /*  unique columns table  */
 function DetailPanelContentUniqueColumnsTable({ uniqueColumns }) {
     // return null

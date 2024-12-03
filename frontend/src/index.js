@@ -8,6 +8,7 @@ import { PostHogProvider} from 'posthog-js/react'
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { LicenseInfo } from '@mui/x-license';
 import App from './App';
 import Main from './Main';
 
@@ -19,6 +20,8 @@ import {
 } from './lib/store'
 
 import tracker from './tracker'
+
+LicenseInfo.setLicenseKey(process.env.REACT_APP_MUI_KEY);
 
 tracker.start()
 
