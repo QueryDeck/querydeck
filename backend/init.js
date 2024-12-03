@@ -18,14 +18,6 @@ var methods = [function (callback){
     if(err) return callback(err);
     callback()
   })
-}, function(callback){
-
-  // require('./lib/migrate_cipher.js').migrateCipher(function(err){
-  //   if(err) return callback(err);
-  //   callback()
-  // })
-
-  callback()
 }
 ];
 
