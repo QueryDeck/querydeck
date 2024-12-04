@@ -1,4 +1,4 @@
-# QueryDeck
+# [QueryDeck](https://querydeck.io)
 
 [![GitHub license](https://img.shields.io/github/license/QueryDeck/querydeck)](https://github.com/QueryDeck/querydeck/blob/prod/LICENSE)
 
@@ -14,7 +14,7 @@
 - [Installation](#️-installation)
 - [Documentation](#-documentation)
 
-QueryDeck generates RESTful APIs from existing SQL databases. Use the visual no-code builder to create complex SQL queries with deep joins, nested inserts, dynamic parameters and turn them into fully functional REST APIs. Deploy your APIs instantly or push them as a Nodejs app to your GitHub repository.
+[QueryDeck](https://querydeck.io) generates RESTful APIs from existing SQL databases. Use the visual no-code builder to create complex SQL queries with deep joins, nested inserts, dynamic parameters and turn them into fully functional REST APIs. Deploy your APIs instantly or push them as a Nodejs app to your GitHub repository.
 
 ## Features
 
