@@ -1,6 +1,6 @@
 # QueryDeck
 
-[![GitHub license](https://img.shields.io/github/license/QueryDeck/querydeck)](https://github.com/QueryDeck/querydeck/blob/main/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/QueryDeck/querydeck)](https://github.com/QueryDeck/querydeck/blob/prod/LICENSE)
 
 QueryDeck is an open-source platform that revolutionizes how developers interact with SQL databases by providing automated REST API generation with a powerful visual interface.
 
