@@ -79,3 +79,5 @@ Visit our [Documentation](https://docs.querydeck.io/docs) for:
 - Best Practices
 - Example Projects
 - Troubleshooting
+
+For additional support, please [contact us](mailto:kabir@querydeck.io) directly via email.
