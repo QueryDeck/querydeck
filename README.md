@@ -2,6 +2,8 @@
 
 [![GitHub license](https://img.shields.io/github/license/QueryDeck/querydeck)](https://github.com/QueryDeck/querydeck/blob/prod/LICENSE)
 
+> **Note:** QueryDeck is currently in beta. While fully functional, you may encounter occasional issues as we continue to improve the platform.
+
 **Navigation:**
 - [Features](#features)
   - [Visual API Builder](#visual-api-builder)
