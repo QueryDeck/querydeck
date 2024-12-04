@@ -2,9 +2,21 @@
 
 [![GitHub license](https://img.shields.io/github/license/QueryDeck/querydeck)](https://github.com/QueryDeck/querydeck/blob/prod/LICENSE)
 
-QueryDeck is an open-source platform that revolutionizes how developers interact with SQL databases by providing automated REST API generation with a powerful visual interface.
+**Navigation:**
+- [Features](#features)
+  - [Visual API Builder](#visual-api-builder)
+  - [Multi-Engine Support](#multi-engine-support)
+  - [Automated Schema Analysis](#automated-schema-analysis)
+  - [Instant Deployment](#instant-deployment)
+  - [Security & Access Control](#security--access-control)
+  - [Developer Tools](#developer-tools)
+- [Demo](#-demo)
+- [Installation](#️-installation)
+- [Documentation](#-documentation)
 
-## 🚀 Features
+QueryDeck generates RESTful APIs from existing SQL databases. Use the visual no-code builder to create complex SQL queries with deep joins, nested inserts, dynamic parameters and turn them into fully functional REST APIs. Deploy your APIs instantly or push them as a Nodejs app to your GitHub repository.
+
+## Features
 
 ### Visual API Builder
 Build complex APIs without writing SQL code:
@@ -49,11 +61,14 @@ Compatible with major SQL databases:
 - **GitHub Integration**: Direct export to GitHub repositories
 - **API Documentation**: Automatic generation of OpenAPI/Swagger documentation
 
+## 🎥 Demo
+
+![QueryDeck Demo](https://querydeck.io/wp-content/uploads/2024/12/demo-basic.gif)
+
 ## 🛠️ Installation
 
 For detailed installation instructions, please refer to our [Installation Guide](https://github.com/QueryDeck/querydeck/blob/prod/Installation.md).
 
-Quick start:
 ## 📖 Documentation
 
 Visit our [Documentation](https://docs.querydeck.io/docs) for:
