@@ -63,7 +63,7 @@ Compatible with major SQL databases:
 
 ## 🎥 Demo
 
-![QueryDeck Demo](https://querydeck.io/wp-content/uploads/2024/12/demo-basic.gif)
+![QueryDeck Demo](./demo-basic.gif)
 
 ## 🛠️ Installation
 
