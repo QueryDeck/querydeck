@@ -1,0 +1,63 @@
+@import '../../../assets/scss/theme/variables';
+// @import '../../../../../assets/scss/dark/variables';
+
+.databases {
+  display: flex;
+}
+
+.database,
+.database_active,
+.database_disabled {
+  background-color: #77777707;
+  border: 1px solid #77777733;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  flex: 1 0 0;
+  margin: 16px;
+  padding: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #7770;
+  }
+
+  &:first-of-type {
+    margin-left: 0;
+  }
+
+  &:last-of-type {
+    margin-right: 0;
+  }
+
+  &_image {
+    width: 40%;
+  }
+
+  &_name {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: center;
+    width: 60%;
+  }
+
+  img {
+    max-width: 100%;
+    scale: 0.9;
+    transition: all 0.2s ease;
+  }
+}
+
+.database_active {
+  background-color: #99EECC44;
+  border: 1px solid #99EECC77;
+
+  img {
+    scale: 1;
+  }
+}
+
+.database_disabled {
+  cursor: not-allowed;
+}

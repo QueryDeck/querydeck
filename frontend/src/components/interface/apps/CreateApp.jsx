@@ -41,14 +41,18 @@ import {
 import { toast } from "react-toastify";
 
 // Image imports
-// import mysql_logo from '../logos/mysql_logo'
-// import pg_logo from '../logos/pg_logo'
+import mssql_logo from '../logos/mssql_logo'
+import mysql_logo from '../logos/mysql_logo'
+import pg_logo from '../logos/pg_logo'
 
 // Components
 // import currentTime from '../../../currentTime'
 
 // API
 import api from "../../../api";
+
+// SCSS module
+import styles from './create.module.scss'
 
 // Abort controller for cancelling network requests
 let createAppController;
@@ -105,7 +109,7 @@ const CreateApp = () => {
           initialState[field].value = 'Untitled'
           break
       case "dbPort":
-        initialState[field].value = "80";
+        initialState[field].value = "5432";
         break;
       default:
         initialState[field].value = "";
@@ -125,12 +129,12 @@ const CreateApp = () => {
   }, []);
 
   // Updates db type
-  // const updateDB = value => {
-  //     dispatch({
-  //         type: 'DB',
-  //         db_engine: value
-  //     })
-  // }
+  const updateDB = value => {
+      dispatch({
+          type: 'DB',
+          db_engine: value
+      })
+  }
 
   // Updates field value
   const updateField = (field, event) => {
@@ -371,8 +375,8 @@ const CreateApp = () => {
         <span>
           I have allowed connections to my database from QueryDeck's IP address:{" "}
           {window.location.hostname === "app.querydeck.io"
-            ? "18.217.221.232"
-            : "52.76.5.239"}
+            ? "3.140.86.70"
+            : "15.206.45.93"}
         </span>
         &nbsp;
       </Label>
@@ -387,6 +391,47 @@ const CreateApp = () => {
       </span>
     </div>
   );
+
+  const renderDatabases = () => {
+    const databases = [
+      {
+        name: 'PostgreSQL',
+        image: pg_logo,
+        disabled: false
+      },
+      {
+        name: 'MySQL',
+        image: mysql_logo,
+        disabled: true
+      },
+      {
+        name: 'Microsoft SQL',
+        image: mssql_logo,
+        disabled: true
+      }
+    ]
+    return (
+      <div className={styles.databases}>
+        {databases.map(element => (
+          <div
+            className={state.db_engine === element.name ? styles.database_active : (element.disabled ? styles.database_disabled : styles.database)}
+            key={element.name}
+            onClick={() => !element.disabled && updateDB(element.name)}
+          >
+            <div className={styles.database_image}>
+              <img
+                alt={element.name}
+                src={element.image}
+              />
+            </div>
+            <div className={styles.database_name}>
+              {element.name} {element.disabled && '(Coming soon)'}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   // Renders combined data
   const renderTabs = () => {
@@ -436,7 +481,7 @@ const CreateApp = () => {
             Click to learn more on how to get started with QueryDeck.
           </a>
         </Alert>
-        <br />
+        {renderDatabases()}
         <Nav tabs>
           <NavItem className="query-right-nav cursor-pointer">
             <NavLink
