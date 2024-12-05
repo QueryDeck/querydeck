@@ -526,7 +526,11 @@ module.exports = function (router) {
 
     final_object.model.method = req.body.method;
     final_object.model = JSON.stringify(final_object.model)  // for insert  'model' is array 
-
+    if(final_object?.docs?.sql_query?.text ){
+      final_object.docs.sql_query.text = sqlFormatter.format(final_object.docs.sql_query.text, {
+        "language": currentModel.db_type == MYSQL ? "mysql" : "postgresql",
+      });
+    }
     query_view_data = {
       column_ids: req.body.c,
       return_column_ids: req.body.return_c,
@@ -668,6 +672,12 @@ module.exports = function (router) {
     }
     final_object.model.method = req.body.method;
     final_object.model = JSON.stringify(final_object.model)  // for insert  'model' is array 
+
+    if(final_object?.docs?.sql_query?.text ){
+      final_object.docs.sql_query.text = sqlFormatter.format(final_object.docs.sql_query.text, {
+        "language": currentModel.db_type == MYSQL ? "mysql" : "postgresql",
+      });
+    }
     query_view_data = {
       column_ids: req.body.c,
       return_column_ids: req.body.return_c,
@@ -716,7 +726,7 @@ module.exports = function (router) {
         // db_id: db_id_select,
         query_json: final_object.model,
         query_text: final_object.query,
-        docs: final_object.docs,
+        docs: final_object.docs, 
         query_view_data: query_view_data,
         name: req.body.name,
         public_link: req.body.public_link || false,
@@ -1098,7 +1108,9 @@ module.exports = function (router) {
     };
     q.query.text = sqlFormatter.format(q.query.text, options);
     if (process.env.PROJECT_ENV === 'dev') console.log(q.query.text)
-
+    if(q?.docs?.sql_query?.text ){
+      q.docs.sql_query.text = sqlFormatter.format(q.docs.sql_query.text, options);
+    }
     var tabs = [
       {
         id: 'req',
