@@ -573,7 +573,7 @@ module.exports = function (router) {
       },
       db_id: req.body.db_id
     });
-
+ 
     new req.DB({}).execute([
       new req.models.public.api_queries().insert({
         db_id: db_id_select,
@@ -2089,7 +2089,6 @@ function condition_count(w) {
   }
   return c;
 }
-
 
 
 
