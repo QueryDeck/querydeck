@@ -1943,3 +1943,5 @@ function condition_count(w) {
   }
   return c;
 }
+
+module.exports.condition_count = condition_count; 
