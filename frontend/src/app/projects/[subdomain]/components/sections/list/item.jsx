@@ -94,7 +94,7 @@ const Item = props => {
         subdomain: props.subdomain
       }))
       if (redirect) {
-        history.push(`${window.location.pathname}/${props.item.query_id}`)
+        history.push(`/apps/${props.subdomain}/api/${props.item.query_id}`)
       }
     } catch (error) {
       props.catchError(error)
