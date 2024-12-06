@@ -30,7 +30,6 @@ import {
 import api from '../../../../../../api'
 
 // Controllers
-let loadDatabaseController
 let loadAPIcontroller
 
 const Item = props => {
@@ -41,11 +40,9 @@ const Item = props => {
   const history = useHistory()
 
   useEffect(() => {
-    loadDatabaseController = new AbortController()
     loadAPIcontroller = new AbortController()
 
     return () => {
-      loadDatabaseController.abort()
       loadAPIcontroller.abort()
     }
   }, [])
@@ -53,14 +50,9 @@ const Item = props => {
   // Gets database id of query
   const loadDatabase = async (query_id, redirect = false) => {
     try {
-      const response = await api.get('/apps/editor/controllers/saved-query-db', {
-        params: {
-          apiMode: true,
-          query_id
-        },
-        // signal: loadDatabaseController.signal // temporarily disabled till i find a solution to preview/edit apis after filtering
-      })
-      const data = response.data.data
+
+      const data = await props.loadDatabaseFromApi(query_id);
+
       dispatch(setDatabase({
         database: {
           label: data.db_name,
@@ -70,18 +62,18 @@ const Item = props => {
         query_id,
         subdomain: props.subdomain
       }))
-      loadAPI(data.db_id, query_id, redirect)
+      loadAPI(query_id, redirect)
     } catch (error) {
       props.catchError(error)
     }
   }
 
   // Gets data to populate ui
-  const loadAPI = async (db_id, query_id, redirect) => {
+  const loadAPI = async (  query_id, redirect) => {
     try {
       const response = await api.get('/apps/editor/controllers/api-queries', {
         params: {
-          db_id,
+          // db_id,
           query_id,
           subdomain: props.subdomain
         },
