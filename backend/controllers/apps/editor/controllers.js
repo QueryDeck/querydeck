@@ -83,7 +83,7 @@ module.exports = function (router) {
   router.get('/api-queries', catchError(async function (req, res) {
 
     let queryObj;
-    if (!req.query.subdomain || !req.query.db_id || req.query.db_id == '' || !req.query.query_id || req.query.query_id == '' || !req.clientModels[req.query.subdomain]) return res.zend(null, 400, "Must have 'subdomin' , 'db_id', 'query_id' ");
+    if (!req.query.subdomain  || !req.query.query_id || req.query.query_id == '' || !req.clientModels[req.query.subdomain]) return res.zend(null, 400, "Must have 'subdomin' , 'query_id' ");
 
       queryObj = {
         text: ` 
@@ -120,14 +120,13 @@ module.exports = function (router) {
                   AND (public.apps.created_by = $2)
               )
             ) 
-            AND (public.databases.db_id =  $3)
         )
-        AND   public.api_queries.query_id =  $4
+        AND   public.api_queries.query_id =  $3
       )   
       
       `,
 
-        values: [req.query.subdomain, req.user_id, req.query.db_id, req.query.query_id]
+        values: [req.query.subdomain, req.user_id,  req.query.query_id]
       }
 
 
