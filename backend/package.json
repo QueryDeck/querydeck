@@ -27,6 +27,7 @@
     "bcryptjs": "^2.4.3",
     "cheerio": "^0.22.0",
     "connect-mongo": "^5.1.0",
+    "graphql": "^16.9.0",
     "connect-pg-simple": "^7.0.0",
     "construx": "^1.0.1",
     "construx-copier": "^1.0.0",
