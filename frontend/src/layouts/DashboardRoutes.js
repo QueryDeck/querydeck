@@ -10,6 +10,7 @@ import Security from '../components/interface/security/Security'
 
 // Deploy
 import Deploy from '../components/interface/deploy/Deploy'
+import GraphQL from '../components/interface/graphql/QraphQL'
 
 // interface/databases
 import DatabasesList from '../components/interface/databases/DatabasesList'
@@ -102,6 +103,17 @@ const AppRoutes = ({ match: { url } }) => (
       path={`/apps/:appid/deploy`}
       render={
         props => <Deploy
+          appid={props.match.params.appid}
+        />
+      }
+    />
+
+        {/* GraphQL */}
+    <Route
+      exact
+      path={`/apps/:appid/graphql`}
+      render={
+        props => <GraphQL
           appid={props.match.params.appid}
         />
       }
