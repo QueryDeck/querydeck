@@ -23,6 +23,7 @@ import {
 
 // Components
 import Menu from "../menu/Menu";
+import Header from '../../../app/projects/[subdomain]/components/sections/engine/header';
 import Domains from "./domain/Domains";
 import Authentication from "./authentication/Authentication";
 import Authorization from "./authorization/Authorization";
@@ -61,77 +62,84 @@ const Security = (props) => {
     return (
       <div className="list-deck">
         <Menu appid={props.appid} />
-        <Card className="list-card-main">
-          <Nav tabs>
-            <NavItem className="query-right-nav cursor-pointer" id="query">
-              <NavLink
-                className={tab !== "domain" ? "active" : ""}
-                onClick={() => (tab !== "domain" ? changeTab("domain") : "")}
-              >
-                CORS <FontAwesomeIcon icon={faGlobe} />
-              </NavLink>
-            </NavItem>
-            <NavItem className="query-right-nav cursor-pointer">
-              <NavLink
-                className={tab !== "authentication" ? "active" : ""}
-                onClick={() =>
-                  tab !== "authentication" ? changeTab("authentication") : ""
-                }
-              >
-                Authentication <FontAwesomeIcon icon={faShieldAlt} />
-              </NavLink>
-            </NavItem>
+        <div style={{ flex: '1 0 0' }}>
+          <Header
+            mode='api'
+            section='Security'
+            subdomain={props.subdomain}
+          />
+          <Card className="list-card-main">
+            <Nav tabs>
+              <NavItem className="query-right-nav cursor-pointer" id="query">
+                <NavLink
+                  className={tab !== "domain" ? "active" : ""}
+                  onClick={() => (tab !== "domain" ? changeTab("domain") : "")}
+                >
+                  CORS <FontAwesomeIcon icon={faGlobe} />
+                </NavLink>
+              </NavItem>
+              <NavItem className="query-right-nav cursor-pointer">
+                <NavLink
+                  className={tab !== "authentication" ? "active" : ""}
+                  onClick={() =>
+                    tab !== "authentication" ? changeTab("authentication") : ""
+                  }
+                >
+                  Authentication <FontAwesomeIcon icon={faShieldAlt} />
+                </NavLink>
+              </NavItem>
 
-            <NavItem className="query-right-nav cursor-pointer">
-              <NavLink
-                className={tab !== "authorization" ? "active" : ""}
-                onClick={() =>
-                  tab !== "authorization" ? changeTab("authorization") : ""
-                }
-              >
-                Roles & Authorization <FontAwesomeIcon icon={faUserShield} />
-              </NavLink>
-            </NavItem>
-          </Nav>
-          <div className={`${tab}-list`}>
-            <TabContent activeTab={tab} className="query-right-tab">
-              <TabPane tabId="domain">
-                <div className="databases-list" style={{ margin: "0 auto" }}>
-                  <CardHeader>
-                    <h2 className="apps-heading">CORS Domains</h2>
-                  </CardHeader>
-                  <CardBody>
-                    <Domains subdomain={props.appid} />
-                  </CardBody>
-                </div>
-              </TabPane>
-              <TabPane tabId="authentication">
-                <div className="databases-list" style={{ margin: "0 auto" }}>
-                  <CardHeader>
-                    <h2 className="apps-heading">Authentication</h2>
-                  </CardHeader>
-                  <CardBody>
-                    <Authentication appid={props.appid} />
-                  </CardBody>
-                </div>
-              </TabPane>
-              <TabPane tabId="authorization">
-                <div className="databases-list" style={{ margin: "0 auto" }}>
-                  <CardHeader>
-                    <h2 className="apps-heading">Roles & Authorization</h2>
-                  </CardHeader>
-                  <CardBody>
-                    <Authorization
-                      appid={props.appid}
-                      roleId={props.roleId}
-                      currSelectedTab={tab}
-                    />
-                  </CardBody>
-                </div>
-              </TabPane>
-            </TabContent>
-          </div>
-        </Card>
+              <NavItem className="query-right-nav cursor-pointer">
+                <NavLink
+                  className={tab !== "authorization" ? "active" : ""}
+                  onClick={() =>
+                    tab !== "authorization" ? changeTab("authorization") : ""
+                  }
+                >
+                  Roles & Authorization <FontAwesomeIcon icon={faUserShield} />
+                </NavLink>
+              </NavItem>
+            </Nav>
+            <div className={`${tab}-list`}>
+              <TabContent activeTab={tab} className="query-right-tab">
+                <TabPane tabId="domain">
+                  <div className="databases-list" style={{ margin: "0 auto" }}>
+                    <CardHeader>
+                      <h2 className="apps-heading">CORS Domains</h2>
+                    </CardHeader>
+                    <CardBody>
+                      <Domains subdomain={props.appid} />
+                    </CardBody>
+                  </div>
+                </TabPane>
+                <TabPane tabId="authentication">
+                  <div className="databases-list" style={{ margin: "0 auto" }}>
+                    <CardHeader>
+                      <h2 className="apps-heading">Authentication</h2>
+                    </CardHeader>
+                    <CardBody>
+                      <Authentication appid={props.appid} />
+                    </CardBody>
+                  </div>
+                </TabPane>
+                <TabPane tabId="authorization">
+                  <div className="databases-list" style={{ margin: "0 auto" }}>
+                    <CardHeader>
+                      <h2 className="apps-heading">Roles & Authorization</h2>
+                    </CardHeader>
+                    <CardBody>
+                      <Authorization
+                        appid={props.appid}
+                        roleId={props.roleId}
+                        currSelectedTab={tab}
+                      />
+                    </CardBody>
+                  </div>
+                </TabPane>
+              </TabContent>
+            </div>
+          </Card>
+        </div>
       </div>
     );
   };

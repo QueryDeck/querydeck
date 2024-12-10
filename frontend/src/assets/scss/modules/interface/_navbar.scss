@@ -91,4 +91,18 @@
         }
         
     }
+
+    &-user {
+        &-button {}
+
+        &-menu {
+            left: 0px !important;
+            right: unset !important;
+            padding: 0;
+
+            .dropdown-divider {
+                margin: 0;
+            }
+        }
+    }
 }

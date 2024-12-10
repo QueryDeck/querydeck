@@ -402,47 +402,30 @@ const Save = props => {
   }
 
   return (
-    <div className='query-left-btn'>
-      <div
-        className='query-left-save'
-        style={{ display: 'flex' }}
-      >
+    <>
         {
           props.query_id === 'new'
           &&
-          <div style={{
-            flex: '1 0 0',
-            paddingRight: '8px'
-          }}>
-            <Button
-              block
-              color='falcon-danger'
-              onClick={() => dispatch(setNew({
-                mode: props.mode,
-                subdomain: props.subdomain
-              }))}
-              size='lg'
-            >
-              Reset <FontAwesomeIcon icon={faEraser} />
-            </Button>
-          </div>
-        }
-        <div
-          id='tour_api-left-save'
-          style={{ flex: '1 0 0' }}
-        >
           <Button
-            block
-            color='falcon-success'
-            onClick={clickHandler}
-            disabled={!(state?.base?.value && state?.method?.value && state?.text.length)}
-            size='lg'
+            color='falcon-danger'
+            onClick={() => dispatch(setNew({
+              mode: props.mode,
+              subdomain: props.subdomain
+            }))}
+            size='sm'
           >
-            Save <FontAwesomeIcon icon={faSave} />
+            Reset <FontAwesomeIcon icon={faEraser} />
           </Button>
-        </div>
-      </div>
-    </div>
+        }
+        <Button
+          color='primary'
+          onClick={clickHandler}
+          disabled={!(state?.base?.value && state?.method?.value && state?.text.length)}
+          size='sm'
+        >
+          Save <FontAwesomeIcon icon={faSave} />
+        </Button>
+    </>
   )
 }
 

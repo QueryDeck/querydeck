@@ -32,6 +32,7 @@ import { useResizable } from '@ag_meq/rrl'
 
 // Components
 import Menu from '../../../../../components/interface/menu/Menu'
+import Header from '../../components/sections/engine/header'
 import Left from '../../components/sections/engine/left'
 // import Right from '../../components/sections/engine/right'
 import Details from '../../components/sections/engine/details'
@@ -551,28 +552,35 @@ export function APIsaved (props) {
         </title>
       </Helmet>
       <Menu appid={props.subdomain} />
-      <div className='api-engine'>
-        <Left
-          catchError={catchError}
-          dragging={isDragging}
-          // getAggregatePaths={getAggregatePaths}
-          mode='api'
-          query_id={props.query_id}
-          searchNodes={searchNodes}
-          subdomain={props.subdomain}
-          width={position - 48 - 8 - 8}
-        />
-        <div
-          className='separator separator-horizontal'
-          {...separatorProps}
-        />
-        <Details
-          dragging={isDragging}
+      <div>
+        <Header
           mode='api'
           query_id={props.query_id}
           subdomain={props.subdomain}
-          width={window.innerWidth - 4 - 4 - position}
         />
+        <div className='api-engine'>
+          <Left
+            catchError={catchError}
+            dragging={isDragging}
+            // getAggregatePaths={getAggregatePaths}
+            mode='api'
+            query_id={props.query_id}
+            searchNodes={searchNodes}
+            subdomain={props.subdomain}
+            width={position - 48 - 8 - 8}
+          />
+          <div
+            className='separator separator-horizontal'
+            {...separatorProps}
+          />
+          <Details
+            dragging={isDragging}
+            mode='api'
+            query_id={props.query_id}
+            subdomain={props.subdomain}
+            width={window.innerWidth - 4 - 4 - position}
+          />
+        </div>
       </div>
     </div>
   )

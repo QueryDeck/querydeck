@@ -33,6 +33,7 @@ import { toast } from 'react-toastify'
 
 // Components
 import Menu from '../menu/Menu'
+import Header from '../../../app/projects/[subdomain]/components/sections/engine/header'
 import SchemaTable from './tables/SchemaTable'
 import Schema from './schema/Schema'
 import Overview from './overview/Overview'
@@ -183,106 +184,120 @@ const Database = props => {
             return(
                 <div className='list-deck'>
                     <Menu appid={appid} />
-                    <Card className='list-card-main'>
-                        <Nav tabs>
-                            {
-                                details && !isSubdomainIsSandbox(appid)
-                                ?
-                                <NavItem className='query-right-nav cursor-pointer'>
-                                    <NavLink
-                                        className={ tab !== 'overview' ? 'active' : '' }
-                                        onClick={() => tab !== 'overview' ? changeTab('overview') : ''}
-                                    >
-                                        Overview <FontAwesomeIcon icon={faInfoCircle} />
-                                    </NavLink>
-                                </NavItem>
-                                :
-                                ''
-                            }
-                            <NavItem
-                                className='query-right-nav cursor-pointer'
-                                id="query"
-                            >
-                                <NavLink
-                                    className={ tab !== 'schema-tables' ? 'active' : '' }
-                                    onClick={() => tab !== 'schema-tables' ? changeTab('schema-tables') : ''}
-                                >
-                                    Tables <FontAwesomeIcon icon={faTable} />
-                                </NavLink>
-                            </NavItem>
-                            <NavItem
-                                className='query-right-nav cursor-pointer'
-                            >
-                                <NavLink
-                                    className={ tab !== 'schema' ? 'active' : '' }
-                                    onClick={() => tab !== 'schema' ? changeTab('schema') : ''}
-                                >
-                                    Schema <FontAwesomeIcon icon={faSitemap} />
-                                </NavLink>
-                            </NavItem>
-                        </Nav>
-                        <div className={`${tab}-list`}>
-                            <TabContent
-                                className='query-right-tab'
-                                activeTab={tab}
-                            >
+                    <div style={{ flex: '1 0 0' }}>
+                        <Header
+                            mode='api'
+                            section='Database'
+                            subdomain={props.subdomain}
+                        />
+                        <Card className='list-card-main'>
+                            <Nav tabs>
                                 {
-                                    details   && !isSubdomainIsSandbox(appid)
+                                    details && !isSubdomainIsSandbox(appid)
                                     ?
-                                    <TabPane tabId='overview'>
-                                        <div
-                                            className='databases-list'
-                                            style={{ margin: '0 auto' }}
+                                    <NavItem className='query-right-nav cursor-pointer'>
+                                        <NavLink
+                                            className={ tab !== 'overview' ? 'active' : '' }
+                                            onClick={() => tab !== 'overview' ? changeTab('overview') : ''}
                                         >
-                                            <CardHeader>
-                                                <h2 className='apps-heading'>Overview</h2>
-                                                {/* <RenderResync/> */}
-                                            </CardHeader>
-                                            <CardBody>
-                                                <Overview
-                                                    appid={appid}
-                                                    db_id={db_id}
-                                                    details={details}
-                                                    resync={resync}
-                                                    reSyncSchema={reSyncSchema}
-                                                />
-                                            </CardBody>
-                                        </div>
-                                    </TabPane>
+                                            Overview <FontAwesomeIcon icon={faInfoCircle} />
+                                        </NavLink>
+                                    </NavItem>
                                     :
                                     ''
                                 }
-                                <TabPane tabId='schema-tables'>
-                                    <SchemaTable
-                                        data={data.tables}
-                                    />
-                                </TabPane>
-                                <TabPane tabId='schema'>
-                                    <Schema
-                                        appid={appid}
-                                        db_id={db_id}
-                                        data={data} 
-                                        tabId={tab}
-                                    />
-                                </TabPane>
-                            </TabContent>
-                        </div>
-                    </Card>
+                                <NavItem
+                                    className='query-right-nav cursor-pointer'
+                                    id="query"
+                                >
+                                    <NavLink
+                                        className={ tab !== 'schema-tables' ? 'active' : '' }
+                                        onClick={() => tab !== 'schema-tables' ? changeTab('schema-tables') : ''}
+                                    >
+                                        Tables <FontAwesomeIcon icon={faTable} />
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem
+                                    className='query-right-nav cursor-pointer'
+                                >
+                                    <NavLink
+                                        className={ tab !== 'schema' ? 'active' : '' }
+                                        onClick={() => tab !== 'schema' ? changeTab('schema') : ''}
+                                    >
+                                        Schema <FontAwesomeIcon icon={faSitemap} />
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+                            <div className={`${tab}-list`}>
+                                <TabContent
+                                    className='query-right-tab'
+                                    activeTab={tab}
+                                >
+                                    {
+                                        details   && !isSubdomainIsSandbox(appid)
+                                        ?
+                                        <TabPane tabId='overview'>
+                                            <div
+                                                className='databases-list'
+                                                style={{ margin: '0 auto' }}
+                                            >
+                                                <CardHeader>
+                                                    <h2 className='apps-heading'>Overview</h2>
+                                                    {/* <RenderResync/> */}
+                                                </CardHeader>
+                                                <CardBody>
+                                                    <Overview
+                                                        appid={appid}
+                                                        db_id={db_id}
+                                                        details={details}
+                                                        resync={resync}
+                                                        reSyncSchema={reSyncSchema}
+                                                    />
+                                                </CardBody>
+                                            </div>
+                                        </TabPane>
+                                        :
+                                        ''
+                                    }
+                                    <TabPane tabId='schema-tables'>
+                                        <SchemaTable
+                                            data={data.tables}
+                                        />
+                                    </TabPane>
+                                    <TabPane tabId='schema'>
+                                        <Schema
+                                            appid={appid}
+                                            db_id={db_id}
+                                            data={data} 
+                                            tabId={tab}
+                                        />
+                                    </TabPane>
+                                </TabContent>
+                            </div>
+                        </Card>
+                    </div>
                 </div>
             )
         } else {
             return(
                 <div className='list-deck'>
                     <Menu appid={appid} />
-                    <Card className='list-card-main'>
-                        <div className='loading-div'>
-                            <Spinner
-                                className='loading-spinner'
-                                color="primary"
-                                type="grow"
-                            />
-                        </div>
-                    </Card>
+                    <div style={{ flex: '1 0 0' }}>
+                        <Header
+                            mode='api'
+                            section='Database'
+                            subdomain={props.subdomain}
+                        />
+                        <Card className='list-card-main'>
+                            <div className='loading-div'>
+                                <Spinner
+                                    className='loading-spinner'
+                                    color="primary"
+                                    type="grow"
+                                />
+                            </div>
+                        </Card>
+                    </div>
                 </div>
             )
         }

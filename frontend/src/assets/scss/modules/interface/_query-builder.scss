@@ -162,7 +162,7 @@
     // LHS Section
     &-left {
         overflow: auto;
-        height: calc(100vh - 61.283px - 12px);
+        height: calc(100vh - 61.283px - 8px - 2rem - 12px - 9px);
         border-radius: 5px;
         margin-top: 4px;
 
@@ -265,7 +265,7 @@
 
         &-tab {
             text-align: left;
-            height: calc(100vh - 61.283px - 50px);
+            height: calc(100vh - 61.283px - 50px - 44px);
             padding: 4px;
         }
 
@@ -1539,7 +1539,7 @@
     &-settings {
         // border: 1px solid #77777733;
         background-color: #7771;
-        // border-radius: 5px;
+        border-radius: 5px;
         padding: 6px;
         margin: 6px 4px;
 

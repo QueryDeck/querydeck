@@ -102,3 +102,8 @@ input {
         background-color: #AAA2 !important;
     }
 }
+
+.dropdown-menu::after {
+    display: none !important;
+    visibility: hidden !important;
+}

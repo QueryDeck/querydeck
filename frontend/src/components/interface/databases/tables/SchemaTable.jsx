@@ -332,7 +332,7 @@ const DatabaseTable = props => {
                 className='data-src-table-bx'
                 sx={{
                     display: 'flex',
-                    height: 'calc(100vh - 61.283px - 8px - 4px - 4px - 34px)'
+                    height: 'calc(100vh - 61.283px - 8px - 4px - 4px - 34px - 44px)'
                 }}
                 dir='ltr'
             >

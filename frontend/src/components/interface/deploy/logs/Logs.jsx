@@ -122,7 +122,7 @@ const Logs = (props) => {
             className="data-src-table-bx"
             sx={{
               display: "flex",
-              height: "calc(100vh - 160.283px  - 4px)",
+              height: "calc(100vh - 160.283px  - 4px - 40px)",
               width: "100%",
             }}
             dir="ltr"

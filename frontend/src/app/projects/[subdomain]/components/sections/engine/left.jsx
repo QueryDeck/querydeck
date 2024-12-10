@@ -16,7 +16,6 @@ import Sort from '../../steps/sort'
 // import Pagination from '../../steps/pagination'
 import Offset from '../../steps/offset'
 import Limit from '../../steps/limit'
-import Save from '../../steps/save'
 import Authentication from '../../steps/authentication'
 import Authorisation from '../../steps/authorisation'
 
@@ -146,16 +145,6 @@ const Left = props => {
     />
   )
 
-  const renderSave = () => (
-    <Save
-      catchError={props.catchError}
-      // getAggregatePaths={props.getAggregatePaths}
-      key='save-step'
-      mode={props.mode}
-      query_id={props.query_id}
-      subdomain={props.subdomain}
-    />
-  )
 
   const renderJoinModal = () => (
     <JoinModal
@@ -247,9 +236,6 @@ const Left = props => {
           {renderLimit()}
           {renderAuthentication()}
           {renderAuthorisation()}
-				</div>
-				<div className='query-left-actions'>
-					{renderSave()}
 				</div>
         {renderJoinModal()}
         {renderFilterModal()}

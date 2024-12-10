@@ -124,6 +124,7 @@ const Left = props => {
       return(
         <Card
           style={{
+            marginTop: '4px',
             opacity: 0.5,
             width: props.width
           }}
@@ -131,7 +132,10 @@ const Left = props => {
       )
     } else {
       return(
-        <Card style={{ width: props.width }}>
+        <Card style={{
+          marginTop: '4px',
+          width: props.width
+        }}>
           <div className='api-saved-list-search'>
             <Input
               autoFocus

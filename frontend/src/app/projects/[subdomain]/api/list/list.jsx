@@ -20,6 +20,7 @@ import { useResizable } from '@ag_meq/rrl'
 
 // Components
 import Menu from '../../../../../components/interface/menu/Menu'
+import Header from '../../components/sections/engine/header'
 import Left from '../../components/sections/list/left'
 import Details from '../../components/sections/engine/details'
 import DeleteModal from '../../components/modals/delete'
@@ -121,33 +122,44 @@ export const APIlist = props => {
         </title>
       </Helmet>
       <Menu appid={props.subdomain} />
-      <div className='api-saved'>
-        <Left
-          catchError={catchError}
-          dragging={isDragging}
-          resolveMethod={resolveMethod}
+      <div>
+        <Header
+          mode='api'
+          query_id={state?.select_preview?.query_id}
+          section='REST APIs'
           subdomain={props.subdomain}
-          width={position - 48 - 8 - 8}
         />
-        <div
-          className='separator separator-horizontal'
-          {...separatorProps}
-        />
-        {
-          state && state[state?.select_preview?.query_id]?.method?.value ?
-          <Details
+        <div className='api-saved'>
+          <Left
+            catchError={catchError}
             dragging={isDragging}
-            mode='api'
-            query_id={state?.select_preview?.query_id}
+            resolveMethod={resolveMethod}
             subdomain={props.subdomain}
-            width={window.innerWidth - 4 - 4 - position}
-          /> :
-          <Card style={{ width: window.innerWidth - 4 - 4 - position }}>
-            <div className='api-saved-details-empty'>
-              Click on an API to view details
-            </div>
-          </Card>
-        }
+            width={position - 48 - 8 - 8}
+          />
+          <div
+            className='separator separator-horizontal'
+            {...separatorProps}
+          />
+          {
+            state && state[state?.select_preview?.query_id]?.method?.value ?
+            <Details
+              dragging={isDragging}
+              mode='api'
+              query_id={state?.select_preview?.query_id}
+              subdomain={props.subdomain}
+              width={window.innerWidth - 4 - 4 - position}
+            /> :
+            <Card style={{
+              marginTop: '4px',
+              width: window.innerWidth - 4 - 4 - position
+            }}>
+              <div className='api-saved-details-empty'>
+                Click on an API to view details
+              </div>
+            </Card>
+          }
+        </div>
       </div>
       <DeleteModal
         catchError={catchError}
