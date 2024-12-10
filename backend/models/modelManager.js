@@ -11,6 +11,7 @@ var Sentry = require('../sentry.js');
 var modelutils = require.main.require('./models/utils');
 var repoManager = require.main.require('./repo-gen/index.js');
 var subdomain_gen = require.main.require('./lib/sub.js').gen;
+const pluralize = require('pluralize');
 
 function compare(a, b) {
   if (a.last_nom < b.last_nom) {
@@ -382,7 +383,7 @@ var ModelManager = {
     ModelManager.extractSchema(db, function(err, rows){
       if(err) return callback(err);
 
-      ModelManager.pgtmodels = ModelManager.makeModelFromSchema(rows);  
+      ModelManager.pgtmodels = ModelManager.makeModelFromSchema({rows: rows});  
 
       if(!ModelManager.pgtmodels || !ModelManager.pgtmodels.models || !ModelManager.pgtmodels.models.public || !ModelManager.pgtmodels.models.public.schema_defs) {
         // create schema
@@ -659,12 +660,13 @@ var ModelManager = {
               })
               return callback(err);
             }
-            var mod_gen_res = ModelManager.makeModelFromSchema(rows2);
+            var mod_gen_res = ModelManager.makeModelFromSchema({rows: rows2});
             databases[element.db_id].models = mod_gen_res.models;
             databases[element.db_id].idToName = mod_gen_res.idToName;
             databases[element.db_id].tidToName = mod_gen_res.tidToName; 
             databases[element.db_id].table_count = mod_gen_res.table_count;
             databases[element.db_id].schema_count = mod_gen_res.schema_count;
+            databases[element.db_id].graphql_tables = mod_gen_res.graphql_tables;
   
             ModelManager.models[subdomain] = {
               appDetails: appdetails,
@@ -688,12 +690,14 @@ var ModelManager = {
             })
           })
         } else {
-          var mod_gen_res = ModelManager.makeModelFromSchema(element.def);
+          var mod_gen_res = ModelManager.makeModelFromSchema({rows: element.def});
           databases[element.db_id].models = mod_gen_res.models;
           databases[element.db_id].idToName = mod_gen_res.idToName;
           databases[element.db_id].tidToName = mod_gen_res.tidToName; 
           databases[element.db_id].table_count = mod_gen_res.table_count;
           databases[element.db_id].schema_count = mod_gen_res.schema_count;
+          databases[element.db_id].graphql = {};
+          databases[element.db_id].graphql.tables = mod_gen_res.graphql_tables;
   
           ModelManager.models[subdomain] = {
             appDetails: appdetails,
@@ -962,9 +966,11 @@ var ModelManager = {
   } 
   ,
 
-  makeModelFromSchema: function(rows){ 
+  makeModelFromSchema: function(params){ 
+
+    var rows = params.rows;
      
-    var idToName = {}, tidToName = {}, table_count = 0, schema_count = 0;
+    var idToName = {}, tidToName = {}, graphql_tables = {}, table_count = 0, schema_count = 0;
     var def = {};
     var tid = 0;
     for (var i = 0; i < rows.length; i++) {
@@ -1009,6 +1015,13 @@ var ModelManager = {
       var id = def[rows[i].nspname][rows[i].relname].properties.id + '.' + rows[i].attnum;
       tidToName[def[rows[i].nspname][rows[i].relname].properties.id] = [rows[i].nspname, rows[i].relname];
       idToName[id] = [rows[i].nspname, rows[i].relname, rows[i].name];
+
+      var graphql_table_name = (rows[i].nspname == 'public' ? '' : (rows[i].nspname + '_')) + rows[i].relname;
+
+      graphql_tables[graphql_table_name] = graphql_tables[graphql_table_name] || {
+        table_schema: [rows[i].nspname, rows[i].relname],
+        rel_tables_raw: {}
+      }
       // def.maps.nameToId[rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name] = id;
       def[rows[i].nspname][rows[i].relname].properties.display_name = rows[i].table_display_name;
       def[rows[i].nspname][rows[i].relname].properties.required_entries = rows[i].table_required_entries;
@@ -1030,8 +1043,6 @@ var ModelManager = {
         def[rows[i].nspname][rows[i].relname].properties.columns[rows[i].name].foreign = false;
         def[rows[i].nspname][rows[i].relname].properties.columns[rows[i].name].fk_col = null;
       } 
-      
-
        
       if(rows[i].uniquekey == 't') {
         def[rows[i].nspname][rows[i].relname].properties.unique.push(rows[i].name);
@@ -1059,6 +1070,10 @@ var ModelManager = {
         def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].type = rows[i].uindex ? '1-1' : 'M-1';
         def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].direct = 'out';
 
+        graphql_tables[graphql_table_name].rel_tables_raw[rows[i].foreignkey_schema + '.' + rows[i].foreignkey] = graphql_tables[graphql_table_name].rel_tables_raw[rows[i].foreignkey_schema + '.' + rows[i].foreignkey] || 0;
+
+        ++graphql_tables[graphql_table_name].rel_tables_raw[rows[i].foreignkey_schema + '.' + rows[i].foreignkey];
+
         def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname] = def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname] || [];
 
         var rel_id_rev = rows[i].foreignkey_schema + '.' + rows[i].foreignkey + '.' + rows[i].foreignkey_fieldname + '-' + rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name;
@@ -1067,7 +1082,17 @@ var ModelManager = {
         def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].type = rows[i].uindex ? '1-1' : '1-M';
         def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].direct = 'in';
 
-        if(def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname].indexOf(rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name) == -1) def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname].push(rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name);
+        if(def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname].indexOf(rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name) == -1) {
+          def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname].push(rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name);
+
+          var fkey_graphql_table = (rows[i].foreignkey_schema == 'public' ? '' : (rows[i].foreignkey_schema + '_')) + rows[i].foreignkey;
+          graphql_tables[fkey_graphql_table] = graphql_tables[fkey_graphql_table] || {
+            table_schema: [rows[i].foreignkey_schema, rows[i].foreignkey],
+            rel_tables_raw: {}
+          }
+          graphql_tables[fkey_graphql_table].rel_tables_raw[rows[i].nspname + '.' + rows[i].relname] = graphql_tables[fkey_graphql_table].rel_tables_raw[rows[i].nspname + '.' + rows[i].relname] || 0;
+          ++graphql_tables[fkey_graphql_table].rel_tables_raw[rows[i].nspname + '.' + rows[i].relname];
+        }
       }
       if (typeof rows[i].default == 'string' && rows[i].default.indexOf('nextval(') > -1) {
         def[rows[i].nspname][rows[i].relname].properties.serials.push(rows[i].name);
@@ -1075,15 +1100,67 @@ var ModelManager = {
       if (rows[i].notnull == true) {
         if(def[rows[i].nspname][rows[i].relname].properties.notnulls.indexOf(rows[i].name) == -1) def[rows[i].nspname][rows[i].relname].properties.notnulls.push(rows[i].name);
       }
-      // console.log( (def[rows[i].nspname][rows[i].relname].properties))
     }
-  //  console.file( def)
+
+    var graphql_models = Object.keys(graphql_tables)
+
+    for (let i = 0; i < graphql_models.length; i++) {
+      const element = graphql_models[i];
+      graphql_tables[element].relations = {};
+
+      var rels = Object.keys(def[graphql_tables[element].table_schema[0]][graphql_tables[element].table_schema[1]].properties.rels_new);
+      for (let j = 0; j < rels.length; j++) {
+        const element2 = rels[j];
+        var rel_table_arr = element2.split('-')[1].split('.');
+        var rel_table = rel_table_arr.slice(0, 2).join('.');
+        var rel_table_graphql = (rel_table_arr[0] == 'public' ? '' : (rel_table_arr[0] + '_')) + rel_table_arr[1];
+        var base_table_arr = element2.split('-')[0].split('.');
+        var base_table = base_table_arr.slice(0, 2).join('.');
+        var base_table_graphql = (base_table_arr[0] == 'public' ? '' : (base_table_arr[0] + '_')) + base_table_arr[1];
+
+        var base_mod_name = (rel_table_arr[0] == 'public' ? '' : (rel_table_arr[0] + '_')) + rel_table_arr[1];
+        var base_rel_name = base_mod_name;
+        if(def[graphql_tables[element].table_schema[0]][graphql_tables[element].table_schema[1]].properties.rels_new[element2].type.charAt(2) == 'M') {
+          base_rel_name = pluralize.plural(base_rel_name);
+        } else {
+          base_rel_name = pluralize.singular(base_rel_name);
+        }
+        
+        if(graphql_tables[element].rel_tables_raw && graphql_tables[element].rel_tables_raw[rel_table] > 1) {
+          // multiple relations to same table
+          if(def[graphql_tables[element].table_schema[0]][graphql_tables[element].table_schema[1]].properties.rels_new[element2].direct == 'out') {
+            // use lhs column name
+            base_rel_name = base_rel_name + '_by_' + base_table_arr[2];
+          } else {
+            // use rhs column name
+            base_rel_name = base_rel_name + '_by_' + rel_table_arr[2];
+          }
+        }
+        var text_path_split = element2.split('-');
+        var text_path_split_lhs = text_path_split[0].split('.');
+        var text_path_split_rhs = text_path_split[1].split('.');
+        var id_path = def[text_path_split_lhs[0]][text_path_split_lhs[1]].properties.id + '.' + def[text_path_split_lhs[0]][text_path_split_lhs[1]].properties.columns[text_path_split_lhs[2]].id + '-' + def[text_path_split_rhs[0]][text_path_split_rhs[1]].properties.id + '.' + def[text_path_split_rhs[0]][text_path_split_rhs[1]].properties.columns[text_path_split_rhs[2]].id;
+        graphql_tables[element].relations[base_rel_name] = {
+          text_path: element2,
+          id_path: id_path,
+          type: def[graphql_tables[element].table_schema[0]][graphql_tables[element].table_schema[1]].properties.rels_new[element2].type,
+          direct: def[graphql_tables[element].table_schema[0]][graphql_tables[element].table_schema[1]].properties.rels_new[element2].direct,
+          rel_table: rel_table,
+          base_table: base_table,
+          rel_table_graphql: rel_table_graphql,
+          base_table_graphql: base_table_graphql
+        }
+      }
+      delete graphql_tables[element].rel_tables_raw;
+    }
+
     return {
       models: def,
       idToName: idToName,
       tidToName: tidToName,
       table_count: table_count,
-      schema_count: schema_count
+      schema_count: schema_count,
+      graphql_tables: graphql_tables
     }; 
   }, 
 

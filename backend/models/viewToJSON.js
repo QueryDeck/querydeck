@@ -514,6 +514,8 @@ module.exports = class ViewToJSON {
     }
 
     initColumn(pathid, coltabid, user_opts) {
+        
+        if(typeof pathid !== 'string') pathid = pathid.toString();
         if (!this.insertOb[pathid]) this.initPath(pathid);
         let col_name_split = this.currentModel.idToName[coltabid];
 
@@ -1935,7 +1937,7 @@ function condition_count(w) {
   w = w || { rules: [] };
   for (let i = 0; i < w.rules.length; i++) {
     const element = w.rules[i];
-    if (w.rules[i].condition) {
+    if (w.rules[i].condition && w.rules[i].rules) {
       c += condition_count(w.rules[i]);
     } else {
       ++c;

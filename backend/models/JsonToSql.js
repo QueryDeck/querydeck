@@ -146,15 +146,14 @@ module.exports = class builder {
 					model.joins[i].where = model.joins[i].on;
 					finalColumns.push('( ' + this.select(model.joins[i], model.joins[i].agg_type) + ' )');
 				} else {
-					jtext += ' ' + (model.joins[i].type) + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table);
+					jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table);
 					// if(model.q.joins[i].model.q.as) jtext += ' AS ' + this.identAlias(model.q.joins[i].model.q.as) + ' ';
 					// old
 					// jtext += ' ON ' + this.resolveConditions(this.addSchemaToObKeys(model.q.joins[i].on, model.q.joins[i].model), model.q.joins[i].model);
-					if (!(this.db_type == POSTGRES && model.joins[i].type == 'CROSS')) {
-						jtext += ' ON ' + this.resolveConditions(model.joins[i].on);
-					}
+					// TODO: throw error if on is null
+					jtext += ' ON ' + this.resolveConditions(model.joins[i].on);
 
-
+					
 					finalColumns = finalColumns.concat(this.resolveSelectColumns(model.joins[i]));
 				}
 			}
@@ -878,10 +877,13 @@ module.exports = class builder {
 				var param_val = false;
 
 				// this.depthpaths.push
-				if(val !== undefined && 	conditions.rules[i].input_key === undefined  ){
-                 // condition  value is static 
-				}
-				else if (val && (!conditions.rules[i].operator || conditions.rules[i].operator.indexOf('$') == -1)) {
+				if(val !== undefined && 	conditions.rules[i].input_key === undefined  && conditions.rules[i].operator.indexOf('$columnref') == -1){
+					if(conditions.rules[i].operator.indexOf('$columnref') == -1) {
+						// condition  value is static 
+						val = this.getParamMapIndex(val)
+					}
+				 
+				} else if (val && (!conditions.rules[i].operator || conditions.rules[i].operator.indexOf('$') == -1)) {
 
 					
 					if (conditions.rules[i].input_key && conditions.rules[i].input_key.match(/BODY|QUERY|URL|SESSION/)) {
@@ -1016,9 +1018,10 @@ module.exports = class builder {
 			else if (params.operator == '$!false') return params.columnName + ' IS NOT FALSE ';
 			else return '';
 		}
-		if(!params.param_val && (suptype == 'text' || suptype ===  'datetime')){ 
-			params.value = "'" + params.value + "'"
-		}
+		// console.log('suptype', suptype)
+		// if(!params.param_val && (suptype == 'text' || suptype ===  'datetime' || suptype ===  'timestamp')){ 
+		// 	params.value = "'" + params.value + "'"
+		// }
 
 		if (params.operator === '$gt') return params.columnName + ' > ' + params.value;
 		else if (params.operator === '$gte') return params.columnName + ' >= ' + params.value;
@@ -1064,8 +1067,7 @@ module.exports = class builder {
 		// else if (params.operator.indexOf('$!cnb') > -1) return ' NOT (' + params.columnName + ' <@ ' + params.value + '::' + pgtype + '[]) ';
 		// else if (params.operator.indexOf('$cn') > -1) return params.columnName + ' @> ' + params.value + '::' + pgtype;
 		// else if (params.operator.indexOf('$!cn') > -1) return ' NOT (' + params.columnName + ' @> ' + params.value + '::' + pgtype + ') ';
-
-		return null;
+		throw new Error('Operator not found: ' + params.operator)
 	}
 
 	getType(columnName) {
