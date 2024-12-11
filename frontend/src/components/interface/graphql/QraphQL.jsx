@@ -16,6 +16,7 @@ import {
 import api  from "../../../api";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
+import Header from '../../../app/projects/[subdomain]/components/sections/engine/header';
 
 // Components
 import Menu from "../menu/Menu";
@@ -183,11 +184,15 @@ const QraphQL = ({ appid: subdomain }) => {
       return (
 
 
-        <div className={`${'tab'}-list`}>
-          <div className="databases-list" style={{ margin: "0 auto" }}>
-            <CardHeader>
-              <h2 className="apps-heading">GraphQL</h2>
-            </CardHeader>
+        <div className="list-deck">
+      
+        <div style={{ flex: '1 0 0' }}>
+          <Header
+            mode='api'
+            section='GraphQL'
+            subdomain={subdomain}
+          />
+  
             <CardBody style={{ paddingTop: 0 }}>
               <SetupGraphQL subdomain={subdomain} db_id={state.database.db_id} tableOptions={state.tableOptions}
                 openSetupGraphQLModal={openSetupGraphQLModal}

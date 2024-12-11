@@ -38,6 +38,7 @@ const Deploy = (props) => {
             section='Deployment'
             subdomain={props.subdomain}
           />
+ 
           <Card className="list-card-main">
             <Nav tabs>
               <NavItem className="query-right-nav cursor-pointer" id="query">

@@ -1,5 +1,7 @@
 // React imports
 import React from "react";
+// SCSS module
+import styles from './graphql.module.scss'
 
 // Library imports
 import { faWrench } from "@fortawesome/free-solid-svg-icons";
@@ -22,13 +24,15 @@ const SetupGraphQL = ({
 
     return (
       <>
-        <br />
-        <br />
-        <br />
+        
+        <div  className={styles.setupbutton}>
+          sds
         <Button block color="primary" onClick={openSetupGraphQLModal}>
           Setup GraphQL &nbsp; <FontAwesomeIcon icon={faWrench} />
         </Button>
 
+        </div>
+  
         <div
           style={{
             height:
