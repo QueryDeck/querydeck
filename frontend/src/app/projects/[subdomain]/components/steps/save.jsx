@@ -14,6 +14,7 @@ import {
 
 // Library imports
 import {
+  faBan,
   faEraser,
   faSave
 } from '@fortawesome/free-solid-svg-icons'
@@ -38,7 +39,8 @@ let updateQueryController
 
 const Save = props => {
   // Redux
-  const state = useSelector(state => state.data[props.mode][props.subdomain]?.[props.query_id])
+  const listState = useSelector(state => state.data[props.mode][props.subdomain])
+  const state = listState?.[props.query_id]
   const dispatch = useDispatch()
 
   const history = useHistory()
@@ -404,6 +406,17 @@ const Save = props => {
   return (
     <>
         {
+          (props.query_id === 'new' ||
+          !listState.select_preview) &&
+          <Button
+            color='falcon-danger'
+            onClick={() => history.push(`/apps/${props.subdomain}/api`)}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faBan} /> Cancel
+          </Button>
+        }
+        {
           props.query_id === 'new'
           &&
           <Button
@@ -414,7 +427,7 @@ const Save = props => {
             }))}
             size='sm'
           >
-            Reset <FontAwesomeIcon icon={faEraser} />
+            <FontAwesomeIcon icon={faEraser} /> Reset
           </Button>
         }
         <Button
@@ -423,7 +436,7 @@ const Save = props => {
           disabled={!(state?.base?.value && state?.method?.value && state?.text.length)}
           size='sm'
         >
-          Save <FontAwesomeIcon icon={faSave} />
+          <FontAwesomeIcon icon={faSave} /> Save
         </Button>
     </>
   )

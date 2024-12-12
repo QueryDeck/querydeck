@@ -539,19 +539,19 @@ export function APInew (props) {
   }
 
   return (
-    <div className='core'>
+    <>
       <Helmet>
         <title>
           {`${state?.route} | API | QueryDeck`}
         </title>
       </Helmet>
-      <Menu appid={props.subdomain} />
-      <div>
-        <Header
-          mode='api'
-          query_id='new'
-          subdomain={props.subdomain}
-        />
+      <Header
+        mode='api'
+        query_id='new'
+        subdomain={props.subdomain}
+      />
+      <div className='core'>
+        <Menu appid={props.subdomain} />
         <div className='api-engine'>
           <Left
             catchError={catchError}
@@ -576,6 +576,6 @@ export function APInew (props) {
           />
         </div>
       </div>
-    </div>
+    </>
   )
 }

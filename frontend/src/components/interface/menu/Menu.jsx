@@ -102,7 +102,7 @@ const Menu = (props) => {
           {state.tooltip ? <span>GraphQL</span> : ""}
         </Button>
         <Button
-          className="menu-btn"
+          className="menu-btn hide"
           color="falcon-primary"
           id="tour_databases"
           onClick={() => history.push(`/apps/${appid}/storage`)}

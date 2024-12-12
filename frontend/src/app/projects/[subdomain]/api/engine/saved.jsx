@@ -545,41 +545,43 @@ export function APIsaved (props) {
   }
 
   return (
-    <div className='core'>
+    <div>
       <Helmet>
         <title>
           {`${state?.route} | API | QueryDeck`}
         </title>
       </Helmet>
-      <Menu appid={props.subdomain} />
-      <div>
-        <Header
-          mode='api'
-          query_id={props.query_id}
-          subdomain={props.subdomain}
-        />
-        <div className='api-engine'>
-          <Left
-            catchError={catchError}
-            dragging={isDragging}
-            // getAggregatePaths={getAggregatePaths}
-            mode='api'
-            query_id={props.query_id}
-            searchNodes={searchNodes}
-            subdomain={props.subdomain}
-            width={position - 48 - 8 - 8}
-          />
-          <div
-            className='separator separator-horizontal'
-            {...separatorProps}
-          />
-          <Details
-            dragging={isDragging}
-            mode='api'
-            query_id={props.query_id}
-            subdomain={props.subdomain}
-            width={window.innerWidth - 4 - 4 - position}
-          />
+      <Header
+        mode='api'
+        query_id={props.query_id}
+        subdomain={props.subdomain}
+      />
+      <div className='core'>
+        <Menu appid={props.subdomain} />
+        <div>
+          <div className='api-engine'>
+            <Left
+              catchError={catchError}
+              dragging={isDragging}
+              // getAggregatePaths={getAggregatePaths}
+              mode='api'
+              query_id={props.query_id}
+              searchNodes={searchNodes}
+              subdomain={props.subdomain}
+              width={position - 48 - 8 - 8}
+            />
+            <div
+              className='separator separator-horizontal'
+              {...separatorProps}
+            />
+            <Details
+              dragging={isDragging}
+              mode='api'
+              query_id={props.query_id}
+              subdomain={props.subdomain}
+              width={window.innerWidth - 4 - 4 - position}
+            />
+          </div>
         </div>
       </div>
     </div>

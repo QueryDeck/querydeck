@@ -115,51 +115,53 @@ export const APIlist = props => {
   }
 
   return(
-    <div className='core'>
+    <div>
       <Helmet>
         <title>
           {state?.select_preview ? `${state?.select_preview?.name} | ` : ''}Saved APIs | QueryCharts
         </title>
       </Helmet>
-      <Menu appid={props.subdomain} />
-      <div>
-        <Header
-          mode='api'
-          query_id={state?.select_preview?.query_id}
-          section='REST APIs'
-          subdomain={props.subdomain}
-        />
-        <div className='api-saved'>
-          <Left
-            catchError={catchError}
-            dragging={isDragging}
-            resolveMethod={resolveMethod}
-            subdomain={props.subdomain}
-            width={position - 48 - 8 - 8}
-          />
-          <div
-            className='separator separator-horizontal'
-            {...separatorProps}
-          />
-          {
-            state && state[state?.select_preview?.query_id]?.method?.value ?
-            <Details
+      <Header
+        mode='api'
+        query_id={state?.select_preview?.query_id}
+        section='REST APIs'
+        subdomain={props.subdomain}
+      />
+      <div className='core'>
+        <Menu appid={props.subdomain} />
+        <div>
+          <div className='api-saved'>
+            <Left
+              catchError={catchError}
               dragging={isDragging}
-              mode='api'
-              query_id={state?.select_preview?.query_id}
+              resolveMethod={resolveMethod}
               subdomain={props.subdomain}
-              width={window.innerWidth - 4 - 4 - position}
-            /> :
-            <Card style={{
-              marginTop: '4px',
-              width: window.innerWidth - 4 - 4 - position
-            }}>
-              <div className='api-saved-details-empty'>
-                Click on an API to view details
-              </div>
-            </Card>
-          }
-        </div>
+              width={position - 48 - 8 - 8}
+            />
+            <div
+              className='separator separator-horizontal'
+              {...separatorProps}
+            />
+            {
+              state && state[state?.select_preview?.query_id]?.method?.value ?
+              <Details
+                dragging={isDragging}
+                mode='api'
+                query_id={state?.select_preview?.query_id}
+                subdomain={props.subdomain}
+                width={window.innerWidth - 4 - 4 - position}
+              /> :
+              <Card style={{
+                marginTop: '4px',
+                width: window.innerWidth - 4 - 4 - position
+              }}>
+                <div className='api-saved-details-empty'>
+                  Click on an API to view details
+                </div>
+              </Card>
+            }
+          </div>
+      </div>
       </div>
       <DeleteModal
         catchError={catchError}

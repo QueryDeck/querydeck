@@ -32,69 +32,62 @@ const Deploy = (props) => {
     return (
       <div className="list-deck">
         <Menu appid={props.appid} />
-        <div style={{ flex: '1 0 0' }}>
-          <Header
-            mode='api'
-            section='Deployment'
-            subdomain={props.subdomain}
-          />
-          <Card className="list-card-main">
-            <Nav tabs>
-              <NavItem className="query-right-nav cursor-pointer" id="query">
-                <NavLink
-                  className={tab !== "github" ? "active" : ""}
-                  onClick={() => (tab !== "github" ? changeTab("github") : "")}
-                >
-                  Github <FontAwesomeIcon icon={faGlobe} />
-                </NavLink>
-              </NavItem>
-              <NavItem className="query-right-nav cursor-pointer">
-                <NavLink
-                  className={tab !== "cloud" ? "active" : ""}
-                  onClick={() => (tab !== "cloud" ? changeTab("cloud") : "")}
-                >
-                  Cloud <FontAwesomeIcon icon={faCloudUploadAlt} />
-                </NavLink>
-              </NavItem>
-            </Nav>
-            <div className={`${tab}-list`}>
-              <TabContent activeTab={tab} className="query-right-tab">
-                <TabPane tabId="github">
-                  <div className="databases-list" style={{ margin: "0 auto" }}>
-                    <CardHeader>
-                      <h2 className="apps-heading">Github Deployment</h2>
-                    </CardHeader>
-                    <CardBody style={{paddingTop: 0}}>
-                      <Github subdomain={props.appid} redirect={props.redirect} />
-                    </CardBody>
-                  </div>
-                </TabPane>
-                <TabPane tabId="cloud">
-                  <Cloud subdomain={props.appid} />
-                </TabPane>
-              </TabContent>
-            </div>
+        <Card className="list-card-main">
+          <Nav tabs>
+            <NavItem className="query-right-nav cursor-pointer" id="query">
+              <NavLink
+                className={tab !== "github" ? "active" : ""}
+                onClick={() => (tab !== "github" ? changeTab("github") : "")}
+              >
+                Github <FontAwesomeIcon icon={faGlobe} />
+              </NavLink>
+            </NavItem>
+            <NavItem className="query-right-nav cursor-pointer">
+              <NavLink
+                className={tab !== "cloud" ? "active" : ""}
+                onClick={() => (tab !== "cloud" ? changeTab("cloud") : "")}
+              >
+                Cloud <FontAwesomeIcon icon={faCloudUploadAlt} />
+              </NavLink>
+            </NavItem>
+          </Nav>
+          <div className={`${tab}-list`}>
+            <TabContent activeTab={tab} className="query-right-tab">
+              <TabPane tabId="github">
+                <div className="databases-list" style={{ margin: "0 auto" }}>
+                  <CardHeader>
+                    <h2 className="apps-heading">Github Deployment</h2>
+                  </CardHeader>
+                  <CardBody style={{paddingTop: 0}}>
+                    <Github subdomain={props.appid} redirect={props.redirect} />
+                  </CardBody>
+                </div>
+              </TabPane>
+              <TabPane tabId="cloud">
+                <Cloud subdomain={props.appid} />
+              </TabPane>
+            </TabContent>
+          </div>
 
-            {/* <div className={`domain-list`}>
-      
-          
-                  <div
-                    className='databases-list'
-                    style={{ margin: '0 auto' }}
-                  >
-                    <CardHeader>
-                      <h2 className='apps-heading'>Deploy App</h2>
-                    </CardHeader>
-                    <CardBody>
-                      <Github subdomain={props.appid} redirect={props.redirect} />
-                    </CardBody>
-                  </div>
-              
-          
-            </div>
-            */}
-          </Card>
-        </div>
+          {/* <div className={`domain-list`}>
+    
+        
+                <div
+                  className='databases-list'
+                  style={{ margin: '0 auto' }}
+                >
+                  <CardHeader>
+                    <h2 className='apps-heading'>Deploy App</h2>
+                  </CardHeader>
+                  <CardBody>
+                    <Github subdomain={props.appid} redirect={props.redirect} />
+                  </CardBody>
+                </div>
+            
+        
+          </div>
+          */}
+        </Card>
       </div>
     );
   };
@@ -104,6 +97,11 @@ const Deploy = (props) => {
       <Helmet>
         <title>Deploy | QueryDeck</title>
       </Helmet>
+      <Header
+        mode='api'
+        section='Deployment'
+        subdomain={props.subdomain}
+      />
       {renderData()}
     </div>
   );

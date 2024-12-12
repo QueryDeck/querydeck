@@ -387,7 +387,7 @@ githubStatus
           <div
             style={{
               height:
-                "calc(100vh - 4px - 4px - 56px - 4px - 79.8167px - 20px - 20px - 36px - 42px - 40px)",
+                "calc(100vh - 4px - 4px - 56px - 4px - 79.8167px - 20px - 20px - 36px - 42px - 40px - 14px)",
               overflow: "auto",
               padding: "8px 0",
             }}
