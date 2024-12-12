@@ -7,7 +7,7 @@ var qutils = require.main.require('./models/utils.js');
 
 // allowed_tables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 // allowed_methods = ['GET', 'POST', 'PUT']
-function getFormattedData({ body_ob, query_data, subdomain, db_id, url_path, auto_orderby, method }) {
+function getFormattedData({ body_ob, query_data, subdomain, db_id, url_path, method, primary_key }) {
 
 
     let appData = ModelManager.models[subdomain]
@@ -123,7 +123,50 @@ function getFormattedData({ body_ob, query_data, subdomain, db_id, url_path, aut
             limit: body_ob.limit,
             limit_dynamic: body_ob.limit_dynamic,
         }
-    } else if (method === "POST") {
+    }
+    if (method === "GET_BY_ID") {
+        let currColProperties = properties.columns[primary_key]
+        let inputType = qutils.getSuperType(currColProperties.type, appData.db_type);
+
+
+        query_view_data.original_state.data.method = {
+            "label": "Select by ID",
+            "method": "GET",
+            "value": "select_id"
+        }
+
+        query_view_data.original_state.data.select_by_id = true;
+        query_view_data.original_state.data.filters = JSON.stringify({
+            condition: "AND",
+            id: "root",
+            rules: [
+                {
+                    fieldName: `${currTablePath[0]}.${currTablePath[1]}.${primary_key}`,
+                    id: "root_base",
+                    input: inputType,
+                    operator: "equal",
+                    method: "dynamic",
+                    type: inputType,
+                    value: `URLParam.${primary_key}`,
+                    input_key: `URLParam.${primary_key}`
+                }
+            ],
+            "not": false
+        })
+
+        query_view_data.original_state.data = {
+            ...query_view_data.original_state.data,
+            sorts: body_ob.sort,
+            sorts_dynamic: body_ob.sorts_dynamic,
+            offset: body_ob.offset,
+            offset_dynamic: body_ob.offset_dynamic,
+            limit: body_ob.limit,
+            limit_dynamic: body_ob.limit_dynamic,
+        }
+    }
+
+
+    else if (method === "POST") {
         query_view_data.original_state.data.method = {
             "label": "Insert",
             "method": "POST",
@@ -132,6 +175,97 @@ function getFormattedData({ body_ob, query_data, subdomain, db_id, url_path, aut
 
         query_view_data.original_state.data.returnColumns = JSON.parse(JSON.stringify(query_view_data.original_state.data.columns))
     }
+    else if (method === "PUT") {
+
+
+        query_view_data.original_state.data.method = {
+            "label": "Update",
+            "method": "PUT",
+            "value": "update"
+        }
+        query_view_data.original_state.data.returnColumns = JSON.parse(JSON.stringify(query_view_data.original_state.data.columns))
+
+
+        // primary_key
+        let currColProperties = properties.columns[primary_key]
+        let inputType = qutils.getSuperType(currColProperties.type, appData.db_type);
+
+        query_view_data.original_state.data.filters = JSON.stringify({
+            condition: "AND",
+            id: "root",
+            rules: [
+                {
+                    fieldName: `${currTablePath[0]}.${currTablePath[1]}.${primary_key}`,
+                    id: "root_base",
+                    input: inputType,
+                    operator: "equal",
+                    method: "dynamic",
+                    type: inputType,
+                    value: `URLParam.${primary_key}`,
+                    input_key: `URLParam.${primary_key}`
+                }
+            ],
+            "not": false
+        })
+       
+        query_view_data.original_state.data = {
+            ...query_view_data.original_state.data,
+            sorts: body_ob.sort,
+            sorts_dynamic: body_ob.sorts_dynamic,
+            offset: body_ob.offset,
+            offset_dynamic: body_ob.offset_dynamic,
+            limit: body_ob.limit,
+            limit_dynamic: body_ob.limit_dynamic,
+        }
+
+
+    }
+    else if (method === "DELETE") {
+
+
+        query_view_data.original_state.data.method = {
+            "label": "Delete",
+            "method": "DELETE",
+            "value": "delete"
+        }
+
+        query_view_data.original_state.data.returnColumns = JSON.parse(JSON.stringify(query_view_data.original_state.data.columns))
+
+        // primary_key
+        let currColProperties = properties.columns[primary_key]
+        let inputType = qutils.getSuperType(currColProperties.type, appData.db_type);
+
+        query_view_data.original_state.data.filters = JSON.stringify({
+            condition: "AND",
+            id: "root",
+            rules: [
+                {
+                    fieldName: `${currTablePath[0]}.${currTablePath[1]}.${primary_key}`,
+                    id: "root_base",
+                    input: inputType,
+                    operator: "equal",
+                    method: "dynamic",
+                    type: inputType,
+                    value: `URLParam.${primary_key}`,
+                    input_key: `URLParam.${primary_key}`
+                }
+            ],
+            "not": false
+        })
+
+        query_view_data.original_state.data = {
+            ...query_view_data.original_state.data,
+            sorts: body_ob.sort,
+            sorts_dynamic: body_ob.sorts_dynamic,
+            offset: body_ob.offset,
+            offset_dynamic: body_ob.offset_dynamic,
+            limit: body_ob.limit,
+            limit_dynamic: body_ob.limit_dynamic,
+        }
+
+
+    }
+
 
 
     return {
@@ -270,6 +404,75 @@ function autoGen(params, callback) {
             })
         }
 
+        // select by id
+        if (params.allowed_methods.indexOf('GET_BY_ID') > -1) {
+
+            if (primary_key) {
+                let new_url_path = url_path + '/:' + primary_key;
+                let body_ob_copied = JSON.parse(JSON.stringify(body_ob))
+                body_ob_copied.orderby = auto_orderby;
+                body_ob_copied.limit_dynamic = true;
+                body_ob_copied.limit = 100;
+                body_ob_copied.offset = 0;
+                body_ob_copied.offset_dynamic = true;
+                body_ob_copied.sorts_dynamic = auto_orderby;
+                body_ob_copied.sorts = auto_orderby;
+
+                clientModel.models[table_spl[0]][table_spl[1]].properties
+
+                let currColProperties = clientModel.models[table_spl[0]][table_spl[1]].properties.columns[primary_key]
+                let inputType = qutils.getSuperType(currColProperties.type, ModelManager.models[params.subdomain].db_type);
+
+                body_ob_copied.w = {
+                    condition: "AND",
+                    id: "root",
+                    rules: [
+                        {
+                            fieldName: `${table_spl[0]}.${table_spl[1]}.${primary_key}`,
+                            id: "root_base",
+                            input: inputType,
+                            operator: "equal",
+                            method: "dynamic",
+                            type: inputType,
+                            value: `URLParam.${primary_key}`,
+                            input_key: `URLParam.${primary_key}`
+                        }
+                    ],
+                    "not": false
+                }
+
+
+                var current_query = v2sql.convert(body_ob_copied)
+
+                const formattedData = getFormattedData({
+                    body_ob: body_ob_copied,
+                    query_data: current_query,
+                    subdomain: params.subdomain,
+                    db_id: params.db_id,
+                    url_path: new_url_path,
+                    auto_orderby,
+                    method: 'GET_BY_ID',
+                    primary_key,
+                })
+                all_models.push({
+                    db_id: params.db_id,
+                    query_json: current_query.model,
+                    query_text: current_query.query,
+                    query_view_data: formattedData.query_view_data,
+
+                    auth_required: body_ob.auth_required || false,
+
+                    name: new_url_path,
+                    deployed: true,
+                    app_id: params.app_id,
+                    method: 'GET',
+                    route: new_url_path,
+                    docs: formattedData.docs
+                })
+            }
+        }
+
+
         // insert
         if (params.allowed_methods.indexOf('POST') > -1) {
 
@@ -285,12 +488,12 @@ function autoGen(params, callback) {
 
             current_query = v2sql.convert(body_ob_copied)
 
-            console.file(current_query)
+
             body_ob_copied.request = current_query.formatted_request_body;
             body_ob_copied.request_detailed = current_query.detailed_body;
             body_ob_copied.response = current_query.response;
             body_ob_copied.response_detailed = current_query.response_detailed;
-            console.file(body_ob_copied)
+
 
             const formattedData = getFormattedData({
                 body_ob: body_ob_copied,
@@ -322,9 +525,39 @@ function autoGen(params, callback) {
 
         // update by id
         if (params.allowed_methods.indexOf('PUT') > -1) {
+
             if (primary_key) {
-                body_ob.method = 'update'
-                current_query = v2sql.convert(body_ob)
+                let new_url_path = url_path + '/:' + primary_key;
+                let body_ob_copied = JSON.parse(JSON.stringify(body_ob))
+
+                body_ob_copied.method = 'update'
+                body_ob_copied.return_c = body_ob_copied.c;
+
+                body_ob_copied.join_type = {};
+                body_ob_copied.allow_multiple_row_paths = [];
+                body_ob_copied.on_conflict = {};
+                body_ob_copied.table_alias = {};
+
+                current_query = v2sql.convert(body_ob_copied)
+
+                body_ob_copied.request = current_query.formatted_request_body;
+                body_ob_copied.request_detailed = current_query.detailed_body;
+                body_ob_copied.response = current_query.response;
+                body_ob_copied.response_detailed = current_query.response_detailed;
+
+
+                const formattedData = getFormattedData({
+                    body_ob: body_ob_copied,
+                    query_data: current_query,
+                    subdomain: params.subdomain,
+                    db_id: params.db_id,
+                    url_path: new_url_path,
+                    auto_orderby,
+                    method: 'PUT',
+                    primary_key,
+                })
+
+                current_query.model = JSON.stringify(current_query.model)
 
                 if (current_query) {
 
@@ -332,12 +565,76 @@ function autoGen(params, callback) {
                         db_id: params.db_id,
                         query_json: current_query.model,
                         query_text: current_query.query,
-                        query_view_data: {},
-                        name: url_path + '/:' + primary_key,
+                        query_view_data: formattedData.query_view_data,
+                        name: new_url_path,
                         deployed: true,
                         app_id: params.app_id,
                         method: 'PUT',
-                        route: url_path + '/:' + primary_key
+                        route: new_url_path,
+                        docs: formattedData.docs,
+
+
+                    })
+
+                }
+
+            }
+        }
+
+        // delete  by id
+        if (params.allowed_methods.indexOf('DELETE') > -1) {
+            if (primary_key) {
+                let new_url_path = url_path + '/:' + primary_key;
+                let body_ob_copied = JSON.parse(JSON.stringify(body_ob))
+
+                body_ob_copied.method = 'delete'
+                body_ob_copied.return_c = body_ob_copied.c;
+
+                body_ob_copied.join_type = {};
+                body_ob_copied.allow_multiple_row_paths = [];
+                body_ob_copied.on_conflict = {};
+                body_ob_copied.table_alias = {};
+
+
+                current_query = v2sql.convert(body_ob_copied)
+
+                body_ob_copied.request = current_query.formatted_request_body;
+                body_ob_copied.request_detailed = current_query.detailed_body;
+                body_ob_copied.response = current_query.response;
+                body_ob_copied.response_detailed = current_query.response_detailed;
+
+
+
+                const formattedData = getFormattedData({
+                    body_ob: body_ob_copied,
+                    query_data: current_query,
+                    subdomain: params.subdomain,
+                    db_id: params.db_id,
+                    url_path: new_url_path,
+                    auto_orderby,
+                    method: 'DELETE',
+                    primary_key,
+                })
+
+                current_query.model = JSON.stringify(current_query.model)
+
+                if (current_query) {
+
+
+
+                    all_models.push({
+                        db_id: params.db_id,
+                        query_json: current_query.model,
+                        query_text: current_query.query,
+                        query_view_data: formattedData.query_view_data,
+                        name: new_url_path,
+                        deployed: true,
+                        app_id: params.app_id,
+                        method: 'DELETE',
+                        route: new_url_path,
+                        docs: formattedData.docs,
+
+
                     })
 
                 }
