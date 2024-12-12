@@ -407,7 +407,7 @@ const Save = props => {
     <>
         {
           (props.query_id === 'new' ||
-          !listState.select_preview) &&
+          !listState?.select_preview) &&
           <Button
             color='falcon-danger'
             onClick={() => history.push(`/apps/${props.subdomain}/api`)}
@@ -431,7 +431,7 @@ const Save = props => {
           </Button>
         }
         {
-          !listState.select_preview &&
+          !listState?.select_preview &&
           <Button
             color='primary'
             onClick={clickHandler}
