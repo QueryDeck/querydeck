@@ -78,8 +78,8 @@ const Save = props => {
           mode: props.mode,
           subdomain: props.subdomain
         }))
-        history.push(`/apps/${props.subdomain}/api`)
       }
+      history.push(`/apps/${props.subdomain}/api`)
     } catch (error) {
       props.catchError(error);
     }
@@ -430,14 +430,17 @@ const Save = props => {
             <FontAwesomeIcon icon={faEraser} /> Reset
           </Button>
         }
-        <Button
-          color='primary'
-          onClick={clickHandler}
-          disabled={!(state?.base?.value && state?.method?.value && state?.text.length)}
-          size='sm'
-        >
-          <FontAwesomeIcon icon={faSave} /> Save
-        </Button>
+        {
+          !listState.select_preview &&
+          <Button
+            color='primary'
+            onClick={clickHandler}
+            disabled={!(state?.base?.value && state?.method?.value && state?.text.length)}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faSave} /> Save
+          </Button>
+        }
     </>
   )
 }
