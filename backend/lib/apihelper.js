@@ -4,7 +4,8 @@ var { condition_count } = require.main.require('./models/viewToJSON.js');
 var DB = require.main.require('./models/index.js').db;
 var repoManager = require.main.require('./repo-gen/index.js');
 var qutils = require.main.require('./models/utils.js');
-
+var sqlFormatter = require('sql-formatter');
+const { MYSQL} = require('../envconfig.js').constant;
 // allowed_tables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 // allowed_methods = ['GET', 'POST', 'PUT']
 function getFormattedData({ body_ob, query_data, subdomain, db_id, url_path, method, primary_key }) {
@@ -267,7 +268,12 @@ function getFormattedData({ body_ob, query_data, subdomain, db_id, url_path, met
     }
 
 
-
+    query_data.docs.sql_query.text =  sqlFormatter.format(query_data.docs.sql_query.text, {
+        "language": appData.db_type == MYSQL ? "mysql" : "postgresql",
+      }); 
+      
+      console.log( query_data.docs.sql_query.tex)
+      
     return {
         docs: {
             ...query_data.docs,
