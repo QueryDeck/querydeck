@@ -1154,8 +1154,9 @@ module.exports = function (router) {
         "content": q
       },
       {
-        "id": "test",
-        "title": "test"
+        "id": "docs",
+        "title": "Documentation", 
+        "content": q.docs , 
       },
       {
         "id": "test2",
