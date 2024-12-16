@@ -8,8 +8,7 @@ import { faWrench } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "reactstrap";
 import SetupGraphQLModal from "./modal/SetupGraphQLModal";
-
-
+import GraphQLLogo from '../../../assets/img/illustrations/graphql.svg'
 const SetupGraphQL = ({
   subdomain,
   tableOptions,
@@ -24,23 +23,20 @@ const SetupGraphQL = ({
 
     return (
       <>
-        
-        <div  className={styles.setupbutton}>
-          sds
-        <Button block color="primary" onClick={openSetupGraphQLModal}>
-          Setup GraphQL &nbsp; <FontAwesomeIcon icon={faWrench} />
-        </Button>
+
+        <div className={styles.setupbutton}>
+
+          <br />
+          <div className={styles.setupiconcontainer}  >
+            <img unselectable="on" alt={'graph-img'} src={GraphQLLogo} />
+          </div>
+          <Button block color="falcon-primary" onClick={openSetupGraphQLModal}>
+            Setup GraphQL &nbsp; <FontAwesomeIcon icon={faWrench} />
+          </Button>
 
         </div>
-  
-        <div
-          style={{
-            height:
-              "calc(100vh - 4px - 4px - 56px - 4px - 79.8167px - 20px - 20px - 36px - 42px - 40px)",
-            overflow: "auto",
-            padding: "8px 0",
-          }}
-        ></div>
+
+
         <SetupGraphQLModal
 
           subdomain={subdomain}

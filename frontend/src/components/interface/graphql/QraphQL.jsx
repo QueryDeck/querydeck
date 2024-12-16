@@ -1,5 +1,5 @@
 // React imports
-import React, {   useEffect, useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import { Helmet } from "react-helmet";
 // Library imports
 // Redux
@@ -13,7 +13,7 @@ import {
 
   Spinner,
 } from "reactstrap";
-import api  from "../../../api";
+import api from "../../../api";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import Header from '../../../app/projects/[subdomain]/components/sections/engine/header';
@@ -184,25 +184,16 @@ const QraphQL = ({ appid: subdomain }) => {
       return (
 
 
-        <div className="list-deck">
-      
-        <div style={{ flex: '1 0 0' }}>
-          <Header
-            mode='api'
-            section='GraphQL'
-            subdomain={subdomain}
+
+        <CardBody style={{ paddingTop: 0 }}>
+          <SetupGraphQL subdomain={subdomain} db_id={state.database.db_id} tableOptions={state.tableOptions}
+            openSetupGraphQLModal={openSetupGraphQLModal}
+            closeSetupGraphQLModal={closeSetupGraphQLModal}
+            setupGraphQLModalState={state.setupGraphQLModalState}
+            handleSetupGraphQLModalClick={handleSetupGraphQLModalClick}
           />
-  
-            <CardBody style={{ paddingTop: 0 }}>
-              <SetupGraphQL subdomain={subdomain} db_id={state.database.db_id} tableOptions={state.tableOptions}
-                openSetupGraphQLModal={openSetupGraphQLModal}
-                closeSetupGraphQLModal={closeSetupGraphQLModal}
-                setupGraphQLModalState={state.setupGraphQLModalState}
-                handleSetupGraphQLModalClick={handleSetupGraphQLModalClick}
-              />
-            </CardBody>
-          </div>
-        </div>
+        </CardBody>
+
 
 
 
@@ -216,6 +207,11 @@ const QraphQL = ({ appid: subdomain }) => {
       <Helmet>
         <title>QraphQL | QueryDeck</title>
       </Helmet>
+      <Header
+        mode='api'
+        section='GraphQL'
+        subdomain={subdomain}
+      />
       <div className="list-deck">
         <Menu appid={subdomain} />
         <Card className="list-card-main">
@@ -224,6 +220,7 @@ const QraphQL = ({ appid: subdomain }) => {
       </div>
     </div>
   );
+
 };
 
 export default QraphQL;
