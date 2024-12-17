@@ -76,10 +76,22 @@ module.exports = class builder {
 
 			if (this.models[i].method == 'select') {
 
-				this.queries.push({
-					query: this.select(this.models[i]),
-					alias: 'q' + this.makeid(3)
-				});
+				var alias = 'q' + this.makeid(3)
+
+				if(this.models.length > 1) {
+
+					this.queries.push({
+						query: 'select JSON_AGG(' + alias + '.*) as ' + this.models[i].table_alias + ' from (' + this.select(this.models[i]) + ') ' + alias,
+						alias: 'q' + this.makeid(3)
+					});
+					
+				} else {
+					this.queries.push({
+						query: this.select(this.models[i]),
+						alias: alias
+					});
+				}
+				
 			} else if(this.models[i].method == 'delete') {
 
 				this.queries.push({
@@ -105,7 +117,7 @@ module.exports = class builder {
 		var aliasArray = [];
 
 		for (var j = 0; j < this.queries.length; j++) {
-			if (!this.queries[j].alias.match(/insert|update|delete/)) {
+			if (!this.queries[j].alias.match(/insert|update|delete|select/)) {
 				aliasArray.push(this.queries[j].alias);
 			}
 

@@ -647,7 +647,7 @@ module.exports = class ViewToJSON {
             return_col_id_split = colData.id.includes("$") ? colData.id.split('$') : colData.id.split('.')
             return_col_table_id = return_col_id_split[0].split("-").pop().split(".")[0]
             let colname_arr = this.currentModel.idToName[return_col_table_id + '.' + return_col_id_split[return_col_id_split.length - 1]];
-            if (return_col_id_split[0] === pathid) {
+            if (return_col_id_split[0] == pathid) {
                 result.push({
                     ...colData,
                     id: colData.id,
@@ -787,28 +787,30 @@ module.exports = class ViewToJSON {
 
         main_model.condition_count = condition_count(main_model.where);
 
-        var rebuilt_where = {
-            condition: 'AND',
-            rules: [{
-                fieldName: [tab_name_spl[0], tab_name_spl[1], p_key[0]].join('.'),
-                operator: 'equal',
-                input: 'text',
-                input_key: 'URLParam.' + p_key[0],
-                type: 'text',
-                value: 'URLParam.' + p_key[0]
-            }]
+        if(!params.graphql) {
+            var rebuilt_where = {
+                condition: 'AND',
+                rules: [{
+                    fieldName: [tab_name_spl[0], tab_name_spl[1], p_key[0]].join('.'),
+                    operator: 'equal',
+                    input: 'text',
+                    input_key: 'URLParam.' + p_key[0],
+                    type: 'text',
+                    value: 'URLParam.' + p_key[0]
+                }]
+            }
+    
+            main_model.where = main_model.where || {};
+            main_model.where.rules = main_model.where.rules || [];
+    
+            for (let k = 1; k < main_model.where.rules.length; k++) {
+                const element = main_model.where.rules[k];
+                rebuilt_where.rules.push(main_model.where.rules[k])
+            }
+    
+            main_model.where = rebuilt_where;
         }
-
-        main_model.where = main_model.where || {};
-        main_model.where.rules = main_model.where.rules || [];
-
-        for (let k = 1; k < main_model.where.rules.length; k++) {
-            const element = main_model.where.rules[k];
-            rebuilt_where.rules.push(main_model.where.rules[k])
-        }
-
-        main_model.where = rebuilt_where;
-
+        
         //console.log(params.columns)
         for (let i = 0; i < params.columns.length; i++) {
             if (!params.columns[i] || !params.columns[i].id || params.columns[i].id.indexOf('-') > -1) return null;
@@ -1115,12 +1117,32 @@ module.exports = class ViewToJSON {
     convertSelectDeep(params) {
       
         params.columns = params.columns.sort(sortIdAsc);
+
+        if(params.graphql) {
+          var all_join_paths = [];
+          for(let i = 0; i < params.columns.length; i++) {
+            var path_id = params.columns[i].id.split('$')[0];
+            all_join_paths.push(path_id);
+            var sub_paths = allPossiblePaths(path_id);
+            for(let sub_path of sub_paths) {
+              if(all_join_paths.indexOf(sub_path) == -1) {
+                all_join_paths.push(sub_path);
+                console.log('adding', {
+                    id: sub_path + '$' + sub_path.split('.').pop()
+                  })
+                params.columns.push({
+                  id: sub_path + '$' + sub_path.split('.').pop(),
+                  dummyjoin: true
+                });
+              }
+            }
+          }
+          params.columns = params.columns.sort(sortIdAsc);
+        }
+
         params.join_conditions = params.join_conditions || {};
-        // return // // ////console.log(params.columns)
         let main_t_spl = params.columns[0]?.id.split('-') || [];
         let base_table = main_t_spl[0]?.split('.')[0] || params.base; //base table id 
-        // //console.log(JSON.stringify(allModels))
-        // let db_id = Object.keys( allModels[this.subdomain].databases)[0] ;   
         let currentModel = this.currentModel;
         let tab_name_spl = currentModel.tidToName[base_table];
         // let columns = [], agg_clusters = [];
@@ -1257,22 +1279,24 @@ module.exports = class ViewToJSON {
                     def: params.columns[i].def,
                 });
 
-                nested[base_table].columns.push({
-                    columnName: col_text,
-                    fn: params.columns[i].fn,
-                    ts_gran: params.columns[i].ts_gran,
-                    def: params.columns[i].def,
-                    customColType: params.columns[i].customColType,
-                    alias: (params.columns[i].alias || col_arr[2]),
-                    label: params.columns[i].label,
-                    rowCount: params.columns[i].rowCount,
-                });
-                let properties = this.currentModel.models[col_arr[0]][col_arr[1]].properties;
-                response_sample[tab_name_spl[1]][0][col_arr[2]] = otherutils.getDummyValue(properties.columns[col_arr[2]].type) || properties.columns[col_arr[2]].type;
-                response_sample_detailed[tab_name_spl[1]][0][col_arr[2]] = {
-                  '$qd_column': true,
-                  type: otherutils.getSuperType(properties.columns[col_arr[2]].type) || properties.columns[col_arr[2]].type,
-                  dataType: properties.columns[col_arr[2]].type
+                if(!params.columns[i].dummyjoin) {
+                    nested[base_table].columns.push({
+                        columnName: col_text,
+                        fn: params.columns[i].fn,
+                        ts_gran: params.columns[i].ts_gran,
+                        def: params.columns[i].def,
+                        customColType: params.columns[i].customColType,
+                        alias: (params.columns[i].alias || col_arr[2]),
+                        label: params.columns[i].label,
+                        rowCount: params.columns[i].rowCount,
+                    });
+                    let properties = this.currentModel.models[col_arr[0]][col_arr[1]].properties;
+                    response_sample[tab_name_spl[1]][0][col_arr[2]] = otherutils.getDummyValue(properties.columns[col_arr[2]].type) || properties.columns[col_arr[2]].type;
+                    response_sample_detailed[tab_name_spl[1]][0][col_arr[2]] = {
+                      '$qd_column': true,
+                      type: otherutils.getSuperType(properties.columns[col_arr[2]].type) || properties.columns[col_arr[2]].type,
+                      dataType: properties.columns[col_arr[2]].type
+                    }
                 }
 
             } else {
@@ -1361,11 +1385,17 @@ module.exports = class ViewToJSON {
                                     agg_clusters[agg_cluster_id].agg_paths.push(sub_id_pure);
                                 }
                             }
-                            // //console.log('agg_clusters[agg_cluster_id].columns.push({id: col_path_id})', col_path_id)
                             agg_clusters[agg_cluster_id].columns.push({
-                                id: col_path_id
+                                id: col_path_id,
+                                dummyjoin: params.columns[i].dummyjoin,
+                                id_pure: params.columns[i].id_pure || id_pure
                             });
+                            var join_condition_id = params.columns[i].id_pure || agg_cluster_id;
+                            agg_clusters[agg_cluster_id].id_pure = params.columns[i].id_pure || id_pure;
                             agg_clusters[agg_cluster_id].agg_type = (rel_type_split[1] == 1 ? 'row_to_json' : 'json_agg');
+                            // agg_clusters[agg_cluster_id].sub_join_conditions = params.join_conditions[id_pure] || {};
+                            agg_clusters[agg_cluster_id].sub_join_conditions = params.join_conditions[join_condition_id] || {};
+                            agg_clusters[agg_cluster_id].join_conditions = params.join_conditions;
                             break aggloop;
                         }
                     }
@@ -1628,7 +1658,7 @@ module.exports = class ViewToJSON {
         }
 
         let agg_keys = Object.keys(agg_clusters);
-        // ////console.log(agg_clusters, agg_keys)
+
         for (let i = 0; i < agg_keys.length; i++) {
             const element = agg_keys[i];
 
@@ -1681,30 +1711,30 @@ module.exports = class ViewToJSON {
                     }
                 }
             }
-            if (params.join_conditions[agg_keys[i]] && params.join_conditions[agg_keys[i]].rules) {
-                for (let k = 1; k < params.join_conditions[agg_keys[i]].rules.length; k++) {
-                    const element = params.join_conditions[agg_keys[i]].rules[k];
-                    agg_mod.on.rules.push(params.join_conditions[agg_keys[i]].rules[k])
+            var id_pure = agg_clusters[agg_keys[i]].id_pure;
+            
+            if (false && params.join_conditions[id_pure] && params.join_conditions[id_pure].rules) {
+                // console.log("JOIN1")
+                for (let k = 1; k < params.join_conditions[id_pure].rules.length; k++) {
+                    const element = params.join_conditions[id_pure].rules[k];
+                    agg_mod.on.rules.push(params.join_conditions[id_pure].rules[k])
                 }
+            } else if(agg_clusters[agg_keys[i]].sub_join_conditions) {
+                // console.log("JOIN2")
+                if(agg_clusters[agg_keys[i]].sub_join_conditions.rules) {
+                    for (let k = 1; k < agg_clusters[agg_keys[i]].sub_join_conditions.rules.length; k++) {
+                        const element = agg_clusters[agg_keys[i]].sub_join_conditions.rules[k];
+                        agg_mod.on.rules.push(agg_clusters[agg_keys[i]].sub_join_conditions.rules[k])
+                    }
+                }
+                
+            } else {
+                throw new Error('No join conditions found for id_pure: ' + id_pure);
             }
+            // console.log(agg_keys[i], id_pure)
+            // console.log('agg_clusters[agg_keys[i]]', agg_clusters[agg_keys[i]])
+            // console.log('params.join_conditions[id_pure]:', params.join_conditions[id_pure]);
             main_model.joins.push(agg_mod);
-
-            // if (same_tab_refs.indexOf(agg_mod.schema + '.' + agg_mod.table) > -1) {
-            //     // change alias
-            //     ////console.log(agg_keys[i])
-            //     let agg_key_split = agg_keys[i].split('-');
-            //     let last_ref_name_split;
-            //     let dir = this.relDirection(agg_keys[i]);
-            //     if (dir == 'out') {
-            //         last_ref_name_split = currentModel.idToName[agg_key_split[agg_key_split.length - 2]];
-            //     } else {
-            //         last_ref_name_split = currentModel.idToName[agg_key_split[agg_key_split.length - 1]];
-            //     }
-
-            //     // TOOD kabir: resolve conflicting table join alias names
-            //     // agg_mod.table_alias = last_ref_name_split[2] + '_' + agg_mod.table;
-            //     // agg_mod.table_alias = agg_mod.table;
-            // }
 
             let agg_key_1 = Object.keys(agg_complete_return.response);
 
@@ -1899,7 +1929,6 @@ module.exports = class ViewToJSON {
 
             }
 
-            // Your code here
         }
 
         return ((lhs_m ? 'M' : '1') + '-' + (rhs_m ? 'M' : '1'));
@@ -1935,6 +1964,7 @@ function makeid(len) {
 function condition_count(w) {
   var c = 0;
   w = w || { rules: [] };
+  if(!w.rules) return 0;
   for (let i = 0; i < w.rules.length; i++) {
     const element = w.rules[i];
     if (w.rules[i].condition && w.rules[i].rules) {
@@ -1947,3 +1977,22 @@ function condition_count(w) {
 }
 
 module.exports.condition_count = condition_count; 
+
+function allPossiblePaths(id) {
+    // Split by $ to remove any column reference
+    let pathOnly = id.split('$')[0];
+    
+    // Split by - to get individual segments
+    let segments = pathOnly.split('-');
+    
+    let paths = [];
+    let currentPath = '';
+    
+    // Loop through segments taking 2 at a time
+    for (let i = 1; i < segments.length; i += 2) {
+        currentPath += (i == 1 ? '' : '-') + segments[i-1] + '-' + segments[i];
+        if(currentPath.length < pathOnly.length) paths.push(currentPath);
+    }
+    
+    return paths;
+  }

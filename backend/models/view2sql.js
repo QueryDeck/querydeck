@@ -79,7 +79,8 @@ exports.convert = function(params){
               offset_dynamic: params.offset_dynamic ? true : false,
               base: params.base,
               join_conditions: params.join_conditions,
-              where: params.w
+              where: params.w,
+              graphql: params.graphql
             }
           })[params.select_by_id ? 'convertSelectByID' : 'convertSelect']()
 
@@ -147,7 +148,8 @@ exports.convert = function(params){
               limit: params.limit,
               offset: params.offset,
               base: params.base,
-              single_base_insert: params.single_base_insert
+              single_base_insert: params.single_base_insert,
+              graphql: params.graphql
             }
           }).convertInsert();
 
@@ -182,7 +184,8 @@ exports.convert = function(params){
               offset: params.offset,
               base: params.base,
               allowedPaths: params.allowedPaths,
-              where: params.w
+              where: params.w,
+              graphql: params.graphql
             }
           }).convertUpdate();
 
@@ -233,7 +236,8 @@ exports.convert = function(params){
           offset: params.offset,
           base: params.base,
           allowedPaths: params.allowedPaths,
-          where: params.w
+          where: params.w,
+          graphql: params.graphql
         }
       }).convertDelete();
 
@@ -264,7 +268,6 @@ exports.convert = function(params){
       }
     }
 
-    queryob.model.method = params.method;
 
     docs.method = params.method;
     docs.request_query = request_query_params;

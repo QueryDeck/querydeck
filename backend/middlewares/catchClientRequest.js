@@ -39,13 +39,47 @@ module.exports = function (req, res, next) {
 
       var clean_path = '/' + clean_path_spl.join('/');
 
-      // console.log(allModels[subdomain].routes)
-
       var query_model;
 
       var url_param_value;
 
-      if(!allModels[subdomain].routes[clean_path] || !allModels[subdomain].routes[clean_path][req.method]) {
+      var db_id = Object.keys(allModels[subdomain].databases)[0];
+
+      let currentModel = allModels[subdomain].databases[db_id];
+
+      if(clean_path == '/graphql' && req.method == 'POST') {
+        if(!req.body.query) {
+          return res.send({
+            error: 'query is required'
+          })
+        } else {
+
+          executeGraphqlRequest({
+            // query_model: query_model,
+            auth: allModels[subdomain].appDetails.auth,
+            request: {
+              // body: req.body,
+              // query: req.query,
+              session: session,
+              // url_param_value: url_param_value
+            },
+            currentModel: allModels[subdomain],
+            db: currentModel.query,
+            graphql: {
+              query: req.body.query,
+              variables: req.body.variables
+            }
+          }, function(err, exec_data) {
+            if(err) {
+              res.status(500).send({error: err});
+            } else {
+              res.send(exec_data);
+            }
+          });
+
+        }
+        return;
+      } else if(!allModels[subdomain].routes[clean_path] || !allModels[subdomain].routes[clean_path][req.method]) {
         // check for url param
         var partial_url = clean_path_spl.slice(0, clean_path_spl.length - 1).join('/')
         partial_url = partial_url +  '/:';
@@ -66,8 +100,6 @@ module.exports = function (req, res, next) {
       if(!query_model){
         return res.status(404).send({error: "Invalid route"})
       }
-
-      let currentModel = allModels[subdomain].databases[query_model.db_id];
 
       var session = {}
 
