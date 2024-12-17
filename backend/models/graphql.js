@@ -4,7 +4,7 @@ const {
     parse
 } = require('graphql');
 const v2sql = require.main.require('./models/view2sql.js');
-const modelutils = require.main.require('./models/modelutils.js');
+const modelutils = require.main.require('./models/modelUtils.js');
 const json2sql = require.main.require('./models/JsonToSql.js');
 const v2json = require.main.require('./models/viewToJSON.js');
 
