@@ -6,7 +6,7 @@ const requestIp = require('request-ip');
 const _ = require('lodash');
 var allModels = require.main.require('./models/modelManager').models;
 var executeClientRequest = require.main.require('./models/executeClientRequest').executeClientRequest;
-
+var executeGraphqlRequest = require.main.require('./models/executeGraphqlRequest').executeClientRequest;
 
 /**
  * @commment  Add user models to ModelManager.models if  subdomain is available
