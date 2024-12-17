@@ -1,0 +1,29 @@
+@import '../../../../../../assets/scss/theme/variables';
+// @import '../../../../../../assets/scss/dark/variables';
+ 
+ 
+.badge_container { 
+  // min-width: 75px; 
+  // border:1px solid blue ; 
+  float:right; 
+  transform: translateX(8px) ; 
+}
+ 
+.badge {
+  &_primary {
+    background-color: $primary;
+  }
+
+  &_success {
+      background-color: $success;
+  }
+
+  &_warning {
+    background-color: $warning;
+  }
+
+  &_danger {
+    background-color: $danger;
+  }
+}
+ 

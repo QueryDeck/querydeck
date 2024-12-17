@@ -23,7 +23,7 @@ import CryptoJS from 'crypto-js'
 import Cookies from 'js-cookie'
 import { Button } from 'reactstrap'
 import { toast } from 'react-toastify'
-
+import AutoGenrateButton from '../modals/autoGenerate/autoGenrateButton'
 // API
 import axios from 'axios'
 import api, { apiurl, apiBase } from '../../../../../api'
@@ -405,6 +405,11 @@ const Save = props => {
 
   return (
     <>
+          <AutoGenrateButton
+        mode={props.mode}
+        query_id={props.query_id}
+        subdomain={props.subdomain}
+      />
         {
           (props.query_id === 'new' ||
           !listState?.select_preview) &&

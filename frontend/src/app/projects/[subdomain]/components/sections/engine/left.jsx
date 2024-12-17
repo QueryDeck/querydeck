@@ -22,7 +22,7 @@ import Authorisation from '../../steps/authorisation'
 // Components - Modals
 import JoinModal from '../../modals/join'
 import ColumnModal from '../../modals/column'
-// import AutoGenerateModal from '../../modals/autoGenerate/autoGenerate'
+import AutoGenerateModal from '../../modals/autoGenerate/autoGenerate'
 import FilterModal from '../../modals/filter'
 import SortModal from '../../modals/sort'
 import AuthorisationModal from '../../modals/authorisation'
@@ -195,15 +195,15 @@ const Left = props => {
     />
   )
     
-  // const renderAutoGenerateModal = () => (
-  //   <AutoGenerateModal
-  //     key='auto-gen-modal'
-  //     mode={props.mode}
-  //     query_id={props.query_id}
-  //     searchNodes={props.searchNodes}
-  //     subdomain={props.subdomain}
-  //   />
-  // )
+  const renderAutoGenerateModal = () => (
+    <AutoGenerateModal
+      key='auto-gen-modal'
+      mode={props.mode}
+      query_id={props.query_id}
+      searchNodes={props.searchNodes}
+      subdomain={props.subdomain}
+    />
+  )
 
 
   if(props.dragging) {
@@ -242,7 +242,7 @@ const Left = props => {
         {renderSortModal()}
         {renderColumnModal()}
         {renderAuthorisationModal()}
-        {/* {renderAutoGenerateModal()} */}
+        {renderAutoGenerateModal()}
 			</Card>
 		)
   }

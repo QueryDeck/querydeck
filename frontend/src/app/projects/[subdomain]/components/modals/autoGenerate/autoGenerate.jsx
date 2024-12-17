@@ -68,7 +68,8 @@ const AutoGenerate = (props) => {
       })
     );
 
-  const renderSelectColumns = () => {
+  const renderBody = () => {
+ 
     if (state?.autoGenerateModalStep === 1) {
       return (
         <MethodSection
@@ -106,7 +107,6 @@ const AutoGenerate = (props) => {
   };
 
  
-
   if (state?.database?.value) {
     return (
       <Modal
@@ -115,7 +115,7 @@ const AutoGenerate = (props) => {
         toggle={closeModal}
       >
         <ModalHeader className="modal-header clearfix">
-          <div className="float-left">Auto Generate Endpoints</div>
+          <div className="float-left">Bulk Create Endpoints</div>
           <Button
             className="float-right"
             color="falcon-danger"
@@ -125,7 +125,7 @@ const AutoGenerate = (props) => {
             <FontAwesomeIcon icon={faTimes} />
           </Button>
         </ModalHeader>
-        {renderSelectColumns()}
+        {renderBody()}
       </Modal>
     );
   }

@@ -5,6 +5,10 @@ import { useDispatch  } from "react-redux";
 import {
   openAutoGenerateModal,
 } from "../../../../../../lib/data/dataSlice";
+import {
+  faCartPlus,
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 // Library imports
 import {
@@ -28,15 +32,16 @@ const AutoGenrateButton = (props) => {
     );
   };
   return (
-    <div className="api-auto-gen-bx">
+ 
       <Button
         title="Click to Auto Generate Endpoints"
         onClick={handleAutoGenrateClick}
         size="sm"
+          color='falcon-danger'
       >
-        Auto Generate API
+          <FontAwesomeIcon icon={faCartPlus} /> Bulk Create
       </Button>
-    </div>
+ 
   );
 };
 

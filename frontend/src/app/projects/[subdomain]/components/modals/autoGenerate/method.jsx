@@ -17,29 +17,60 @@ import {
   faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, ModalBody, ModalFooter } from "reactstrap";
+import { Button, ModalBody, ModalFooter, Badge } from "reactstrap";
 import { toast } from "react-toastify";
-
+import styles from './autoGenerate.module.scss'
 // Components
 import CustomSelect from "../../../../../../components/common/CustomSelect";
 const METHOD_OPTIONS = [
   {
-    label: "GET",
+    label: "Select",
     value: "GET",
+    method: "GET"
   },
   {
-    label: "POST",
+    label: "Select by ID",
+    value: "GET_BY_ID",
+    method: "GET"
+  },
+  {
+    label: "Insert/Upsert",
     value: "POST",
+    method: "POST"
   },
   {
-    label: "PUT",
+    label: "Update",
     value: "PUT",
+    method: "PUT"
   },
   {
-    label: "DELETE",
+    label: "Delete",
     value: "DELETE",
+    method: "DELETE"
   }
 ];
+
+
+const getBadgeData = (method) => {
+  if (method.toLowerCase() === 'post') {
+    return ({
+      badge: styles.badge_success,
+    })
+  } else if (method.toLowerCase() === 'put') {
+    return ({
+      badge: styles.badge_warning,
+    })
+  } else if (method.toLowerCase() === 'delete') {
+    return ({
+      badge: styles.badge_danger,
+    })
+  } else {
+    return ({
+      badge: styles.badge_primary,
+    })
+  }
+}
+
 
 const Method = (props) => {
   // Redux
@@ -145,7 +176,7 @@ const Method = (props) => {
             onChange={(value) => addMethodToList(value)}
             options={METHOD_OPTIONS}
             placeholder="Select Method"
-            // value={column}
+          // value={column}
           />
         </div>
 
@@ -175,6 +206,7 @@ const Method = (props) => {
 
     if (state?.autoGenerate?.methods?.length) {
       state.autoGenerate.methods.forEach((element) => {
+        const badgeData = getBadgeData(element.method)
         list.push(
           <div
             className="query-modal-columns-vanilla-list-container-item"
@@ -182,17 +214,17 @@ const Method = (props) => {
           >
             <div className="query-modal-columns-vanilla-list-container-item-content">
               <div className="query-modal-columns-vanilla-columns">
-                <div className="fake-input">{element.label}</div>
-              </div>
-              {element.alias ? (
-                <div className="query-modal-columns-vanilla-alias ml-3">
-                  <div className="fake-input">
-                    <strong>AS</strong> {element.alias}
-                  </div>
+                <div className="fake-input">
+                  <span> {element.label}</span>
+
+                  <span className={styles.badge_container}>
+                    <Badge className={badgeData?.badge}>
+                      {element.method}
+                    </Badge>
+                  </span>
                 </div>
-              ) : (
-                ""
-              )}
+              </div>
+ 
             </div>
 
             <Button
