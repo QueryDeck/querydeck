@@ -142,11 +142,6 @@ module.exports = function (req, res, next) {
             error: "Login required"
            })
         }
-        // TODO: dev testing
-        // session = {
-        //   user_id: 1,
-        //   user_role: 'user'
-        // }
 
       }
       var res_status = 200;
