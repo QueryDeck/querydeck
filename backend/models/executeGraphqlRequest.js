@@ -32,6 +32,8 @@ function executeClientRequest(params, callback) {
         });
     }
 
+    // return callback(null, result)
+
     if (result.type == 'mutation') {
 
         var parsed_models = result.models;

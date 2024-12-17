@@ -59,12 +59,16 @@ class GraphQLConverter {
 
     // TODO: replace with json2sql later
     convertWhereToQueryBuilder(params) {
+
         const whereValue = params.whereValue;
         if (!whereValue || !whereValue.fields || !params.table || !params.schema) return null;
 
         const processValue = (value) => {
             if (Array.isArray(value.value)) {
                 return value.value.map(v => v.value);
+            }
+            if (Array.isArray(value.values)) {
+                return value.values.map(v => v.value);
             }
             return value.value;
         };
@@ -91,7 +95,6 @@ class GraphQLConverter {
                 };
             }
             // Handle leaf nodes (actual conditions)
-            // console.log('fields', fields)
             const field = fields[0];
 
             if (!this.currentModel.databases[this.db_id].models[params.schema][params.table].properties.columns[field.name.value]) {
@@ -453,7 +456,11 @@ class GraphQLConverter {
                     base: base_table_id,
                     join_conditions: result.join_conditions,
                     where: result.where,
-                    graphql: true
+                    graphql: true,
+                    limit: result.limit,
+                    offset: result.offset,
+                    other_conditions: result.other_conditions,
+                    orderby: result.orderby
                 }
             }).convertSelect()
 
@@ -491,6 +498,7 @@ class GraphQLConverter {
         var offset = null;
         var where = {};
         var agg_type = 'row_to_json';
+        var order_by = [];
 
         for (let i = 0; i < selection.arguments.length; i++) {
             const arg = selection.arguments[i];
@@ -504,6 +512,21 @@ class GraphQLConverter {
                     table: table_arr[1],
                     schema: table_arr[0]
                 });
+            } else if (arg.name.value == 'order_by') {
+                // Handle order_by argument
+                const orderFields = arg.value.fields;
+                for (const field of orderFields) {
+                    const columnName = field.name.value;
+                    const direction = field.value.value;
+                    if (table_columns[columnName]) {
+                        order_by.push({
+                            id: this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.id + '.' + table_columns[columnName].id,
+                            dir: direction.toLowerCase(),
+                            asc: direction.toLowerCase() == 'asc',
+                            name: table_arr.join('.') + '.' + columnName
+                        });
+                    }
+                }
             }
 
             if (current_rel_type == 'array') {
@@ -527,6 +550,7 @@ class GraphQLConverter {
 
             other_conditions[table_path_id].limit = limit;
             other_conditions[table_path_id].offset = offset;
+            other_conditions[table_path_id].orderby = order_by;
         }
 
 
@@ -545,7 +569,8 @@ class GraphQLConverter {
                     select_column_ids: select_column_ids,
                     rel_table_def: this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[field.name.value],
                     selection: field,
-                    join_conditions: join_conditions
+                    join_conditions: join_conditions,
+                    other_conditions: other_conditions
                 }
 
                 this.handleSelect(nested_table);
@@ -576,7 +601,8 @@ class GraphQLConverter {
             where: where,
             other_conditions: other_conditions,
             limit: limit,
-            offset: offset
+            offset: offset,
+            orderby: order_by
         };
     }
 

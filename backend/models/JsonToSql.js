@@ -1,10 +1,4 @@
 'use strict';
-const {
-	isArray
-} = require("lodash");
-const {
-	postgresql
-} = require("sql-formatter");
 const _ = require('lodash');
 
 const modelutils = require.main.require('./models/modelUtils')
@@ -1009,7 +1003,9 @@ module.exports = class builder {
 			'not_regex': '$!regex',
 			'contains': '$contains',
 			'contained_by': '$contained_by',
-			'overlaps': '$overlaps'
+			'overlaps': '$overlaps',
+			'any': '$any',
+			'in': '$any'
 		};
 		let quotes = this.quotes
 
@@ -1030,10 +1026,6 @@ module.exports = class builder {
 			else if (params.operator == '$!false') return params.columnName + ' IS NOT FALSE ';
 			else return '';
 		}
-		// console.log('suptype', suptype)
-		// if(!params.param_val && (suptype == 'text' || suptype ===  'datetime' || suptype ===  'timestamp')){ 
-		// 	params.value = "'" + params.value + "'"
-		// }
 
 		if (params.operator === '$gt') return params.columnName + ' > ' + params.value;
 		else if (params.operator === '$gte') return params.columnName + ' >= ' + params.value;
@@ -1071,6 +1063,8 @@ module.exports = class builder {
 			return params.columnName + ' <@ ' + params.value;
 		} else if (params.operator === '$overlaps') {
 			return params.columnName + ' && ' + params.value;
+		} else if (params.operator === '$any') {
+			return params.columnName + ' = ANY(' + params.value + ')';
 		}
 
 		// else if (params.operator.indexOf('$cnq') > -1) return params.columnName + ' @> ARRAY[(' + this.select(params.value) + ')]';

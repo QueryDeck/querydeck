@@ -1118,6 +1118,7 @@ module.exports = class ViewToJSON {
         }
 
         params.join_conditions = params.join_conditions || {};
+        params.other_conditions = params.other_conditions || {};
         let main_t_spl = params.columns[0]?.id.split('-') || [];
         let base_table = main_t_spl[0]?.split('.')[0] || params.base; //base table id 
         let currentModel = this.currentModel;
@@ -1363,7 +1364,17 @@ module.exports = class ViewToJSON {
                             });
                             var join_condition_id = params.columns[i].id_pure || agg_cluster_id;
                             agg_clusters[agg_cluster_id].id_pure = params.columns[i].id_pure || id_pure;
-                            agg_clusters[agg_cluster_id].agg_type = (rel_type_split[1] == 1 ? 'row_to_json' : 'json_agg');
+
+                            if(rel_type_split[1] == 1) {
+                                agg_clusters[agg_cluster_id].agg_type = 'row_to_json';
+                            } else {
+                                agg_clusters[agg_cluster_id].agg_type = 'json_agg';
+                                // add other conditions
+                                agg_clusters[agg_cluster_id].sub_other_conditions = params.other_conditions[join_condition_id] || {};
+                            }
+                            agg_clusters[agg_cluster_id].other_conditions = params.other_conditions;
+
+                            // agg_clusters[agg_cluster_id].agg_type = (rel_type_split[1] == 1 ? 'row_to_json' : 'json_agg');
                             // agg_clusters[agg_cluster_id].sub_join_conditions = params.join_conditions[id_pure] || {};
                             agg_clusters[agg_cluster_id].sub_join_conditions = params.join_conditions[join_condition_id] || {};
                             agg_clusters[agg_cluster_id].join_conditions = params.join_conditions;
@@ -1690,6 +1701,18 @@ module.exports = class ViewToJSON {
 
             } else {
                 throw new Error('No join conditions found for id_pure: ' + id_pure);
+            }
+
+            if(agg_clusters[agg_keys[i]].sub_other_conditions) {
+                if(agg_clusters[agg_keys[i]].sub_other_conditions.limit) {
+                    agg_mod.limit = agg_clusters[agg_keys[i]].sub_other_conditions.limit;
+                }
+                if(agg_clusters[agg_keys[i]].sub_other_conditions.offset) {
+                    agg_mod.offset = agg_clusters[agg_keys[i]].sub_other_conditions.offset;
+                }
+                if(agg_clusters[agg_keys[i]].sub_other_conditions.orderby) {
+                    agg_mod.orderby = agg_clusters[agg_keys[i]].sub_other_conditions.orderby;
+                }
             }
 
             main_model.joins.push(agg_mod);
