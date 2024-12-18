@@ -5,7 +5,7 @@ let apiurl
 let apiBase
 if(window.location.hostname === 'localhost') {
     apiurl = 'http://localhost:3000'
-    apiBase = 'http://localhost:3000'
+    apiBase = 'localhost:3000'
 } else if(window.location.hostname.split('.').length === 2) {
     switch (window.location.hostname) {
         case 'app.querydeck-dev.com':

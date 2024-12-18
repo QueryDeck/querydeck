@@ -1,5 +1,5 @@
 // React imports
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer  ,useMemo} from "react";
 import { Helmet } from "react-helmet";
 // Library imports
 // Redux
@@ -13,7 +13,7 @@ import {
 
   Spinner,
 } from "reactstrap";
-import api from "../../../api";
+
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import Header from '../../../app/projects/[subdomain]/components/sections/engine/header';
@@ -21,7 +21,12 @@ import Header from '../../../app/projects/[subdomain]/components/sections/engine
 // Components
 import Menu from "../menu/Menu";
 import SetupGraphQL from "./SetupGraphQL";
+import GraphQLQuery from "./GraphQLQuery";
 
+
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+
+import api,{apiBase} from "../../../api";
 
 
 
@@ -42,14 +47,21 @@ const QraphQL = ({ appid: subdomain }) => {
   const history = useHistory();
   const initialState = {
     loading: true,
-
+    
     database: null,
     tableOptions: null,
     setupGraphQLModalState: false,
+    step:2,
 
   };
   const [state, dispatch] = useReducer(qraphQLReducer, initialState);
-
+  const client = useMemo(()=>new ApolloClient({
+    uri:  `${apiBase === 'localhost:3000' ? "http"  :  "https"}://${subdomain}.${apiBase}/graphql`,  // 'http://hidden-darkness-8.localhost:3000/graphql',
+    cache: new InMemoryCache(),
+    credentials:'include',
+  }) , [subdomain]);
+  
+  
 
 
 
@@ -171,6 +183,7 @@ const QraphQL = ({ appid: subdomain }) => {
 
   const renderData = () => {
 
+
     if (state.loading) {
       return (<div className="loading-div">
         <Spinner
@@ -179,6 +192,8 @@ const QraphQL = ({ appid: subdomain }) => {
           type="grow"
         />
       </div>)
+    }else if( state.step === 2){ 
+      return <GraphQLQuery />
     }
     else if (state.database) {
       return (
@@ -203,6 +218,7 @@ const QraphQL = ({ appid: subdomain }) => {
 
   }
   return (
+    <ApolloProvider client={client}>
     <div>
       <Helmet>
         <title>QraphQL | QueryDeck</title>
@@ -219,6 +235,7 @@ const QraphQL = ({ appid: subdomain }) => {
         </Card>
       </div>
     </div>
+    </ApolloProvider>
   );
 
 };

@@ -6,6 +6,7 @@
   "dependencies": {
     "@ag_meq/rrl": "^0.2.0",
     "@ag_meq/rtc": "^5.4.0",
+    "@apollo/client": "^3.12.3",
     "@babel/core": "7.9.0",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
@@ -58,6 +59,7 @@
     "express": "^4.21.1",
     "file-loader": "4.3.0",
     "fs-extra": "^8.1.0",
+    "graphql": "^16.10.0",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^6.1.0",
     "gulp-clean-css": "^4.3.0",
@@ -131,7 +133,6 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "devDependencies": {},
   "jest": {
     "roots": [
       "<rootDir>/src"
