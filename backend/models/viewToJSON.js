@@ -1369,9 +1369,8 @@ module.exports = class ViewToJSON {
                                 agg_clusters[agg_cluster_id].agg_type = 'row_to_json';
                             } else {
                                 agg_clusters[agg_cluster_id].agg_type = 'json_agg';
-                                // add other conditions
-                                agg_clusters[agg_cluster_id].sub_other_conditions = params.other_conditions[join_condition_id] || {};
                             }
+                            agg_clusters[agg_cluster_id].sub_other_conditions = params.other_conditions[join_condition_id] || {};
                             agg_clusters[agg_cluster_id].other_conditions = params.other_conditions;
 
                             // agg_clusters[agg_cluster_id].agg_type = (rel_type_split[1] == 1 ? 'row_to_json' : 'json_agg');
@@ -1704,14 +1703,19 @@ module.exports = class ViewToJSON {
             }
 
             if(agg_clusters[agg_keys[i]].sub_other_conditions) {
-                if(agg_clusters[agg_keys[i]].sub_other_conditions.limit) {
+                if(agg_clusters[agg_keys[i]].sub_other_conditions.limit && agg_mod.agg_type == 'json_agg') {
                     agg_mod.limit = agg_clusters[agg_keys[i]].sub_other_conditions.limit;
                 }
-                if(agg_clusters[agg_keys[i]].sub_other_conditions.offset) {
+                if(agg_clusters[agg_keys[i]].sub_other_conditions.offset && agg_mod.agg_type == 'json_agg') {
                     agg_mod.offset = agg_clusters[agg_keys[i]].sub_other_conditions.offset;
                 }
-                if(agg_clusters[agg_keys[i]].sub_other_conditions.orderby) {
+                if(agg_clusters[agg_keys[i]].sub_other_conditions.orderby && agg_mod.agg_type == 'json_agg') {
                     agg_mod.orderby = agg_clusters[agg_keys[i]].sub_other_conditions.orderby;
+                }
+                if(agg_clusters[agg_keys[i]].sub_other_conditions.__typename) {
+                    agg_mod.columns.unshift({
+                        raw: "'" + agg_mod.table + "' as __typename"
+                    });
                 }
             }
 
@@ -1784,6 +1788,11 @@ module.exports = class ViewToJSON {
         }
         if (params.offset) {
             main_model.offset = Math.abs(parseInt(params.offset)) || 0;
+        }
+        if(params.__typename) {
+            main_model.columns.unshift({
+                raw: "'" + main_model.table + "' as __typename"
+            })
         }
         main_model.tsColumnData = tsColData;
 

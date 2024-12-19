@@ -39,6 +39,7 @@ class GraphQLConverter {
                 db_type: this.currentModel.databases[this.db_id].db_type
             }).generate();
             if (json_select_models.length > 1) q.multiple = true;
+            else q.base_alias = json_select_models[0].table_alias;
             return {
                 type: 'query',
                 query: q
@@ -490,16 +491,15 @@ class GraphQLConverter {
         for (let i = 0; i < selections.length; i++) {
             const selection = selections[i];
 
-            var base_table_graphql_name = selection.name.value
+            var base_table_graphql_name = selection.name.value;
 
-            var table_arr = this.currentModel.databases[this.db_id].graphql.tables[selection.name.value].table_schema;
+            if(!this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name]) {
+                throw new Error('Table ' + base_table_graphql_name + ' not found');
+            }
+
+            var table_arr = this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name].table_schema;
 
             var base_table_id = this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.id;
-
-            if (!this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name]) {
-                // TODO: throw better error
-                throw new Error('Table not found');
-            }
 
             var result = this.handleSelect({
                 table_path_id: base_table_id,
@@ -530,7 +530,8 @@ class GraphQLConverter {
                     limit: result.limit,
                     offset: result.offset,
                     other_conditions: result.other_conditions,
-                    orderby: result.orderby
+                    orderby: result.orderby,
+                    __typename: result.__typename
                 }
             }).convertSelect()
 
@@ -569,6 +570,7 @@ class GraphQLConverter {
         var where = {};
         var agg_type = 'row_to_json';
         var order_by = [];
+        var __typename = false;
 
         for (let i = 0; i < selection.arguments.length; i++) {
             const arg = selection.arguments[i];
@@ -659,9 +661,15 @@ class GraphQLConverter {
                     select_column_ids.push(column_id);
                 }
 
+            } else if(field.name.value == '__typename') {
+                
+                if(nested) {
+                    other_conditions[table_path_id].__typename = true;
+                } else {
+                    __typename = true;
+                }
             } else {
-                // TODO: throw better error
-                throw new Error('Column not found');
+                throw new Error('Column ' + field.name.value + ' not found in table ' + table_graphql_name);
             }
         }
 
@@ -672,7 +680,8 @@ class GraphQLConverter {
             other_conditions: other_conditions,
             limit: limit,
             offset: offset,
-            orderby: order_by
+            orderby: order_by,
+            __typename: __typename
         };
     }
 

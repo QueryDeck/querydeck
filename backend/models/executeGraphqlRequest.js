@@ -150,7 +150,7 @@ function executeClientRequest(params, callback) {
         params.db({
             text: result.query.text,
             values: result.query.values
-        }, function(err, result) {
+        }, function(err, query_result) {
             if(err) {
                 console.log('err', err)
                 return callback({
@@ -158,7 +158,17 @@ function executeClientRequest(params, callback) {
                     error: err
                 })
             }
-            return callback(null, result)
+            if(result.query.multiple) {
+                return callback(null, {
+                    data: query_result.rows[0]
+                })
+            } else {
+                return callback(null, {
+                    data: {
+                        [result.query.base_alias]: query_result.rows
+                    }
+                })
+            }
         })
 
     } else {

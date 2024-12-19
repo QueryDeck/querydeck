@@ -213,11 +213,12 @@ module.exports = class builder {
 		let quotes = this.quotes;
 		// quotes =  '`'
 		for (let i = 0; i < model.columns.length; i++) {
-			// var coltext = this.addSchemaToColumn(model.columns[i].columnName, model);
 
-			// if(model.q.columns[i].alias) coltext += ' AS ' + this.identAlias(model.columns[i].alias);
+			if(model.columns[i].raw) {
+				finalColumns.push(model.columns[i].raw);
+				continue;
+			}
 
-			// quotes = ''
 			var col_name = model.columns[i].columnName;
 			let colNameQuotes = quotes + model.columns[i].columnName.split(".").join(quotes + "." + quotes) + quotes;
 			// var col_name_quotes = quotes +  model.columns[i].columnName.split(".").join(quotes+ "." + quotes) + quotes;
