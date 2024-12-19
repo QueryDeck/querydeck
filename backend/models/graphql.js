@@ -220,7 +220,18 @@ class GraphQLConverter {
             throw new Error('Table not found');
         }
 
-        var values = selection.arguments[0].value.kind == 'ListValue' ? selection.arguments[0].value.values : [selection.arguments[0].value];
+        var arg_res = this.extractValuesAndOnConflict({
+            arguments: selection.arguments,
+            table_arr: table_arr,
+            table_path_id: base_table_id,
+            nested: false
+        });
+
+        var values = arg_res.values;
+
+        var on_conflict = {
+            [base_table_id]: arg_res.on_conflict
+        }
 
         var return_nested = this.handleNestedReturning({
             returningField: selection.selectionSet.selections[0],
@@ -237,6 +248,7 @@ class GraphQLConverter {
             table_id: base_table_id,
             table_arr: table_arr,
             values: values,
+            on_conflict: on_conflict,
             table_graphql_name: base_table_graphql_name,
             // return_nested: return_nested
         });
@@ -258,6 +270,7 @@ class GraphQLConverter {
             subdomain: this.subdomain,
             return_c: return_nested,
             graphql: true,
+            on_conflict: result.on_conflict
             // insert_value_ob: result.insert_value_ob
         });
 
@@ -267,6 +280,47 @@ class GraphQLConverter {
             query: query,
             body: result.insert_value_ob
         };
+    }
+
+    extractValuesAndOnConflict(params) {
+        // console.log('extractValuesAndOnConflict', params)
+        var args = params.arguments;
+        var table_arr = params.table_arr;
+        var values;
+        var on_conflict;
+        var nested = params.nested || false;
+        var table_path_id = params.table_path_id;
+
+        for (let i = 0; i < args.length; i++) {
+            if (args[i].name.value === 'on_conflict' && args[i].value.fields && args[i].value.fields.length > 0) {
+                for (let j = 0; j < args[i].value.fields.length; j++) {
+                    const field = args[i].value.fields[j];
+                    if (field.name.value === 'constraint') {
+                        on_conflict = {
+                            constraint: field.value.value
+                        }
+                    } else if (field.name.value === 'update_columns') {
+
+                        on_conflict.columns = [];
+                        for (let k = 0; k < field.value.values.length; k++) {
+                            if(this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.columns[field.value.values[k].value]) {
+                                on_conflict.columns.push({
+                                    // name: field.value.values[k].value,
+                                    id: table_path_id + (nested ? '$' : '.') + this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.columns[field.value.values[k].value].id
+                                });
+                            }
+                        }
+                    }
+                }
+            } else {
+                values = args[i].value.kind == 'ListValue' ? args[i].value.values : [args[i].value];
+            }
+        }
+
+        return {
+            values: values,
+            on_conflict: on_conflict
+        }
     }
 
     handleNestedReturning(params) {
@@ -331,6 +385,8 @@ class GraphQLConverter {
         var nested = params.nested || false;
         var table_path_id = params.table_path_id;
 
+        params.on_conflict = params.on_conflict || {};
+
         var current_rel_type = 'array';
 
         if (nested && params.rel_table_def.type.charAt(2) != 'M') {
@@ -370,17 +426,30 @@ class GraphQLConverter {
 
                     if (this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name]) {
 
+                        var nested_table_path_id = (nested ? table_path_id + '-' : '') + this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name].id_path;
+                        var nested_table_arr = this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name].rel_table.split('.');
+
+                        var arg_res = this.extractValuesAndOnConflict({
+                            arguments: field.value.fields,
+                            table_arr: nested_table_arr,
+                            table_path_id: nested_table_path_id,
+                            nested: true
+                        });
+
                         var nested_table = {
-                            table_path_id: (nested ? table_path_id + '-' : '') + this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name].id_path,
+                            table_path_id: nested_table_path_id,
                             table_id: this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name].rel_table,
-                            table_arr: this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name].rel_table.split('.'),
+                            table_arr: nested_table_arr,
                             table_graphql_name: this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name].rel_table_graphql,
                             nested: true,
-                            values: (field.value.fields[0].value.kind == 'ListValue') ? field.value.fields[0].value.values : [field.value.fields[0].value],
+                            values: arg_res.values,
+                            // on_conflict: arg_res.on_conflict,
                             // insert_value_ob: insert_value_ob[table_arr[1]][0],
                             insert_column_ids: insert_column_ids,
                             rel_table_def: this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name],
                         }
+
+                        params.on_conflict[nested_table.table_path_id] = arg_res.on_conflict;
 
                         if (!nested_table.values || !nested_table.values.length) {
                             // TODO: throw better error
@@ -393,7 +462,7 @@ class GraphQLConverter {
 
                     } else {
                         // TODO: throw better error
-                        throw new Error('Relation not found');
+                        throw new Error('Relation ' + rel_name + ' not found' + ' in ' + table_graphql_name);
                     }
                 }
             }
@@ -409,7 +478,8 @@ class GraphQLConverter {
 
         return {
             insert_value_ob: insert_value_ob,
-            insert_column_ids: insert_column_ids
+            insert_column_ids: insert_column_ids,
+            on_conflict: params.on_conflict
         };
     }
 

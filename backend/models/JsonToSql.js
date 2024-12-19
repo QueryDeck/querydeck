@@ -476,7 +476,7 @@ module.exports = class builder {
 
 		var return_joins = [];
 
-		var current_alias = 'q' + model.method + '_' + model.table + (model.dynamic_base_index ? '_' + model.dynamic_base_index : '')
+		var current_alias = (model.with_alias ? model.with_alias : ('q' + model.method + '_' + model.table)) + (model.dynamic_base_index ? '_' + model.dynamic_base_index : '')
 		
 		if(model.values_added && model.qref_used && model.table_body_type == 'array' && (model.columns.length > 1 || model.qref_only)) {
 
