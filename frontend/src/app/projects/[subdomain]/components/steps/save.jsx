@@ -9,6 +9,7 @@ import {
 } from 'react-redux'
 import {
   setNew,
+  selectPreviewAPIlist,
   updateDeploymentDiff
 } from '../../../../../lib/data/dataSlice'
 
@@ -23,7 +24,7 @@ import CryptoJS from 'crypto-js'
 import Cookies from 'js-cookie'
 import { Button } from 'reactstrap'
 import { toast } from 'react-toastify'
-import AutoGenrateButton from '../modals/autoGenerate/autoGenrateButton'
+
 // API
 import axios from 'axios'
 import api, { apiurl, apiBase } from '../../../../../api'
@@ -61,7 +62,7 @@ const Save = props => {
     }
   })
 
-  const getDeploymentDiff = async (createMode = false) => {
+  const getDeploymentDiff = async (query_id, createMode = false) => {
     try {
       const response = await api.get("/apps/git/diff", {
         params: {
@@ -72,6 +73,21 @@ const Save = props => {
       dispatch(updateDeploymentDiff({
         subdomain:  props.subdomain,
         diff: response.data.data.diff
+      }))
+      dispatch(selectPreviewAPIlist({
+        subdomain: props.subdomain,
+        select_preview: {
+          name: state.name,
+          // table: ,
+          // schema: ,
+          method: state.method,
+          apiRoute: state.route,
+          // created_at: ,
+          query_id,
+          deployed: true,
+          auth_required: state.authentication.value,
+          docs: state.docs
+        }
       }))
       if (createMode) {
         dispatch(setNew({
@@ -238,9 +254,9 @@ const Save = props => {
         data: config,
         withCredentials: true
       }
-      await create(createConfig)
+      const response = await create(createConfig)
       navigator.clipboard.writeText(`https://${props.subdomain}.${apiBase}${state.route}`)
-      getDeploymentDiff(true)
+      getDeploymentDiff(response.data.data.query_id, true)
       toast.success('API saved successfully!')
     } catch (error) {
       if (error.response.status === 400) {
@@ -383,9 +399,9 @@ const Save = props => {
         data: config,
         withCredentials: true
       }
-      await update(updateConfig)
+      const response = await update(updateConfig)
       navigator.clipboard.writeText(`https://${props.subdomain}.${apiBase}${state.route}`)
-      getDeploymentDiff()
+      getDeploymentDiff(response.data.data.query_id)
       toast.success('API updated successfully!')
     } catch (error) {
       props.catchError(error)
@@ -405,47 +421,42 @@ const Save = props => {
 
   return (
     <>
-          <AutoGenrateButton
-        mode={props.mode}
-        query_id={props.query_id}
-        subdomain={props.subdomain}
-      />
-        {
-          (props.query_id === 'new' ||
-          !listState?.select_preview) &&
-          <Button
-            color='falcon-danger'
-            onClick={() => history.push(`/apps/${props.subdomain}/api`)}
-            size='sm'
-          >
-            <FontAwesomeIcon icon={faBan} /> Cancel
-          </Button>
-        }
-        {
-          props.query_id === 'new'
-          &&
-          <Button
-            color='falcon-danger'
-            onClick={() => dispatch(setNew({
-              mode: props.mode,
-              subdomain: props.subdomain
-            }))}
-            size='sm'
-          >
-            <FontAwesomeIcon icon={faEraser} /> Reset
-          </Button>
-        }
-        {
-          !listState?.select_preview &&
-          <Button
-            color='primary'
-            onClick={clickHandler}
-            disabled={!(state?.base?.value && state?.method?.value && state?.text.length)}
-            size='sm'
-          >
-            <FontAwesomeIcon icon={faSave} /> Save
-          </Button>
-        }
+      {
+        (props.query_id === 'new' ||
+        !listState?.select_preview) &&
+        <Button
+          color='falcon-danger'
+          onClick={() => history.push(`/apps/${props.subdomain}/api`)}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faBan} /> Cancel
+        </Button>
+      }
+      {
+        props.query_id === 'new'
+        &&
+        <Button
+          color='falcon-danger'
+          onClick={() => dispatch(setNew({
+            mode: props.mode,
+            subdomain: props.subdomain
+          }))}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faEraser} /> Reset
+        </Button>
+      }
+      {
+        !listState?.select_preview &&
+        <Button
+          color='primary'
+          onClick={clickHandler}
+          disabled={!(state?.base?.value && state?.method?.value && state?.docs?.sql_query?.text.length)}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faSave} /> Save
+        </Button>
+      }
     </>
   )
 }

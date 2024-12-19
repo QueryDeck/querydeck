@@ -106,7 +106,6 @@ const AutoGenerate = (props) => {
     }
   };
 
- 
   if (state?.database?.value) {
     return (
       <Modal

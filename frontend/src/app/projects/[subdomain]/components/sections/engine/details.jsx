@@ -4,9 +4,6 @@ import React, {
   useState
 } from 'react'
 
-// Redux
-import { useSelector } from 'react-redux'
-
 // Library imports
 import {
   faCopy,
@@ -29,9 +26,8 @@ import { apiBase } from '../../../../../../api';
 // SCSS module
 import styles from './details.module.scss'
 
-const Documentation = props => {
-  // Redux
-  const state = useSelector(state => state.data[props.mode][props.subdomain]?.[props.query_id])
+const Details = props => {
+  const { docs } = props
 
   const [docState, setDocState] = useState({
     request: {},
@@ -41,7 +37,7 @@ const Documentation = props => {
 
   // Tab Label
   const copyAPI = () => {
-    navigator.clipboard.writeText(`https://${props.subdomain}.${apiBase}${state.route}`).then(() => {
+    navigator.clipboard.writeText(`https://${props.subdomain}.${apiBase}${docs?.apiRoute}`).then(() => {
       toast.success('API copied!')
     }).catch(err => {
       console.error(err)
@@ -58,7 +54,7 @@ const Documentation = props => {
 
 
   const copyRequest = () => {
-    navigator.clipboard.writeText(state?.base?.value ? JSON.stringify(state.request) : '{}').then(() => {
+    navigator.clipboard.writeText(docs?.request_body ? JSON.stringify(docs?.request_body) : '{}').then(() => {
       toast.success('Sample request copied!')
     }).catch(err => {
       console.error(err)
@@ -66,7 +62,7 @@ const Documentation = props => {
   }
 
   const copyResponse = () => {
-    navigator.clipboard.writeText(state?.base?.value ? JSON.stringify(state.response) : '{}').then(() => {
+    navigator.clipboard.writeText(docs?.response_body ? JSON.stringify(docs?.response_body) : '{}').then(() => {
       toast.success('Sample response copied!')
     }).catch(err => {
       console.error(err)
@@ -74,7 +70,7 @@ const Documentation = props => {
   }
 
   const copyQuery = () => {
-    navigator.clipboard.writeText(state.text).then(() => {
+    navigator.clipboard.writeText(docs?.sql_query?.text).then(() => {
       toast.success('Query copied!')
     }).catch(err => {
       console.error(err)
@@ -82,41 +78,46 @@ const Documentation = props => {
   }
 
   const getBadgeData = (status = null) => {
-    if (state?.method?.method?.toLowerCase() === 'post' || status === 200) {
+    if (docs?.method === 'insert' || status === 200) {
       return ({
         badge: styles.badge_success,
-        heading: styles.script_heading_success
+        heading: styles.script_heading_success,
+        method: 'POST'
       })
-    } else if (state?.method?.method?.toLowerCase() === 'put' || status === 300) {
+    } else if (docs?.method === 'update' || status === 300) {
       return ({
         badge: styles.badge_warning,
-        heading: styles.script_heading_warning
+        heading: styles.script_heading_warning,
+        method: 'PUT'
       })
-    } else if (state?.method?.method?.toLowerCase() === 'delete' || status === 400) {
+    } else if (docs?.method === 'delete' || status === 400) {
       return ({
         badge: styles.badge_danger,
-        heading: styles.script_heading_danger
+        heading: styles.script_heading_danger,
+        method: 'DELETE'
       })
     } else {
       return ({
         badge: styles.badge_primary,
-        heading: styles.script_heading_primary
+        heading: styles.script_heading_primary,
+        method: 'GET'
       })
     }
   }
 
   useEffect(() => {
     updateCommand()
-  }, [state?.text, state?.authentication])
+  }, [docs?.sql_query?.text, docs?.auth_required])
 
   const updateCommand = () => {
+    const badgeData = getBadgeData()
     let updatedCommand = `${command}`
-    updatedCommand = `curl 'https://${props.subdomain}.${apiBase}${state?.route}' \\ \n  -X ${state?.method?.method} \\ \n  -H 'Accept: application/json' `
-    if (state?.authentication?.value) {
+    updatedCommand = `curl 'https://${props.subdomain}.${apiBase}${docs?.apiRoute}' \\ \n  -X ${badgeData?.method} \\ \n  -H 'Accept: application/json' `
+    if (docs?.auth_required) {
       updatedCommand = updatedCommand.split(`\\ \n --H 'authorization:`)[0].concat(`\\ \n  -H 'authorization: your JWT goes here' `)
     }
-    if (state?.request && JSON.stringify(state?.request).length > 2) {
-      updatedCommand = updatedCommand.split(`\\ \n --data-raw:`)[0].concat(`\\ \n  --data-raw: '${JSON.stringify(state?.request)}'`)
+    if (docs?.request_body && JSON.stringify(docs?.request_body).length > 2) {
+      updatedCommand = updatedCommand.split(`\\ \n --data-raw:`)[0].concat(`\\ \n  --data-raw: '${JSON.stringify(docs?.request_body)}'`)
     }
     setCommand(updatedCommand)
   }
@@ -146,45 +147,41 @@ const Documentation = props => {
   }
 
   const renderPathParameters = () => {
-    const parameters = state?.route?.split(':')
-    const pathParameters = parameters
-      .filter(element => element[0] !== '/')
-      .map(element => element.split('/')[0])
-    const data = {}
-    pathParameters.forEach(element => {
-      data[element] = {
-        $qd_column: true,
-        type: 'text',
-        required: true,
-        dataType: 'text'
+    const parameters = docs?.apiRoute?.split(':')
+    if (parameters) {
+      const pathParameters = parameters
+        .filter(element => element[0] !== '/')
+        .map(element => element.split('/')[0])
+      const data = {}
+      pathParameters.forEach(element => {
+        data[element] = {
+          $qd_column: true,
+          type: 'text',
+          required: true,
+          dataType: 'text'
+        }
+      })
+      if (Object.keys(data).length) {
+        return (
+          <>
+            <div className={styles.parameters_title}>
+              Path Parameters
+            </div>
+            <div className={styles.parameters_content}>
+              {parseData(data, null, 'request')}
+            </div>
+          </>
+        )
       }
-    })
-    if (Object.keys(data).length) {
-      return (
-        <>
-          <div className={styles.parameters_title}>
-            Path Parameters
-          </div>
-          <div className={styles.parameters_content}>
-            {parseData(data, null, 'request')}
-          </div>
-        </>
-      )
     }
   }
 
   const renderQueryParameters = () => {
-    const queryParams = state?.queryParams
+    const queryParams = docs?.request_query
     const data = {}
-    if (state?.queryParams) {
+    if (queryParams) {
       Object.keys(queryParams).forEach(param => {
-        // if (['_limit', '_offset', '_order'].includes(param)) {
-          // if (param === '_order') {
-            // let details = ''
-            // state.sorts.forEach(element => {
-              //   details = details.concat(`${element.column.label}:${element.order},`)
-              // })
-        if (['_limit', '_offset'].includes(param)) {
+        if (['_limit', '_offset', '_orderby'].includes(param)) {
           data[param] = {
             $qd_column: true,
             type: queryParams[param].type,
@@ -200,21 +197,6 @@ const Documentation = props => {
           }
         }
       })
-    }
-    if (state?.sorts_dynamic?.length) {
-      let details = ''
-      state.sorts_dynamic.forEach((element, index) => {
-        details = details.concat(`${element.label}:${index % 2 === 0 ? 'asc' : 'desc'}`)
-        if (index < state.sorts_dynamic.length - 1) {
-          details = details.concat(',')
-        }
-      })
-      data['_order'] = {
-        $qd_column: true,
-        type: 'text',
-        details,
-        required: false
-      }
     }
     if (Object.keys(data).length) {
       return (
@@ -339,14 +321,14 @@ const Documentation = props => {
   }
 
   const renderBodyParameters = () => {
-    if (JSON.stringify(state?.request_detailed).length > 2) {
+    if (JSON.stringify(docs?.request_body_detailed).length > 2) {
       return (
         <>
           <div className={styles.parameters_title}>
             Body Parameters
           </div>
           <div className={styles.parameters_content}>
-            {parseData(state.request_detailed, null, 'request')}
+            {parseData(docs?.request_body_detailed, null, 'request')}
           </div>
         </>
       )
@@ -354,14 +336,14 @@ const Documentation = props => {
   }
 
   const renderResponse = () => {
-    if (JSON.stringify(state?.response_detailed).length > 2) {
+    if (JSON.stringify(docs?.response_detailed).length > 2) {
       return (
         <>
           <div className={styles.parameters_title}>
             Response
           </div>
           <div className={styles.parameters_content}>
-            {parseData(state.response_detailed, null, 'response')}
+            {parseData(docs?.response_detailed, null, 'response')}
           </div>
         </>
       )
@@ -383,16 +365,16 @@ const Documentation = props => {
     const badgeData = getBadgeData()
     return (
       <div className={styles.data}>
-        {state?.method?.method && <div className={styles.script} >
+        <div className={styles.script} >
           <div
             className={badgeData?.heading}
             onClick={copyAPI}
           >
             <Badge className={badgeData?.badge}>
-              {state.method.method ? state.method.method : 'GET'}
+              {badgeData?.method}
             </Badge>
             <span>
-              https://{props.subdomain}.{apiBase}{state.route}
+              https://{props.subdomain}.{apiBase}{docs?.apiRoute}
             </span>
           </div>
           <div
@@ -401,8 +383,8 @@ const Documentation = props => {
           >
             {command}
           </div>
-        </div>}
-        {JSON.stringify(state?.request).length > 2 && <div className={styles.request}>
+        </div>
+        {JSON.stringify(docs?.request_body).length > 2 && <div className={styles.request}>
           <div className={styles.request_heading}>
             <span>
               Request
@@ -417,15 +399,15 @@ const Documentation = props => {
           </div>
           <div className={styles.request_body}>
             <ReactJson
-              // collapsed={state.request.length <= 25 ? 3 : 2}
+              // collapsed={docs?.request.length <= 25 ? 3 : 2}
               // collapseStringsAfterLength={50}
               displayDataTypes={false}
               name={null}
-              src={state?.base?.value ? state.request : {}}
+              src={docs?.request_body}
             />
           </div>
         </div>}
-        {JSON.stringify(state?.response).length > 2 && <div className={styles.response}>
+        {JSON.stringify(docs?.response).length > 2 && <div className={styles.response}>
           <div className={styles.response_heading}>
             <span>
               Response
@@ -446,15 +428,15 @@ const Documentation = props => {
               This is a sample response. The actual response will differ depending on the parameters selected.
             </Alert>
             <ReactJson
-              // collapsed={state.response.length <= 25 ? 4 : 3}
+              // collapsed={docs?.response.length <= 25 ? 4 : 3}
               // collapseStringsAfterLength={50}
               displayDataTypes={false}
               name={null}
-              src={state?.base?.value ? state.response : {}}
+              src={docs?.response}
             />
           </div>
         </div>}
-        {state?.text.length ? <div className={styles.query}>
+        {docs?.sql_query.text.length ? <div className={styles.query}>
           <div className={styles.query_heading}>
             <span>
               Query
@@ -468,14 +450,14 @@ const Documentation = props => {
             </Button>
           </div>
           <div className={styles.query_body}>
-            {state.text}
+            {docs?.sql_query.text}
           </div>
         </div> : null}
       </div>
     )
   }
 
-  if(props.dragging || !state) {
+  if(props.dragging || !docs) {
 		return (
 			<Card
         style={{
@@ -500,4 +482,4 @@ const Documentation = props => {
 
 }
 
-export default Documentation
+export default Details

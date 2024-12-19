@@ -2,9 +2,6 @@
 import React from 'react'
 import { useHistory } from 'react-router-dom'
 
-// Redux
-import { useSelector } from 'react-redux'
-
 // Library imports
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -15,6 +12,7 @@ import {
 } from 'reactstrap'
 
 // Components
+import AutoGenerateButton from '../../modals/autoGenerate/autoGenerateButton'
 import Save from '../../steps/save'
 
 // Utils
@@ -24,23 +22,15 @@ import Save from '../../steps/save'
 import styles from './header.module.scss'
 
 const Header = props => {
-  // Redux
-  const listState = useSelector(state => state.data[props.mode][props.subdomain])
-  const state = useSelector(state => state.data[props.mode][props.subdomain]?.[props.query_id])
-
   // For 403 errors on unauthorised users
   const history = useHistory();
 
   const renderUnsavedWarning = () => {
-    if (props.query_id === 'new') {
-      if (state?.text?.length) {
-        return true
+    if (window.location.pathname.includes('api')) {
+      if (window.location.pathname.endsWith('/api') || window.location.pathname.endsWith('/api/')) {
+        return false
       }
-    } else {
-      const savedDocs = listState?.list?.filter(element => element.query_id === props.query_id)[0]
-      if (savedDocs) {
-        return savedDocs.docs.sql_query.text.replace(/\s\s+/g, ' ') !== state?.text.replace(/\s\s+/g, ' ')
-      }
+      return true
     }
     return false
   }
@@ -57,9 +47,16 @@ const Header = props => {
         </Button>
       </div>
       <div className={styles.title}>
-        {props.query_id ? state?.name || 'Untitled' : props.section}
+        {props.query_id ? props.docs?.title || 'Untitled' : props.section}
         {renderUnsavedWarning() && <Badge className={styles.title_warning}>Draft</Badge>}
       </div>
+      {(window.location.pathname.endsWith('/api') || window.location.pathname.endsWith('/api/')) &&
+        <AutoGenerateButton
+          mode={props.mode}
+          query_id={props.query_id}
+          subdomain={props.subdomain}
+        />
+      }
       {props.query_id && <div className={styles.actions}>
         <Save
           mode='api'

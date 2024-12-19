@@ -122,6 +122,7 @@ export const APIlist = props => {
         </title>
       </Helmet>
       <Header
+        docs={state?.select_preview?.docs}
         mode='api'
         query_id={state?.select_preview?.query_id}
         section='REST APIs'
@@ -143,8 +144,9 @@ export const APIlist = props => {
               {...separatorProps}
             />
             {
-              state && state[state?.select_preview?.query_id]?.method?.value ?
+              state?.select_preview?.docs ?
               <Details
+                docs={state?.select_preview?.docs}
                 dragging={isDragging}
                 mode='api'
                 query_id={state?.select_preview?.query_id}

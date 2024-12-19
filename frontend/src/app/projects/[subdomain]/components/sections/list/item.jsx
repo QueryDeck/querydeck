@@ -94,7 +94,7 @@ const Item = props => {
   }
 
   const previewAPI = () => {
-    loadDatabase(props.item.query_id)
+    // loadDatabase(props.item.query_id)
     dispatch(selectPreviewAPIlist({
       select_preview: props.item,
       subdomain: props.subdomain

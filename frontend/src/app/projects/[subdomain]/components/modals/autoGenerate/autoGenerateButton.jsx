@@ -17,7 +17,7 @@ import {
 
 
 
-const AutoGenrateButton = (props) => {
+const AutoGenerateButton = (props) => {
   const dispatch = useDispatch();
 
   const handleAutoGenrateClick = () => {
@@ -32,17 +32,15 @@ const AutoGenrateButton = (props) => {
     );
   };
   return (
- 
-      <Button
-        title="Click to Auto Generate Endpoints"
-        onClick={handleAutoGenrateClick}
-        size="sm"
-          color='falcon-danger'
-      >
-          <FontAwesomeIcon icon={faCartPlus} /> Bulk Create
-      </Button>
- 
+    <Button
+      title="Click to Auto Generate Endpoints"
+      onClick={handleAutoGenrateClick}
+      size="sm"
+      color='falcon-primary'
+    >
+      <FontAwesomeIcon icon={faCartPlus} /> Bulk Create
+    </Button>
   );
 };
 
-export default AutoGenrateButton; 
+export default AutoGenerateButton; 

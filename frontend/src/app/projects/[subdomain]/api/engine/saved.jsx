@@ -34,7 +34,6 @@ import { useResizable } from '@ag_meq/rrl'
 import Menu from '../../../../../components/interface/menu/Menu'
 import Header from '../../components/sections/engine/header'
 import Left from '../../components/sections/engine/left'
-// import Right from '../../components/sections/engine/right'
 import Details from '../../components/sections/engine/details'
 
 // API
@@ -54,6 +53,7 @@ let tablesController
 
 export function APIsaved (props) {
   // Redux
+  const listState = useSelector(state => state.data.api[props.subdomain])
   const state = useSelector(state => state.data.api[props.subdomain]?.[props.query_id])
   const dispatch = useDispatch()
 
@@ -529,15 +529,9 @@ export function APIsaved (props) {
         query_id: props.query_id,
         authenticationEnabled: Boolean(!data[3].content.query.session_vars_used.length),
         authorisation: data[3].content.roles,
+        docs: data[3].content.docs,
         filtersCount: data[3].content.model.condition_count,
-        name: data[3].content.docs.title,
-        queryParams: data[3].content.query.request_query_params,
-        request: data[0].content,
-        request_detailed: data[0].content_detailed,
-        response: data[1].content,
-        response_detailed: data[1].content_detailed,
-        subdomain: props.subdomain,
-        text: data[2].content
+        subdomain: props.subdomain
       }))
     } catch (error) {
       catchError(error)
@@ -552,6 +546,7 @@ export function APIsaved (props) {
         </title>
       </Helmet>
       <Header
+        docs={state?.docs}
         mode='api'
         query_id={props.query_id}
         subdomain={props.subdomain}
@@ -574,13 +569,29 @@ export function APIsaved (props) {
               className='separator separator-horizontal'
               {...separatorProps}
             />
-            <Details
-              dragging={isDragging}
-              mode='api'
-              query_id={props.query_id}
-              subdomain={props.subdomain}
-              width={window.innerWidth - 4 - 4 - position}
-            />
+            {
+              (state?.docs && Object.keys(state?.docs)?.length) ?
+              <Details
+                docs={{
+                  ...state?.docs,
+                  apiRoute: state?.route,
+                  auth_required: state?.authentication?.value
+                }}
+                dragging={isDragging}
+                mode='api'
+                query_id={props.query_id}
+                subdomain={props.subdomain}
+                width={window.innerWidth - 4 - 4 - position}
+              /> :
+              <Details
+                docs={listState?.list?.find(element => element.query_id === props.query_id)?.docs}
+                dragging={isDragging}
+                mode='api'
+                query_id={props.query_id}
+                subdomain={props.subdomain}
+                width={window.innerWidth - 4 - 4 - position}
+              />
+            }
           </div>
         </div>
       </div>

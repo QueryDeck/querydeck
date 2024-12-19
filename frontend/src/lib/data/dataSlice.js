@@ -102,13 +102,7 @@ const blank = {
     /////// LHS END ////////
 
     ///// RHS (Viewer) /////
-    resultMode: 'sql',
-    queryParams: {},
-    request: {},
-    request_detailed: {},
-    response: {},
-    response_detailed: {},
-    text: '',
+    docs: {},
     /////// RHS END ////////
 
     //////// WIZARD  ////////
@@ -156,7 +150,6 @@ const dataSlice = createSlice({
           list_filtered: action.payload.list.sort((a, b) => a.name.localeCompare(b.name)),
           search: '',
           select_delete: '',
-          select_preview: null,
           sort: {
             field: 'Name',
             order: true // True: Ascending | False: Descending
@@ -1266,18 +1259,6 @@ const dataSlice = createSlice({
         }
       }
     },
-    setResultMode (state, action) {
-      state[action.payload.mode] = {
-        ...state[action.payload.mode],
-        [action.payload.subdomain]: {
-          ...state[action.payload.mode][action.payload.subdomain],
-          [action.payload.query_id]: {
-            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
-            resultMode: action.payload.resultMode
-          }
-        }
-      }
-    },
     setResult (state, action) {
       state[action.payload.mode] = {
         ...state[action.payload.mode],
@@ -1290,12 +1271,7 @@ const dataSlice = createSlice({
             authorisation: action.payload.authorisation,
             filtersCount: action.payload.filtersCount,
             name: action.payload.name,
-            queryParams: action.payload.queryParams,
-            request: action.payload.request,
-            request_detailed: action.payload.request_detailed,
-            response: action.payload.response,
-            response_detailed: action.payload.response_detailed,
-            text: action.payload.text
+            docs: action.payload.docs,
           }
         }
       }
@@ -1346,7 +1322,7 @@ const dataSlice = createSlice({
     updateAutoGenerateTable(state, action) {
 
       action.payload.tables.sort((a,b)=>{
-       return  a.label.localeCompare(b.label)
+        return  a.label.localeCompare(b.label)
       });
       state[action.payload.mode] = {
         ...state[action.payload.mode],
@@ -1452,7 +1428,6 @@ export const {
   toggleDynamicOffset,
   setLimit,
   toggleDynamicLimit,
-  setResultMode,
   setResult,
   closeWizardModal,
   openAutoGenerateModal,
