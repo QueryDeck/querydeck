@@ -77,7 +77,7 @@ const Save = props => {
       dispatch(selectPreviewAPIlist({
         subdomain: props.subdomain,
         select_preview: {
-          name: state.name,
+          name: state.route,
           // table: ,
           // schema: ,
           method: state.method,
