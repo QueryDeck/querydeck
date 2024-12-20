@@ -2067,6 +2067,37 @@ module.exports = function (router) {
 
   }));
 
+  /* ##### Get graphql tables  ####  */
+  router.get('/graphql/tables', catchError(async function (req, res) {
+
+    if (!req.query.subdomain  ) return res.zend(null, 400, "Must have fields subdomain");
+     
+    if (req.user_id !== req.clientModels[req.query.subdomain].appDetails.created_by) return res.zend(null, 401, "Login Required");
+    const db_id = Object.keys(req.clientModels[req.query.subdomain].databases)[0];
+  
+    let currentModel = req.clientModels[req.query.subdomain].databases[db_id];
+ 
+    let result = Object.values( currentModel.graphql.tables || {} ).map((table)=>{ 
+      let currTableObj = {
+        relations : [] , 
+        table_name : table.table_schema.join(".") , 
+      } ; 
+      
+         let relation_keys = Object.keys (table.relations)
+         for (let i = 0; i < relation_keys.length; i++) {
+              relation_keys[i];
+              currTableObj.relations.push ( {
+                ...table.relations[relation_keys[i]],
+                relation_name : relation_keys[i],
+              })
+         }
+       return currTableObj ; 
+    })
+
+    return res.zend(result);
+   
+
+  } ) )
 
   router.all('/*', (req, res) => {
     res.zend({ method: req.method }, 404, "Not Found",);
