@@ -1,43 +1,34 @@
 // React imports
-import React, { useEffect, useReducer  ,useMemo} from "react";
+import React, { useEffect, useReducer, useMemo } from "react";
 import { Helmet } from "react-helmet";
 // Library imports
 // Redux
-import { useHistory } from 'react-router-dom';
+import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import qraphQLReducer from "../../reducers/graphQL/qraphQLReducer";
 import {
   Card,
-  CardBody,
   // CardHeader,
-
   Spinner,
 } from "reactstrap";
 
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
-import Header from '../../../app/projects/[subdomain]/components/sections/engine/header';
+import Header from "../../../app/projects/[subdomain]/components/sections/engine/header";
 
 // Components
 import Menu from "../menu/Menu";
 import SetupGraphQL from "./SetupGraphQL";
-import GraphQLQuery from "./GraphQLQuery";
-
+// import GraphQLQuery from "./GraphQLQuery";
+import Details from "./detail/Details";
 
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
-import api,{apiBase} from "../../../api";
-
-
+import api, { apiBase } from "../../../api";
 
 let getDatabasesController;
 let getTablesController;
-
-
-
-
-
-
+let getGraphQLTablesController;
 
 const QraphQL = ({ appid: subdomain }) => {
   // Redux
@@ -47,41 +38,42 @@ const QraphQL = ({ appid: subdomain }) => {
   const history = useHistory();
   const initialState = {
     loading: true,
-    
+
     database: null,
     tableOptions: null,
     setupGraphQLModalState: false,
-    step:2,
-
+    step: 3,
+    details: {
+      selectedTable: "",
+    },
   };
   const [state, dispatch] = useReducer(qraphQLReducer, initialState);
-  const client = useMemo(()=>new ApolloClient({
-    uri:  `${apiBase === 'localhost:3000' ? "http"  :  "https"}://${subdomain}.${apiBase}/graphql`,  // 'http://hidden-darkness-8.localhost:3000/graphql',
-    cache: new InMemoryCache(),
-    credentials:'include',
-  }) , [subdomain]);
-  
-  
-
-
+  const client = useMemo(
+    () =>
+      new ApolloClient({
+        uri: `${
+          apiBase === "localhost:3000" ? "http" : "https"
+        }://${subdomain}.${apiBase}/graphql`, // 'http://hidden-darkness-8.localhost:3000/graphql',
+        cache: new InMemoryCache(),
+        credentials: "include",
+      }),
+    [subdomain]
+  );
 
   useEffect(() => {
     getDatabasesController = new AbortController();
     getTablesController = new AbortController();
+    getGraphQLTablesController = new AbortController();
 
-    getDatabases()
-
+    getDatabases();
+    getGraphQLTables();
     return () => {
       getDatabasesController.abort();
       getTablesController.abort();
-
-
+      getGraphQLTablesController.abort();
     };
     // eslint-disable-next-line
   }, []);
-
-
-
 
   ///// Network requests /////
   const catchError = (error) => {
@@ -112,50 +104,50 @@ const QraphQL = ({ appid: subdomain }) => {
     });
   };
 
-
   const openSetupGraphQLModal = () => {
-    updateAttribute('setupGraphQLModalState', true)
-    getTables()
+    // console.log( 'clicked')
+    updateAttribute("setupGraphQLModalState", true);
+    getTables();
   };
   const closeSetupGraphQLModal = () => {
-    updateAttribute('setupGraphQLModalState', false)
+    updateAttribute("setupGraphQLModalState", false);
   };
 
-
+  const handleSelectedTable = (selectedTable) => {
+    dispatch({
+      type: "SET_SELECTED_TABLE",
+      selectedTable,
+    });
+  };
 
   const handleSetupGraphQLModalClick = () => {
-
-    closeSetupGraphQLModal()
-    updateAttribute('loading', true)
+    closeSetupGraphQLModal();
+    updateAttribute("loading", true);
   };
-
 
   // Databases List
   const getDatabases = async () => {
     try {
-      const response = await api.get('/databases', {
+      const response = await api.get("/databases", {
         params: {
-          subdomain: subdomain
+          subdomain: subdomain,
         },
-        signal: getDatabasesController.signal
-      })
-      const data = response.data.data
+        signal: getDatabasesController.signal,
+      });
+      const data = response.data.data;
       const database = {
         name: data.databases[0].name,
-        db_id: data.databases[0].db_id
-      }
+        db_id: data.databases[0].db_id,
+      };
 
       dispatch({
         type: "SET_DATABASE",
         database,
       });
-
-
     } catch (error) {
-      catchError(error)
+      catchError(error);
     }
-  }
-
+  };
 
   // Fetches a list of  table
   const getTables = async () => {
@@ -175,69 +167,74 @@ const QraphQL = ({ appid: subdomain }) => {
         tables: response.data.data.tables,
         //  tables: response.data.data.tables,
       });
-
     } catch (error) {
       catchError(error);
     }
   };
 
-  const renderData = () => {
-
-
-    if (state.loading) {
-      return (<div className="loading-div">
-        <Spinner
-          className="loading-spinner"
-          color="primary"
-          type="grow"
-        />
-      </div>)
-    }else if( state.step === 2){ 
-      return <GraphQLQuery />
+  // Fetches a list of  graphql  table
+  const getGraphQLTables = async () => {
+    try {
+      updateAttribute("loading", true);
+      const response = await api.get("apps/editor/controllers/graphql/tables", {
+        params: {
+          subdomain: subdomain,
+        },
+        signal: getGraphQLTablesController.signal,
+      });
+      // setTableOptions(response.data.data )
+      dispatch({
+        type: "SET_GQL_TABLE",
+        tableData: response.data.data,
+        //  tables: response.data.data.tables,
+      });
+    } catch (error) {
+      catchError(error);
     }
-    else if (state.database) {
+  };
+  const renderData = () => {
+    if (state.loading) {
       return (
+        <div className="loading-div">
+          <Spinner className="loading-spinner" color="primary" type="grow" />
+        </div>
+      );
+    } else if (state.database) {
+      return (
+        <>
+          <Details
+            handleSelectedTable={handleSelectedTable}
+            details={state.details}
+            openSetupGraphQLModal={openSetupGraphQLModal}
+          />
 
-
-
-        <CardBody style={{ paddingTop: 0 }}>
-          <SetupGraphQL subdomain={subdomain} db_id={state.database.db_id} tableOptions={state.tableOptions}
+          <SetupGraphQL
+            subdomain={subdomain}
+            db_id={state.database.db_id}
+            tableOptions={state.tableOptions}
             openSetupGraphQLModal={openSetupGraphQLModal}
             closeSetupGraphQLModal={closeSetupGraphQLModal}
             setupGraphQLModalState={state.setupGraphQLModalState}
             handleSetupGraphQLModalClick={handleSetupGraphQLModalClick}
           />
-        </CardBody>
-
-
-
-
+        </>
       );
     }
-
-
-  }
+  };
   return (
     <ApolloProvider client={client}>
-    <div>
-      <Helmet>
-        <title>QraphQL | QueryDeck</title>
-      </Helmet>
-      <Header
-        mode='api'
-        section='GraphQL'
-        subdomain={subdomain}
-      />
-      <div className="list-deck">
-        <Menu appid={subdomain} />
-        <Card className="list-card-main">
-          {renderData()}
-        </Card>
+      <div>
+        <Helmet>
+          <title>QraphQL | QueryDeck</title>
+        </Helmet>
+        <Header mode="api" section="GraphQL" subdomain={subdomain} />
+        <div className="list-deck">
+          <Menu appid={subdomain} />
+          <Card className="list-card-main">{renderData()}</Card>
+        </div>
       </div>
-    </div>
     </ApolloProvider>
   );
-
 };
 
 export default QraphQL;

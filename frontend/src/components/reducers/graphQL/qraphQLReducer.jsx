@@ -7,20 +7,16 @@ const qraphQLReducer = (state, action) => {
         loading: true,
       };
 
-
     // Set Database
     case "SET_DATABASE":
       return {
         ...state,
         loading: false,
-        database: action.database
+        database: action.database,
       };
 
-
-
-    // Set tables options   
+    // Set tables options
     case "SET_TABLE":
-
       let tableOptions = [];
       let tablesHash = {};
       action.tables.forEach((element) => {
@@ -67,7 +63,26 @@ const qraphQLReducer = (state, action) => {
         tableOptions,
       };
 
+    // Set selected table
+    case "SET_SELECTED_TABLE":
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          selectedTable: action.selectedTable,
+        },
+      };
 
+    // Set selected table
+    case "SET_GQL_TABLE":
+      return {
+        ...state,
+        loading: false,
+        details: {
+          ...state.details,
+          tableData: action.tableData,
+        },
+      };
 
     // Updates a single field
     case "SINGLE":
