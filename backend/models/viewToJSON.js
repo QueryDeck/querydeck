@@ -1161,7 +1161,7 @@ module.exports = class ViewToJSON {
             method: 'select',
             table_alias: tab_name_spl[1],
             where: params.where,
-            orderby_dynamic: params.orderby_dynamic ? true : false,
+            orderby_dynamic: clean_orderby_dynamic_columns.length > 0 ? true : false,
             orderby_dynamic_columns: clean_orderby_dynamic_columns,
             limit_dynamic: params.limit_dynamic ? true : false,
             offset_dynamic: params.offset_dynamic ? true : false,

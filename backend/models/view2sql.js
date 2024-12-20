@@ -90,23 +90,29 @@ exports.convert = function(params){
             { db_type: currentModel.db_type }
           ).generate();
 
-          if(params.orderby_dynamic) {
-            request_query_params._order = {
-              type: 'text'
-            }
-          }
-
-          if(params.limit_dynamic) {
+          if(queryob.model.limit_dynamic) {
             request_query_params._limit = {
               type: 'number',
-              description: 'Number of results to return per page (default: ' + params.limit + ', max: 1000)'
+              description: 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
             }
           }
 
-          if(params.offset_dynamic) {
+          if(queryob.model.offset_dynamic) {
             request_query_params._offset = {
               type: 'number',
               description: 'The initial index from which to return the results (default: 0)'
+            }
+          }
+
+          if(queryob.model.orderby_dynamic && queryob.model.orderby_dynamic_columns.length > 0) {
+            request_query_params._order = {
+              type: 'text',
+              description: 'Order results by columns. Format: column1:asc,column2:desc. Available columns: ' + 
+                queryob.model.orderby_dynamic_columns.map(col => col.name.split('.').pop()).join(', ')
+            }
+
+            if(queryob.model.orderby && queryob.model.orderby.length > 0) {
+              request_query_params._order.description += ' (default: ' + queryob.model.orderby.map(col => (col.name.split('.').pop() + ':' + (col.asc ? 'asc' : 'desc'))).join(',') + ')'
             }
           }
 
