@@ -68,6 +68,11 @@ function executeClientRequest(params, callback) {
                 final_models = final_models.concat(modelob.models);
                 all_return_paths.push(modelob.models[0].table_alias);
 
+           } else if(query_model.method == 'delete') {
+
+                final_models = final_models.push(query_model.query.model)
+                all_return_paths.push(query_model.query.model.table_alias);
+
            }
         }
 

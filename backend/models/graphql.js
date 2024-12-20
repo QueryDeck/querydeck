@@ -150,12 +150,72 @@ class GraphQLConverter {
                 var parsed = this.convertUpdateToSQL(processedSelection);
                 parsed.method = 'update';
                 all_models.push(parsed);
+            } else if (processedSelection.name.value.startsWith('delete_')) {
+                var parsed = this.convertDeleteToSQL(processedSelection);
+                parsed.method = 'delete';
+                all_models.push(parsed);
             } else {
                 throw new Error('Invalid mutation');
             }
         }
 
         return all_models;
+    }
+
+    convertDeleteToSQL(selection) {
+        var base_table_graphql_name = selection.name.value.replace('delete_', '');
+    
+        if (!this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name]) {
+            throw new Error('Table not found');
+        }
+    
+        var table_arr = this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name].table_schema;
+        var base_table_id = this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.id;
+        var where = {};
+        var return_c = [];
+    
+        // Process arguments (where clause)
+        for (let i = 0; i < selection.arguments.length; i++) {
+            const arg = selection.arguments[i];
+            if (arg.name.value === 'where') {
+                where = this.convertWhereToQueryBuilder({
+                    whereValue: arg.value,
+                    table: table_arr[1],
+                    schema: table_arr[0]
+                });
+            }
+        }
+    
+        // Process returning fields
+        for (let i = 0; i < selection.selectionSet.selections.length; i++) {
+            const element = selection.selectionSet.selections[i];
+            if (element.name.value === 'returning') {
+                for (let j = 0; j < element.selectionSet.selections.length; j++) {
+                    const field = element.selectionSet.selections[j];
+                    if (this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.columns[field.name.value]) {
+                        return_c.push({
+                            id: base_table_id + '.' + this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.columns[field.name.value].id
+                        });
+                    }
+                }
+            }
+        }
+    
+        var query = v2sql.convert({
+            base: base_table_id,
+            method: 'delete',
+            return_c: return_c,
+            db_id: this.db_id,
+            subdomain: this.subdomain,
+            w: where,
+            graphql: true,
+            c: []
+        });
+    
+        return {
+            query: query,
+            body: {}
+        };
     }
 
     replaceVariablesInSelection(selection, variables) {

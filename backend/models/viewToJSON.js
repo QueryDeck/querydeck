@@ -936,27 +936,28 @@ module.exports = class ViewToJSON {
 
         main_model.condition_count = condition_count(main_model.where);
 
-        var rebuilt_where = {
-            condition: 'AND',
-            rules: [{
-                fieldName: [tab_name_spl[0], tab_name_spl[1], p_key[0]].join('.'),
-                operator: 'equal',
-                input: 'text',
-                input_key: 'URLParam.' + p_key[0],
-                type: 'text',
-                value: 'URLParam.' + p_key[0]
-            }]
+        if(!params.graphql) {
+            var rebuilt_where = {
+                condition: 'AND',
+                rules: [{
+                    fieldName: [tab_name_spl[0], tab_name_spl[1], p_key[0]].join('.'),
+                    operator: 'equal',
+                    input: 'text',
+                    input_key: 'URLParam.' + p_key[0],
+                    type: 'text',
+                    value: 'URLParam.' + p_key[0]
+                }]
+            }
+            main_model.where = main_model.where || {};
+            main_model.where.rules = main_model.where.rules || [];
+
+            for (let k = 1; k < main_model.where.rules.length; k++) {
+                const element = main_model.where.rules[k];
+                rebuilt_where.rules.push(main_model.where.rules[k])
+            }
+
+            main_model.where = rebuilt_where;
         }
-
-        main_model.where = main_model.where || {};
-        main_model.where.rules = main_model.where.rules || [];
-
-        for (let k = 1; k < main_model.where.rules.length; k++) {
-            const element = main_model.where.rules[k];
-            rebuilt_where.rules.push(main_model.where.rules[k])
-        }
-
-        main_model.where = rebuilt_where;
 
         for (let i = 0; i < params.columns.length; i++) {
             if (!params.columns[i] || !params.columns[i].id || params.columns[i].id.indexOf('-') > -1) return null;
