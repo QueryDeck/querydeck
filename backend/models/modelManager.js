@@ -301,11 +301,11 @@ var ModelManager = {
 
   domainToSubdomain: {},
 
-  testConnect: function(params, callback) {
+  testConnect: async function(params, callback) {
     console.log("---->test connect");
     /* db_type_name :  MySQL  
       db_type_id :   142cdcea-9bbe-41ea-be1e-a2b7254f66c5 */
-    return callback()
+    // return callback()
     // TODO : Handle connection error 
     if (params.db_type == MYSQL) {
     // console.log("---->test mysql connect");
@@ -340,39 +340,35 @@ var ModelManager = {
       // }
 
     } else {
- 
-      console.log("------>test connect postgres");
-   
-      // TODO : sanitized user input before executing 
-      let connectionString = "postgres://" + params.dbusername + ":" + params.dbpassword + "@" + params.dbhost + ":" + params.dbport + "/" + params.dbname; 
-   
-      let command = `psql -d ${connectionString} -c "${ ModelManager.query[POSTGRES]}"`;
-      // console.log(connectionString);
-      //  console.log(command )
-      execCommand(command, {maxExecTime: 20000}) 
-        .then((res) => {
-          //  console.log(res.stdout)
-          callback(null, res.stdout);
-        })
-        .catch((err) => {
-          //  console.log(err) 
-          if(err.error?.killed) err.error.message = "Connection Timeout"; 
-          else if(err.stderr) err.error.message = err.stderr;
-          callback(err.error);
-        });
-   
-      // // console.log(  "postgres://" + params.dbusername + ":" + params.dbpassword + "@" + params.dbhost + ":" + params.dbport + "/" + params.dbname)
-      // const client = postgres("postgres://" + params.dbusername + ":" + params.dbpassword + "@" + params.dbhost + ":" + params.dbport + "/" + params.dbname ) 
+      try {
+        // console.log("------>test connect postgres");
+        // TODO : sanitized user input before executing 
+        const client = new pg.Client({
+          user: params.dbusername,
+          password: params.dbpassword,
+          host: params.dbhost,
+          port: params.dbport,
+          database: params.dbname,
+          connectionTimeoutMillis: 20000, // 20 seconds
           
-      //     client.unsafe(  ModelManager.query[POSTGRES] )
-      //     .then((res)=>{
-      //       callback(null , res)
-      //     })
-      //     .catch((err)=>{ 
-      //       callback(err)
-      //     } )
-      //      client.end({ timeout: 5 }) // end connection after 5 seconds 
-     
+        })
+        await client.connect()
+
+        const result = await client.query(ModelManager.query[POSTGRES])
+        // console.log(result?.rows || result)
+        callback(null, result?.rows || result)
+        await client.end()
+
+
+      } catch (e) {
+        console.error(e)
+        if(e.message.startsWith('received invalid response: 4a')){ 
+          e.message = "Invalid Database"
+        }
+        callback(e);
+      }
+
+
     }
 
   },

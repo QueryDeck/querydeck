@@ -2077,7 +2077,7 @@ module.exports = function (router) {
   
     let currentModel = req.clientModels[req.query.subdomain].databases[db_id];
  
-    let result = Object.values( currentModel.graphql.tables || {} ).map((table)=>{ 
+    let result = Object.values( currentModel.graphql?.tables || {} ).map((table)=>{ 
       let currTableObj = {
         relations : [] , 
         table_name : table.table_schema.join(".") , 
