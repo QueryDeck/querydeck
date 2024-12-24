@@ -1,6 +1,12 @@
 services:
   frontend:
-    build: './frontend'
+    build:
+      context: './frontend'
+      args:
+        REACT_APP_MUI_KEY: "${REACT_APP_MUI_KEY}"
+        REACT_APP_OPENREPLAY_KEY: "${REACT_APP_OPENREPLAY_KEY}"
+        REACT_APP_PUBLIC_POSTHOG_HOST: "${REACT_APP_PUBLIC_POSTHOG_HOST}"
+        REACT_APP_PUBLIC_POSTHOG_KEY: "${REACT_APP_PUBLIC_POSTHOG_KEY}"
     env_file: "./frontend/.env"
     restart: always
     ports:

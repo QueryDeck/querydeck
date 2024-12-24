@@ -124,7 +124,7 @@
   "scripts": {
     "start": "node scripts/start.js",
     "dev": "concurrently \"npm run start\" \"npm run scss\"",
-    "build": "node --max_old_space_size=4096 scripts/build.js",
+    "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=4096 scripts/build.js",
     "postbuild": "gzip build/static/js/*.js && gzip build/static/css/*.css",
     "scss": "gulp",
     "test": "node scripts/test.js",
