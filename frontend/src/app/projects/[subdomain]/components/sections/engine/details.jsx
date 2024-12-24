@@ -181,7 +181,7 @@ const Details = props => {
     const data = {}
     if (queryParams) {
       Object.keys(queryParams).forEach(param => {
-        if (['_limit', '_offset', '_orderby'].includes(param)) {
+        if (['_limit', '_offset', '_order'].includes(param)) {
           data[param] = {
             $qd_column: true,
             type: queryParams[param].type,
@@ -421,12 +421,6 @@ const Details = props => {
             </Button>
           </div>
           <div className={styles.response_body}>
-            <Alert
-              className={styles.alert}
-              color='warning'
-            >
-              This is a sample response. The actual response will differ depending on the parameters selected.
-            </Alert>
             <ReactJson
               // collapsed={docs?.response.length <= 25 ? 4 : 3}
               // collapseStringsAfterLength={50}
@@ -450,6 +444,12 @@ const Details = props => {
             </Button>
           </div>
           <div className={styles.query_body}>
+            <Alert
+              className={styles.alert}
+              color='warning'
+            >
+              This is a sample query. The actual query will differ depending on the parameters selected.
+            </Alert>
             {docs?.sql_query.text}
           </div>
         </div> : null}

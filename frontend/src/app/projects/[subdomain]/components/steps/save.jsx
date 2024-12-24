@@ -80,13 +80,17 @@ const Save = props => {
           name: state.route,
           // table: ,
           // schema: ,
-          method: state.method,
+          method: state.method.value,
           apiRoute: state.route,
           // created_at: ,
           query_id,
           deployed: true,
           auth_required: state.authentication.value,
-          docs: state.docs
+          docs: {
+            ...state.docs,
+            apiRoute: state.route,
+            auth_required: state.authentication.value
+          }
         }
       }))
       if (createMode) {
