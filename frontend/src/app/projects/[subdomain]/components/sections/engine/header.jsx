@@ -53,7 +53,6 @@ const Header = props => {
       {(window.location.pathname.endsWith('/api') || window.location.pathname.endsWith('/api/')) &&
         <AutoGenerateButton
           mode={props.mode}
-          query_id={props.query_id}
           subdomain={props.subdomain}
         />
       }

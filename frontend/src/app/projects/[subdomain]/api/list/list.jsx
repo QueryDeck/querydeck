@@ -2,7 +2,8 @@
 import React, { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useHistory } from 'react-router-dom'
-
+import AutoGenerateModal from '../../components/modals/autoGenerate/autoGenerate'
+ 
 // Redux
 import {
   useDispatch,
@@ -96,7 +97,9 @@ export const APIlist = props => {
       catchError(error)
     }
   }
-
+  const onGenerateSuccess = ()=> { 
+    getList()
+  }
   const resolveMethod = method => {
     switch(method) {
       case 'select':
@@ -168,6 +171,12 @@ export const APIlist = props => {
       <DeleteModal
         catchError={catchError}
         subdomain={props.subdomain}
+      />
+      <AutoGenerateModal
+        key='auto-gen-modal'
+        mode={'api'}
+        subdomain={props.subdomain}
+        onGenerateSuccess={onGenerateSuccess}
       />
     </div>
   )

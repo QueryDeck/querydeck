@@ -24,7 +24,6 @@ const AutoGenerateButton = (props) => {
     dispatch(
       openAutoGenerateModal({
         mode: props.mode,
-        query_id: props.query_id,
         subdomain: props.subdomain,
         autoGenerateModal: true ,
 

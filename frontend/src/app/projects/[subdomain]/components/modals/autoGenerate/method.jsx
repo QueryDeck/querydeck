@@ -75,7 +75,7 @@ const getBadgeData = (method) => {
 const Method = (props) => {
   // Redux
   const state = useSelector(
-    (state) => state.data[props.mode][props.subdomain]?.[props.query_id]
+    (state) => state.data[props.mode][props.subdomain].autoGen || {}
   );
   const dispatch = useDispatch();
 

@@ -93,12 +93,12 @@ const blank = {
     limit: 100,
     limit_dynamic: true,
     
-    autoGenerateModal: false,
-    autoGenerateModalStep: 1 ,
-    autoGenerate: {
-      methods: [],
-      tables: [],
-    },
+    // autoGenerateModal: false,
+    // autoGenerateModalStep: 1 ,
+    // autoGenerate: {
+    //   methods: [],
+    //   tables: [],
+    // },
     /////// LHS END ////////
 
     ///// RHS (Viewer) /////
@@ -108,6 +108,14 @@ const blank = {
     //////// WIZARD  ////////
     wizardModal: true
     /////// WIZARD END //////
+  },
+  autoGen: { 
+    autoGenerateModal: false,
+    autoGenerateModalStep: 1 ,
+    autoGenerate: {
+      methods: [],
+      tables: [],
+    },
   }
 }
 
@@ -154,6 +162,8 @@ const dataSlice = createSlice({
             field: 'Name',
             order: true // True: Ascending | False: Descending
           }
+          , 
+          autoGen:blank.autoGen
         }
       }
     },
@@ -1281,9 +1291,9 @@ const dataSlice = createSlice({
         ...state[action.payload.mode],
         [action.payload.subdomain]: {
           ...state[action.payload.mode][action.payload.subdomain],
-          [action.payload.query_id]: {
-            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
-            autoGenerateModal: action.payload.autoGenerateModal
+          autoGen: {
+            ...state[action.payload.mode][action.payload.subdomain].autoGen,
+            autoGenerateModal: action.payload.autoGenerateModal,
           }
         }
       }
@@ -1294,11 +1304,11 @@ const dataSlice = createSlice({
         ...state[action.payload.mode],
         [action.payload.subdomain]: {
           ...state[action.payload.mode][action.payload.subdomain],
-          [action.payload.query_id]: {
-            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
-            autoGenerateModal: blank.api.autoGenerateModal,
-            autoGenerateModalStep: blank.api.autoGenerateModalStep,
-            autoGenerate: blank.api.autoGenerate,
+          autoGen: {
+            ...state[action.payload.mode][action.payload.subdomain].autoGen,
+            autoGenerateModal: blank.autoGen.autoGenerateModal,
+            autoGenerateModalStep: blank.autoGen.autoGenerateModalStep,
+            autoGenerate: blank.autoGen.autoGenerate,
             
           }
         }
@@ -1309,11 +1319,11 @@ const dataSlice = createSlice({
         ...state[action.payload.mode],
         [action.payload.subdomain]: {
           ...state[action.payload.mode][action.payload.subdomain],
-          [action.payload.query_id]: {
-            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
-            autoGenerate:      {
-              ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id]?.autoGenerate,
-              methods:  action.payload.methods,
+          autoGen: {
+            ...state[action.payload.mode][action.payload.subdomain].autoGen,
+            autoGenerate:  {
+              ...state[action.payload.mode][action.payload.subdomain].autoGen?.autoGenerate,
+               methods:  action.payload.methods,
             },  
           }
         }
@@ -1328,10 +1338,10 @@ const dataSlice = createSlice({
         ...state[action.payload.mode],
         [action.payload.subdomain]: {
           ...state[action.payload.mode][action.payload.subdomain],
-          [action.payload.query_id]: {
-            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
+          autoGen: {
+            ...state[action.payload.mode][action.payload.subdomain].autoGen,
             autoGenerate:      {
-              ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id]?.autoGenerate,
+              ...state[action.payload.mode][action.payload.subdomain].autoGen?.autoGenerate,
               tables:  action.payload.tables,
             },  
           }
@@ -1346,8 +1356,8 @@ const dataSlice = createSlice({
         ...state[action.payload.mode],
         [action.payload.subdomain]: {
           ...state[action.payload.mode][action.payload.subdomain],
-          [action.payload.query_id]: {
-            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
+          autoGen: {
+            ...state[action.payload.mode][action.payload.subdomain].autoGen,
             autoGenerateModalStep:  action.payload.autoGenerateModalStep,
           }
         }
