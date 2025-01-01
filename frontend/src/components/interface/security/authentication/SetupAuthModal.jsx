@@ -33,8 +33,8 @@ const SetupAuthModal = (props) => {
     modalState,
     secretHandler,
     secret,
-    authHeaderName,
-    authorizationTokenHandler,
+    // authHeaderName,
+    // authorizationTokenHandler,
 
     algorithmList,
     algorithmHandler,
@@ -355,7 +355,7 @@ const SetupAuthModal = (props) => {
               value={roleSessionKey}
             />
           </Label>
-          <Label className="list-card-label">
+          {/* <Label className="list-card-label">
             Authorization Header Token Name (Optional)
             <Input
               placeholder={"Enter authorization header token name  "}
@@ -363,7 +363,7 @@ const SetupAuthModal = (props) => {
               onChange={authorizationTokenHandler}
               value={authHeaderName}
             />
-          </Label>
+          </Label> */}
         </div>
       );
     }

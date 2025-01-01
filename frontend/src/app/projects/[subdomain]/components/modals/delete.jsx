@@ -7,6 +7,7 @@ import {
   useSelector
 } from 'react-redux'
 import {
+  selectPreviewAPIlist,
   selectDeleteAPIlist,
   updateDeploymentDiff
 } from '../../../../../lib/data/dataSlice'
@@ -64,6 +65,12 @@ const DeleteModal = props => {
         select_delete: state.select_delete.query_id,
         subdomain: props.subdomain
       }))
+      if (state.select_preview?.query_id === state.select_delete.query_id) {
+        dispatch(selectPreviewAPIlist({
+          select_preview: null,
+          subdomain: props.subdomain
+        }))
+      }
     } catch (error) {
       props.catchError(error);
     }

@@ -23,6 +23,7 @@ import {
 
 // Components
 import Menu from "../menu/Menu";
+import Header from '../../../app/projects/[subdomain]/components/sections/engine/header';
 import Domains from "./domain/Domains";
 import Authentication from "./authentication/Authentication";
 import Authorization from "./authorization/Authorization";
@@ -141,6 +142,11 @@ const Security = (props) => {
       <Helmet>
         <title>Security | QueryDeck</title>
       </Helmet>
+      <Header
+        mode='api'
+        section='Security'
+        subdomain={props.subdomain}
+      />
       {renderData()}
     </div>
   );

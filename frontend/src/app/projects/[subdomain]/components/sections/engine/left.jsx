@@ -16,14 +16,12 @@ import Sort from '../../steps/sort'
 // import Pagination from '../../steps/pagination'
 import Offset from '../../steps/offset'
 import Limit from '../../steps/limit'
-import Save from '../../steps/save'
 import Authentication from '../../steps/authentication'
 import Authorisation from '../../steps/authorisation'
 
 // Components - Modals
 import JoinModal from '../../modals/join'
 import ColumnModal from '../../modals/column'
-// import AutoGenerateModal from '../../modals/autoGenerate/autoGenerate'
 import FilterModal from '../../modals/filter'
 import SortModal from '../../modals/sort'
 import AuthorisationModal from '../../modals/authorisation'
@@ -146,16 +144,6 @@ const Left = props => {
     />
   )
 
-  const renderSave = () => (
-    <Save
-      catchError={props.catchError}
-      // getAggregatePaths={props.getAggregatePaths}
-      key='save-step'
-      mode={props.mode}
-      query_id={props.query_id}
-      subdomain={props.subdomain}
-    />
-  )
 
   const renderJoinModal = () => (
     <JoinModal
@@ -205,16 +193,7 @@ const Left = props => {
       subdomain={props.subdomain}
     />
   )
-    
-  // const renderAutoGenerateModal = () => (
-  //   <AutoGenerateModal
-  //     key='auto-gen-modal'
-  //     mode={props.mode}
-  //     query_id={props.query_id}
-  //     searchNodes={props.searchNodes}
-  //     subdomain={props.subdomain}
-  //   />
-  // )
+
 
 
   if(props.dragging) {
@@ -247,9 +226,6 @@ const Left = props => {
           {renderLimit()}
           {renderAuthentication()}
           {renderAuthorisation()}
-				</div>
-				<div className='query-left-actions'>
-					{renderSave()}
 				</div>
         {renderJoinModal()}
         {renderFilterModal()}

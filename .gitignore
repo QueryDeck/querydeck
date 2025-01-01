@@ -51,3 +51,4 @@ node_modules/
 tester.js
 
 /repo-gen/repos
+draft.sql

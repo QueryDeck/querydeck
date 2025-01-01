@@ -289,7 +289,7 @@ async function copyModelFiles(params) {
     const sourceDir = 'models';
     const destDir = params.directoryName + '/models';
     // logger.log('copyModelFiles', params.directoryName)
-    const filesToCopy = ['JsonToSql.js', 'executeClientRequest.js', 'modelUtils.js', 'replaceModelWithBody.js', 'utils.js'];
+    const filesToCopy = ['JsonToSql.js', 'executeClientRequest.js', 'modelUtils.js', 'replaceModelWithBody.js', 'utils.js', 'view2sql.js', 'viewToJSON.js', 'graphql.js', 'requestHandler.js'];
     
     try {
       // Ensure the destination directory exists

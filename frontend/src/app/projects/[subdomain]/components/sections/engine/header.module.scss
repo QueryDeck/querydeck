@@ -1,0 +1,35 @@
+@import '../../../../../../assets/scss/theme/variables';
+// @import '../../../../../../assets/scss/dark/variables';
+
+.header {
+  border-bottom: 1px solid #7773;
+  display: flex;
+  flex-direction: row;
+  padding: 6px;
+}
+
+.title {
+  flex: 1 0 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+
+  &_warning {
+    background-color: #f5803e;
+    font-size: 12px;
+    transform: translateY(-4px);
+  }
+}
+
+.actions {
+  button {
+    margin: 4px 4px 0 4px;
+    &:first-of-type {
+      margin-left: 0;
+    }
+
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
+}

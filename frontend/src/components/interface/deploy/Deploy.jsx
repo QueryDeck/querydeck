@@ -17,6 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // Components
 import Menu from "../menu/Menu";
+import Header from '../../../app/projects/[subdomain]/components/sections/engine/header';
 import Github from "./Github";
 import Cloud from "./Cloud";
 
@@ -69,8 +70,8 @@ const Deploy = (props) => {
           </div>
 
           {/* <div className={`domain-list`}>
-     
-         
+    
+        
                 <div
                   className='databases-list'
                   style={{ margin: '0 auto' }}
@@ -82,10 +83,10 @@ const Deploy = (props) => {
                     <Github subdomain={props.appid} redirect={props.redirect} />
                   </CardBody>
                 </div>
-             
+            
         
           </div>
-           */}
+          */}
         </Card>
       </div>
     );
@@ -96,6 +97,11 @@ const Deploy = (props) => {
       <Helmet>
         <title>Deploy | QueryDeck</title>
       </Helmet>
+      <Header
+        mode='api'
+        section='Deployment'
+        subdomain={props.subdomain}
+      />
       {renderData()}
     </div>
   );

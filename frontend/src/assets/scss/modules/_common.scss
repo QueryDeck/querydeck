@@ -24,7 +24,7 @@
         &-main {
             margin-top: 4px;
             flex: 1 0 0;
-            height: calc(100vh - 57.667px - 12px - 2px);
+            height: calc(100vh - 57.667px - 12px - 2px - 50px);
             
             &-enum {
                 height: calc(100vh - 57.667px - 4px - 8px - 4px - 40px);
@@ -208,6 +208,7 @@
 .enums,
 .custom-columns,
 .raw-queries,
+.roles,
 .queries,
 .forms,
 .tables {
@@ -379,6 +380,10 @@
             margin: 2px 0;
         }
     }
+}
+
+.roles-list-saved {
+    height: calc(100vh - 61.283px - 50px - 44px);
 }
 
 .api,

@@ -5,12 +5,12 @@
 .api {
    &-engine {
       display: flex;
-      height: calc(100vh - 56px - 4px - 4px - 4px);
+      height: calc(100vh - 56px - 4px - 4px - 4px - 12px - 2rem - 6px);
    }
 
    &-saved {
       display: flex;
-      height: calc(100vh - 56px - 4px - 4px - 4px);
+      height: calc(100vh - 56px - 4px - 4px - 4px - 50px);
 
       &-list {
          height: 100%;

@@ -15,13 +15,14 @@ module.exports = function(router) {
         api_gen.autoGenAndSave({
             subdomain: req.body.subdomain,
             allowed_tables: req.body.allowed_tables || [],
-            allowed_methods: req.body.allowed_methods || ['GET', 'POST', 'PUT']
-        }, function(err){
+            allowed_methods: req.body.allowed_methods || ['GET', 'POST', 'PUT' , 'DELETE', 'GET_BY_ID']
+        }, function(err,data){
             if (err) {
                 console.log(err);
                 return res.zend(err, 500, "Internal Server Error");
             }
-            res.zend({});
+        
+            res.zend(data);
         })
 
     }));

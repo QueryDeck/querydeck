@@ -200,7 +200,7 @@ const Authorization = (props) => {
     <Box
       className="data-src-table-bx"
       sx={{
-        height: "calc(100vh - 226px)",
+        height: "calc(100vh - 275px)",
         paddingRight: "4px",
         overflow: "auto",
       }}

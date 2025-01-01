@@ -162,7 +162,7 @@
     // LHS Section
     &-left {
         overflow: auto;
-        height: calc(100vh - 61.283px - 12px);
+        height: calc(100vh - 61.283px - 8px - 2rem - 12px - 9px);
         border-radius: 5px;
         margin-top: 4px;
 
@@ -265,7 +265,7 @@
 
         &-tab {
             text-align: left;
-            height: calc(100vh - 61.283px - 50px);
+            height: calc(100vh - 61.283px - 50px - 44px);
             padding: 4px;
         }
 
@@ -419,7 +419,7 @@
             &-list {
                 display: flex;
                 flex-direction: column;
-                height: calc(100vh - 66px - 65px - 58px - 40px - 16px - 48px);
+                height: calc(100vh - 66px - 65px - 58px - 40px - 16px - 48px - 34px);
                 justify-content: space-between;
 
                 &-container {
@@ -1539,7 +1539,7 @@
     &-settings {
         // border: 1px solid #77777733;
         background-color: #7771;
-        // border-radius: 5px;
+        border-radius: 5px;
         padding: 6px;
         margin: 6px 4px;
 

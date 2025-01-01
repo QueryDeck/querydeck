@@ -1,0 +1,68 @@
+// @import '../../../assets/scss/theme/variables';
+// @import '../../../../../assets/scss/dark/variables';
+
+
+.setupiconcontainer {
+
+  width: 400px;
+  height: 400px;
+  border: 1px solid rgb(0 0 0 / 6%);
+  margin: 10px 0px 10px 0px;
+  width: 100%;
+  display: flex;
+  background: #fafafa4f;
+  justify-content: center;
+  border-radius: 6px;
+
+}
+
+.setupiconcontainer img {
+  user-select: none;
+  width: 200px;
+}
+
+.setupbutton {
+  margin: auto;
+  margin-top: 110px;
+  width: 768px;
+  margin: auto;
+  padding: 6px;
+  display: block;
+  width: 650px;
+}
+
+.relationbox  {
+  border-bottom: 1px solid hsla(0, 0%, 46.7%, .2);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 12px;
+    padding-bottom: 6px;
+    padding-left:8px;
+  
+}
+ 
+
+.relationbox_badge{ 
+  background-color: #2c7be5;
+    transform: translateY(-2px);
+ }
+
+ .left_item{ 
+  .api-saved-list-item, .api-saved-list-item-active {
+    background-color: rgba(119,119,119,.0666666667);
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 4px 4px;
+    padding: 7px 5px;
+    transition: all .2s ease;
+}
+ }
+ .right { 
+  // border: 1px solid blue;
+  // width: 779px;
+  overflow: auto;
+  max-width: 2500px;
+  height: calc(-87.283px - 2rem + 100vh);
+ }

@@ -83,7 +83,7 @@ module.exports = function (router) {
   router.get('/api-queries', catchError(async function (req, res) {
 
     let queryObj;
-    if (!req.query.subdomain || !req.query.db_id || req.query.db_id == '' || !req.query.query_id || req.query.query_id == '' || !req.clientModels[req.query.subdomain]) return res.zend(null, 400, "Must have 'subdomin' , 'db_id', 'query_id' ");
+    if (!req.query.subdomain  || !req.query.query_id || req.query.query_id == '' || !req.clientModels[req.query.subdomain]) return res.zend(null, 400, "Must have 'subdomin' , 'query_id' ");
 
       queryObj = {
         text: ` 
@@ -120,14 +120,13 @@ module.exports = function (router) {
                   AND (public.apps.created_by = $2)
               )
             ) 
-            AND (public.databases.db_id =  $3)
         )
-        AND   public.api_queries.query_id =  $4
+        AND   public.api_queries.query_id =  $3
       )   
       
       `,
 
-        values: [req.query.subdomain, req.user_id, req.query.db_id, req.query.query_id]
+        values: [req.query.subdomain, req.user_id,  req.query.query_id]
       }
 
 
@@ -526,7 +525,11 @@ module.exports = function (router) {
 
     final_object.model.method = req.body.method;
     final_object.model = JSON.stringify(final_object.model)  // for insert  'model' is array 
-
+    if(final_object?.docs?.sql_query?.text ){
+      final_object.docs.sql_query.text = sqlFormatter.format(final_object.docs.sql_query.text, {
+        "language": currentModel.db_type == MYSQL ? "mysql" : "postgresql",
+      });
+    }
     query_view_data = {
       column_ids: req.body.c,
       return_column_ids: req.body.return_c,
@@ -569,7 +572,7 @@ module.exports = function (router) {
       },
       db_id: req.body.db_id
     });
-
+ 
     new req.DB({}).execute([
       new req.models.public.api_queries().insert({
         db_id: db_id_select,
@@ -668,6 +671,12 @@ module.exports = function (router) {
     }
     final_object.model.method = req.body.method;
     final_object.model = JSON.stringify(final_object.model)  // for insert  'model' is array 
+
+    if(final_object?.docs?.sql_query?.text ){
+      final_object.docs.sql_query.text = sqlFormatter.format(final_object.docs.sql_query.text, {
+        "language": currentModel.db_type == MYSQL ? "mysql" : "postgresql",
+      });
+    }
     query_view_data = {
       column_ids: req.body.c,
       return_column_ids: req.body.return_c,
@@ -716,7 +725,7 @@ module.exports = function (router) {
         // db_id: db_id_select,
         query_json: final_object.model,
         query_text: final_object.query,
-        docs: final_object.docs,
+        docs: final_object.docs, 
         query_view_data: query_view_data,
         name: req.body.name,
         public_link: req.body.public_link || false,
@@ -1098,7 +1107,9 @@ module.exports = function (router) {
     };
     q.query.text = sqlFormatter.format(q.query.text, options);
     if (process.env.PROJECT_ENV === 'dev') console.log(q.query.text)
-
+    if(q?.docs?.sql_query?.text ){
+      q.docs.sql_query.text = sqlFormatter.format(q.docs.sql_query.text, options);
+    }
     var tabs = [
       {
         id: 'req',
@@ -1143,8 +1154,9 @@ module.exports = function (router) {
         "content": q
       },
       {
-        "id": "test",
-        "title": "test"
+        "id": "docs",
+        "title": "Documentation", 
+        "content": q.docs , 
       },
       {
         "id": "test2",
@@ -2055,6 +2067,37 @@ module.exports = function (router) {
 
   }));
 
+  /* ##### Get graphql tables  ####  */
+  router.get('/graphql/tables', catchError(async function (req, res) {
+
+    if (!req.query.subdomain  ) return res.zend(null, 400, "Must have fields subdomain");
+     
+    if (req.user_id !== req.clientModels[req.query.subdomain].appDetails.created_by) return res.zend(null, 401, "Login Required");
+    const db_id = Object.keys(req.clientModels[req.query.subdomain].databases)[0];
+  
+    let currentModel = req.clientModels[req.query.subdomain].databases[db_id];
+ 
+    let result = Object.values( currentModel.graphql?.tables || {} ).map((table)=>{ 
+      let currTableObj = {
+        relations : [] , 
+        table_name : table.table_schema.join(".") , 
+      } ; 
+      
+         let relation_keys = Object.keys (table.relations)
+         for (let i = 0; i < relation_keys.length; i++) {
+              relation_keys[i];
+              currTableObj.relations.push ( {
+                ...table.relations[relation_keys[i]],
+                relation_name : relation_keys[i],
+              })
+         }
+       return currTableObj ; 
+    })
+
+    return res.zend(result);
+   
+
+  } ) )
 
   router.all('/*', (req, res) => {
     res.zend({ method: req.method }, 404, "Not Found",);
@@ -2077,7 +2120,6 @@ function condition_count(w) {
   }
   return c;
 }
-
 
 
 

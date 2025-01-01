@@ -350,10 +350,7 @@ const SortModal = props => {
               </NavLink>
             </NavItem>
           </Nav>
-					<TabContent
-						className='query-right-tab'
-						activeTab={tab}
-					>
+					<TabContent activeTab={tab}>
 						<TabPane tabId='static' >
 							{renderSorts()}
 							{renderSortsList()}

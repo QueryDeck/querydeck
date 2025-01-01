@@ -1,7 +1,6 @@
 var _ = require('lodash')
 
 exports.bodytoquery = bodytoquery;
-exports.dynamicInsertModels = dynamicInsertModels;
 
 // todo: add 'final_key' in insert columns
 function bodytoquery(models, body) {
@@ -119,38 +118,153 @@ function bodytoquery(models, body) {
 
 }
 
-function dynamicInsertModels(params) {
+class DynamicInsertModels {
+    constructor(params) {
+        this.models = params.models;
+        this.body = params.body;
+        this.single_base_insert = this.models[0].single_base_insert;
+        this.nested_insert = params.nested_insert;
+        this.final_paths = [];
+        this.new_models = [];
+        this.all_return_paths = [];
+        this.index_map = {};
+        this.body_path_map = {};
+        
+        this.buildPaths();
+        return this.processModels();
+    }
 
-    var models = params.models;
-    var body = params.body;
-    var single_base_insert = models[0].single_base_insert;
+    buildPaths() {
+        // Create sorted index map based on table_body_path_arr length
+        this.sorted_model_map = {};
+        
+        // Create array of indices and models for sorting
+        let modelIndices = this.models.map((model, index) => ({
+            index: index,
+            pathLength: model.table_body_path_arr.length
+        }));
 
-    var new_models = []
+        // Sort by path length ascending
+        modelIndices.sort((a, b) => a.pathLength - b.pathLength);
 
-    var paths = new pathBuilder({
-        models: params.models,
-        body: params.body,
-    })
+        // Create map of new sorted index -> original model index
+        modelIndices.forEach((item, newIndex) => {
+            this.sorted_model_map[newIndex] = item.index;
+        });
 
-    var all_return_paths = []
+        for (let i = 0; i < this.models.length; i++) {            
+            this.keypathsfromarr({
+                model: this.models[this.sorted_model_map[i]],
+                model_index: this.sorted_model_map[i],
+                base_index: 0
+            });
+        }
+    }
 
-    for (let i = 0; i < (single_base_insert ? 1 : paths.length); i++) {
-        // const path = paths[i];
-        for (let k = 0; k < models.length; k++) {
-            var model = JSON.parse(JSON.stringify(models[k]));
-            model.qref_only = true;
+    keypathsfromarr(params) {
+        var model = params.model;
+        var body = this.body;
+        var current_key_index = params.current_key_index || 0;
+        var gen_arr = params.gen_arr ? params.gen_arr.slice() : [];
 
-            if (model.table_body_path && model.table_body_path != '' && all_return_paths.indexOf(model.table_body_path) == -1) {
-                all_return_paths.push(model.table_body_path)
+        var final_arr = [];
+
+        if (gen_arr.length == 0) {
+            if (model.table_body_path_arr[0]) gen_arr.push(model.table_body_path_arr[0])
+        } else {
+            gen_arr.push('.' + model.table_body_path_arr[current_key_index])
+        }
+
+        var model_val_arr = _.get(body, gen_arr.join(''));
+
+
+        if (!Array.isArray(model_val_arr)) {
+            model_val_arr = [model_val_arr];
+            if (gen_arr.length > 0) _.set(body, gen_arr.join(''), model_val_arr)
+        }
+
+        var base_index = params.base_index || 0;
+
+        var current_len = model_val_arr.length;
+
+        for (let i = 0; i < current_len; i++) {
+            const element = model_val_arr[i];
+
+            var newGenArr = gen_arr.slice();
+            newGenArr.push('[' + i + ']');
+            
+            if (model.table_body_path_arr[current_key_index + 1]) {
+                // gen_arr.push('[' + i + ']')
+
+                this.keypathsfromarr({
+                    model: model,
+                    body: body,
+                    current_key_index: current_key_index + 1,
+                    gen_arr: newGenArr,
+                    model_index: params.model_index,
+                    base_index: base_index,
+                    parent_idx: this.body_path_map[newGenArr.join('')],
+                    // parent_idx: i
+                })
+
+            } else {
+
+                var current_index = this.getCurrentIndex({
+                    table_body_path_arr: model.table_body_path_arr,
+                    gen_body_path: newGenArr.join('')
+                })
+
+                if(!this.nested_insert) {
+
+                    this.final_paths[0] = this.final_paths[0] || []
+                    this.final_paths[0][0] = this.final_paths[0][0] || []
+                    this.final_paths[0][0].push({
+                        parent_idx: params.parent_idx,
+                        path: newGenArr.join(''),
+                        current_index: current_index
+                    })
+                    
+                } else if (gen_arr.length > 0) {
+                    this.final_paths[base_index] = this.final_paths[base_index] || []
+                    this.final_paths[base_index][params.model_index] = this.final_paths[base_index][params.model_index] || []
+                    this.final_paths[base_index][params.model_index].push({
+                        parent_idx: params.parent_idx,
+                        current_index: current_index,
+                        path: newGenArr.join('')
+                    })
+                }
+
+            }
+            if (!current_key_index) {
+                ++base_index;
+            }
+
+        }
+    }
+
+    processModels() {
+        const paths = this.final_paths;
+
+        for (let i = 0; i < (this.single_base_insert ? 1 : paths.length); i++) {
+            for (let k = 0; k < this.models.length; k++) {
+                // ... existing model processing code ...
+                var model = JSON.parse(JSON.stringify(this.models[k]));
+                model.qref_only = true;
+
+            if (model.table_body_path && model.table_body_path != '' && this.all_return_paths.indexOf(model.table_body_path) == -1) {
+                this.all_return_paths.push(model.table_body_path)
             }
             model.body_vals = []
-            // console.log('paths[i][k]', paths[i][k])
+
             var new_columns = []
             if (paths[i][k]) {
                 for (let j = 0; j < paths[i][k].length; j++) {
-                    const path = paths[i][k][j];
+                    const pathOb = paths[i][k][j];
 
-                    var current_val_ob = _.get(body, path)
+                    _.set(this.body, pathOb.path + '.__q_idx', pathOb.current_index)
+                    _.set(this.body, pathOb.path + '.__q_p_idx', pathOb.parent_idx)
+
+                    var current_val_ob = _.get(this.body, pathOb.path)
 
                     var cols = []
                     var col_ob = {}
@@ -179,6 +293,8 @@ function dynamicInsertModels(params) {
                         }
                         cols.push(column)
                     }
+                    col_ob.__q_idx = pathOb.current_index;
+                    col_ob.__q_p_idx = pathOb.parent_idx;
                     model.body_vals.push(col_ob)
                     new_columns.push(cols)
                 }
@@ -194,108 +310,30 @@ function dynamicInsertModels(params) {
             model.dynamic_base_index = i.toString()
             model.values_added = true;
 
-            new_models.push(model)
-            // if(paths[i][k].length > 1) {
-
-            // }
-            // model.new_body_path = 
+            model.nested_insert = this.nested_insert;
+                this.new_models.push(model);
+            }
         }
+
+        return {
+            all_return_paths: this.all_return_paths,
+            models: this.new_models
+        };
     }
 
-    return {
-        // paths: paths,
-        all_return_paths: all_return_paths,
-        models: new_models
-    }
+    getCurrentIndex(params) {
+        var p = params.table_body_path_arr.join('.');
 
+        if(!this.index_map[p] && this.index_map[p] !== 0) {
+            this.index_map[p] = 0;
+        } else {
+            ++this.index_map[p];
+        }
+
+        this.body_path_map[params.gen_body_path] = this.index_map[p];
+
+        return this.index_map[p];
+    }
 }
 
-class pathBuilder {
-
-    constructor(params) {
-        this.models = params.models;
-        this.body = params.body;
-        this.final_paths = []
-
-        var dynamic_models = []
-
-        for (let i = 0; i < this.models.length; i++) {
-            const model = this.models[i];
-
-            var f = this.keypathsfromarr({
-                model: model,
-                model_index: i,
-                base_index: 0
-            })
-
-        }
-
-        return this.final_paths
-    }
-
-    keypathsfromarr(params) {
-
-        var model = params.model;
-        var body = this.body;
-        var current_key_index = params.current_key_index || 0;
-        var gen_arr = params.gen_arr ? params.gen_arr.slice() : [];
-
-        var final_arr = [];
-
-        if (gen_arr.length == 0) {
-            if (model.table_body_path_arr[0]) gen_arr.push(model.table_body_path_arr[0])
-        } else {
-            gen_arr.push('.' + model.table_body_path_arr[current_key_index])
-        }
-
-        var model_val_arr = _.get(body, gen_arr.join(''));
-
-
-        if (!Array.isArray(model_val_arr)) {
-            model_val_arr = [model_val_arr];
-            if (gen_arr.length > 0) _.set(body, gen_arr.join(''), model_val_arr)
-        }
-
-        var base_index = params.base_index || 0;
-
-        for (let i = 0; i < model_val_arr.length; i++) {
-            const element = model_val_arr[i];
-
-            if (!params.current_key_index) {
-                // console.log(element, params)
-            }
-
-            if (model.table_body_path_arr[current_key_index + 1]) {
-                // gen_arr.push('[' + i + ']')
-                var newGenArr = gen_arr.slice();
-                newGenArr.push('[' + i + ']');
-                this.keypathsfromarr({
-                    model: model,
-                    body: body,
-                    current_key_index: current_key_index + 1,
-                    gen_arr: newGenArr,
-                    model_index: params.model_index,
-                    base_index: base_index
-                })
-
-            } else {
-                if (gen_arr.length > 0) {
-                    // gen_arr.push('[' + i + ']')
-                    var newGenArr = gen_arr.slice();
-                    newGenArr.push('[' + i + ']');
-                    // console.log(base_index, params.model_index, newGenArr)
-                    this.final_paths[base_index] = this.final_paths[base_index] || []
-                    this.final_paths[base_index][params.model_index] = this.final_paths[base_index][params.model_index] || []
-                    this.final_paths[base_index][params.model_index].push(newGenArr.join(''))
-                }
-
-            }
-            if (!params.current_key_index) {
-                ++base_index;
-            }
-
-        }
-
-    }
-
-};
+exports.DynamicInsertModels = DynamicInsertModels;

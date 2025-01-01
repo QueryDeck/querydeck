@@ -1,4 +1,6 @@
 var crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 /** Sync */
 function getRandomString(length, chars) {
@@ -132,6 +134,19 @@ function replaceAllDataFromText(text, dataObj) {
   return text; 
 }
 
+function logToFile (data ) {
+  options = { extn: 'txt', path : __dirname + '/../temp/'}
+let finalPath = path.resolve(options.path  + "output."+ options.extn); 
+console.log( "output File : ",finalPath )
+
+  fs.writeFile(finalPath, JSON.stringify(data,null,2), function(err) {
+    if(err) {
+        return console.log(err);
+    }
+  }); 
+}
+
+ 
 
 
 
@@ -143,3 +158,8 @@ function replaceAllDataFromText(text, dataObj) {
   exports.formatNodesForTableMode = formatNodesForTableMode;
   exports.formatJoinGraph = formatJoinGraph;
   exports.replaceAllDataFromText = replaceAllDataFromText;
+  exports.logToFile = logToFile;
+  console.file = logToFile;
+  
+
+  

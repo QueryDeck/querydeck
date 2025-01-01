@@ -555,7 +555,7 @@ const Schema = props => {
     <div>
       {!loading ? LOADING_ELEMENT : null}
 
-      <div className="list-deck  db-schema-par-bx" style={{ height: 'calc(100vh - 48px - 4px - 33px - 4px - 8px - 8px)', position: 'relative' }}>
+      <div className="list-deck  db-schema-par-bx" style={{ height: 'calc(100vh - 48px - 4px - 33px - 4px - 8px - 8px - 80px)', position: 'relative' }}>
         {loading ? (
           <>
             <SchemaSideBar

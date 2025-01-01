@@ -31,7 +31,7 @@ let autoGenApiController;
 const Table = (props) => {
   // Redux
   const state = useSelector(
-    (state) => state.data[props.mode][props.subdomain]?.[props.query_id]
+    (state) => state.data[props.mode][props.subdomain]?.autoGen || {}
   );
 
   const dispatch = useDispatch();
@@ -246,6 +246,7 @@ const Table = (props) => {
           subdomain: props.subdomain,
         })
       );
+      props.onGenerateSuccess && props.onGenerateSuccess()
     } catch (error) {
       catchError(error);
     }
