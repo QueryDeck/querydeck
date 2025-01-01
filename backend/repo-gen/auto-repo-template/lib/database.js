@@ -2,11 +2,13 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  connectionString: process.env.QD_DB_URL
+  connectionString: process.env.QD_DB_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
  
 function query(q, callback){
-  // console.log('MAIND', q)
   pool.connect((err, client, done) => {
     if (err) {
       done();

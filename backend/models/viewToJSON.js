@@ -159,7 +159,8 @@ module.exports = class ViewToJSON {
                 method: this.insertOb[this.insertPaths[i]].method,
                 allow_multiple_row: params.allow_multiple_row_paths.includes(this.insertPaths[i]),
                 qref_used: this.insertOb[this.insertPaths[i]].qref_used,
-                single_base_insert: params.single_base_insert
+                single_base_insert: params.single_base_insert,
+                nest_in: this.insertOb[this.insertPaths[i]].nest_in
             };
             if (
                 params?.on_conflict &&
@@ -423,47 +424,64 @@ module.exports = class ViewToJSON {
         }
 
     }
-    hasMultipleRefs(pathid) {
+    getAlias(pathid) {
 
         let dir = this.relDirection(pathid, this.subdomain);
         let pathid_split = pathid.split('-');
-        if (pathid_split.length == 1) return false;
-        let base_tab, ref_col, base_tab_name_split, ref_col_name_split;
+        if (pathid_split.length == 1) return null;
+        let ref_col, base_tab_name_split, ref_col_name_split, base_col_id;
         // let last_path = [];
-        if (dir == 'in') {
-            base_tab = pathid_split[pathid_split.length - 1].split('.')[0];
+        if (false && dir == 'in') {
+            base_col_id = pathid_split[pathid_split.length - 1];
+            // base_tab = pathid_split[pathid_split.length - 1].split('.')[0];
             ref_col = pathid_split[pathid_split.length - 2];
         } else {
-            base_tab = pathid_split[pathid_split.length - 2].split('.')[0];
+            // base_tab = pathid_split[pathid_split.length - 2].split('.')[0];
             ref_col = pathid_split[pathid_split.length - 1];
+            base_col_id = pathid_split[pathid_split.length - 2];
         }
 
-        base_tab_name_split = this.currentModel.tidToName[base_tab];
+        base_tab_name_split = this.currentModel.idToName[base_col_id];
         ref_col_name_split = this.currentModel.idToName[ref_col];
-        let ref_col_name = this.currentModel.idToName[ref_col].join('.');
+        let ref_col_name = ref_col_name_split.join('.');
+
+        let rel_path = base_tab_name_split.join('.') + '-' + ref_col_name;
+
+        return this.currentModel.models[base_tab_name_split[0]][base_tab_name_split[1]].properties.rels_new[rel_path].alias;
+
+        // console.log('rel_path', rel_path)
 
         let ref_keys = Object.keys(this.currentModel.models[base_tab_name_split[0]][base_tab_name_split[1]].properties.rels_new);
 
+        // console.log('ref_keys', ref_keys)
+
         let ref_col_count = 0;
+        let ref_col_alias = null;
         for (let i = 0; i < ref_keys.length; i++) {
             const element = ref_keys[i];
             let ref_key_split = ref_keys[i].split('-');
-            if (ref_key_split[1] == ref_col_name) ++ref_col_count;
+            let ref_key_split_rhs = ref_key_split[1].split('.');
+            if (ref_key_split_rhs[0] == ref_col_name_split[0] && ref_key_split_rhs[1] == ref_col_name_split[1]) ++ref_col_count;
+            if (rel_path == element) {
+                ref_col_alias = this.currentModel.models[base_tab_name_split[0]][base_tab_name_split[1]].properties.rels_new[element].alias;
+            }
         }
 
-        if (ref_col_count > 1) return true;
-        return false;
+        // console.log('ref_col_alias*****************************************', ref_col_alias)
+
+        if (ref_col_count > 1) return ref_col_alias;
+        return null;
     }
 
     initPath(pathid) {
         let dir = this.relDirection(pathid, this.subdomain);
-        let havemultiplerefs = this.hasMultipleRefs(pathid);
+        let multi_ref_alias = this.getAlias(pathid);
 
         let psplit_init = pathid.split('-');
         let tab = psplit_init[psplit_init.length - 1].split('.')[0];
         let tab_name_arr = this.currentModel.tidToName[tab];
         let with_alias, body_alias;
-        if (havemultiplerefs) {
+        if (multi_ref_alias) {
             let col_name_with_alias;
             if (dir == 'in') {
                 col_name_with_alias = this.currentModel.idToName[psplit_init[psplit_init.length - 1]];
@@ -471,7 +489,7 @@ module.exports = class ViewToJSON {
                 col_name_with_alias = this.currentModel.idToName[psplit_init[psplit_init.length - 2]];
             }
 
-            body_alias = (tab_name_arr[0] == 'public' ? col_name_with_alias[2] + '_' + tab_name_arr[1] : col_name_with_alias[2] + '_' + tab_name_arr.join('_'));
+            body_alias = multi_ref_alias;
 
         } else {
             body_alias = (tab_name_arr[0] == 'public' ? tab_name_arr[1] : tab_name_arr.join('_'));
@@ -480,6 +498,8 @@ module.exports = class ViewToJSON {
 
         let currMethod = this.viewdata?.submittedPkeys && this.viewdata.submittedPkeys[pathid] ? 'update' : 'insert';
         with_alias = 'q' + currMethod + '_' + body_alias;
+
+        var current_rel_type = this.relType(pathid)
         this.insertOb[pathid] = {
             method: currMethod,
             columns: {},
@@ -490,7 +510,8 @@ module.exports = class ViewToJSON {
             returns: {
                 qref: [],
                 user: []
-            }
+            },
+            table_body_type: (current_rel_type && current_rel_type.charAt(2) == 'M') ? 'array' : 'object'
         };
         // add not nulls
         if (currMethod !== 'update') {
@@ -529,6 +550,8 @@ module.exports = class ViewToJSON {
 
         let out_rel_path, out_rel_ref_id;
 
+        var nest_in;
+
         if (psplit_init[psplit_init.length - 1] == coltabid) {
 
             let last_ref_path = psplit_init[psplit_init.length - 2] + '-' + psplit_init[psplit_init.length - 1];
@@ -555,6 +578,13 @@ module.exports = class ViewToJSON {
                     let col_build_name = this.currentModel.idToName[psplit_init[psplit_init.length - 2]].join('.');
                     this.initColumn(qref_path_build, psplit_init[psplit_init.length - 2]);
 
+                    if(this.insertOb[qref_path_build].table_body_type == 'array') {
+                        nest_in = {
+                            table_body_type: this.insertOb[qref_path_build].table_body_type,
+                            with_alias: this.insertOb[qref_path_build].with_alias
+                        };
+                    }
+
                     this.insertOb[qref_path_build].columns[col_build_name].operator = '$qref';
                     this.insertOb[qref_path_build].columns[col_build_name].value = this.insertOb[pathid].with_alias + '$' + col_name_split[2];
                     val = this.buildBodyPath(pathid, col_name_split[2]);
@@ -578,6 +608,13 @@ module.exports = class ViewToJSON {
                     q_ref_path = psplit_init.slice(0, psplit_init.length - 2).join('-');
                     ref_col_name = this.currentModel.idToName[psplit_init[psplit_init.length - 2]][2];
 
+                    if(this.insertOb[q_ref_path].table_body_type == 'array') {
+                        nest_in = {
+                            table_body_type: this.insertOb[q_ref_path].table_body_type,
+                            with_alias: this.insertOb[q_ref_path].with_alias
+                        };
+                    }
+
                 }
 
                 if (this.insertOb[q_ref_path]?.returns.qref.indexOf(ref_col_name) == -1) this.insertOb[q_ref_path].returns.qref.push(ref_col_name);
@@ -590,6 +627,11 @@ module.exports = class ViewToJSON {
             op = '$req-body';
 
             val = this.buildBodyPath(pathid, col_name_split[2]);
+        }
+
+        if (nest_in) {
+            // console.log('nest_in', nest_in)
+            this.insertOb[pathid].nest_in = nest_in;
         }
 
         if (this.currentModel.models[col_name_split[0]][col_name_split[1]].properties.serials.indexOf(col_name_split[2]) > -1) {
@@ -661,10 +703,10 @@ module.exports = class ViewToJSON {
             basetid = psplit_b[0].split('.')[0];
         }
 
-        let havemultiplerefs = this.hasMultipleRefs(pathid);
+        let multi_ref_alias = this.getAlias(pathid);
 
         let col_name_add;
-        if (havemultiplerefs) {
+        if (multi_ref_alias) {
             let col_name_add_split;
             if (dir == 'in') {
                 col_name_add_split = this.currentModel.idToName[psplit_b[psplit_b.length - 1]];
@@ -1156,6 +1198,7 @@ module.exports = class ViewToJSON {
         // let columns = [];
 
         // let mainMod = new currentModel.models[tab_name_spl[0]][tab_name_spl[1]]();
+        let tables_used = [tab_name_spl.join('.')];
         let main_model = {
             schema: tab_name_spl[0],
             table: tab_name_spl[1],
@@ -1168,7 +1211,8 @@ module.exports = class ViewToJSON {
             offset_dynamic: params.offset_dynamic ? true : false,
             offset: params.offset,
             limit: params.limit,
-            default_where: params.default_where
+            default_where: params.default_where,
+            tables_used: tables_used,
         };
 
         let all_col_names = [];
@@ -1284,6 +1328,7 @@ module.exports = class ViewToJSON {
                 let rel_type = this.relType(id_pure);
                 let rel_type_split = rel_type.split('-');
                 var alt_alias_prefix;
+                var default_alias = this.getAlias(id_pure)
 
                 if (id_spl.length > 2) {
                     // get last table
@@ -1304,6 +1349,10 @@ module.exports = class ViewToJSON {
                     col_arr = currentModel.idToName[id_spl[1].split('.')[0] + '.' + column];
                 } else {
                     col_arr = currentModel.idToName[id_spl[id_spl.length - 1].split('.')[0] + '.' + column];
+                }
+
+                if(tables_used.indexOf(col_arr[0] + '.' + col_arr[1]) == -1) {
+                    tables_used.push(col_arr[0] + '.' + col_arr[1]);
                 }
 
                 // force agg all joins
@@ -1340,7 +1389,8 @@ module.exports = class ViewToJSON {
                                 agg_clusters[agg_cluster_id] = {
                                     columns: [],
                                     agg_paths: [],
-                                    alt_alias_prefix: alt_alias_prefix
+                                    alt_alias_prefix: alt_alias_prefix,
+                                    default_alias: default_alias
                                 }
                             }
                             let col_path_id;
@@ -1413,6 +1463,7 @@ module.exports = class ViewToJSON {
                     table: col_arr[1],
                     join_type: join_type,
                     alt_alias_prefix: alt_alias_prefix,
+                    default_alias: default_alias,
                     // agg_type: (rel_type_split[1] == 1 ? 'row_to_json' : 'json_agg')
                 };
 
@@ -1627,7 +1678,8 @@ module.exports = class ViewToJSON {
                 joins: nested[nested_keys[i]].joins,
                 type: nested[nested_keys[i]].join_type,
                 on: on_conditions,
-                alt_alias_prefix: nested[nested_keys[i]].alt_alias_prefix
+                alt_alias_prefix: nested[nested_keys[i]].alt_alias_prefix,
+                default_alias: nested[nested_keys[i]].default_alias
             });
         }
 
@@ -1640,13 +1692,10 @@ module.exports = class ViewToJSON {
             let agg_mod = agg_complete_return.model;
             agg_mod.agg_type = agg_clusters[agg_keys[i]].agg_type;
             agg_mod.alt_alias_prefix = agg_clusters[agg_keys[i]].alt_alias_prefix;
+            agg_mod.default_alias = agg_clusters[agg_keys[i]].default_alias;
 
-            if (agg_alias_count[agg_mod.table_alias] > 1) {
-                // agg_mod.table_alias = agg_mod.alt_alias_prefix + cleanTname(agg_mod.table_alias, (agg_mod.agg_type.indexOf('row') > -1 ? false : true));
-                agg_mod.table_alias = agg_mod.alt_alias_prefix + (agg_mod.agg_type.indexOf('row') > -1 ? pluralize.singular(agg_mod.table_alias) : pluralize.plural(agg_mod.table_alias));
-            } else {
-                agg_mod.table_alias = (agg_mod.agg_type.indexOf('row') > -1 ? pluralize.singular(agg_mod.table_alias) : pluralize.plural(agg_mod.table_alias))
-            }
+            agg_mod.table_alias = agg_mod.default_alias;
+
 
             join_paths_where.push(agg_keys[i]);
             join_paths_where = join_paths_where.concat(agg_complete_return.join_paths_where);

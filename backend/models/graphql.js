@@ -29,6 +29,7 @@ class GraphQLConverter {
         this.db_id = Object.keys(this.currentModel.databases)[0];
         this.query = params.query;
         this.variables = params.variables || {};
+        this.current_role = params.current_role;
         // console.log(params)
         var parsedQueries = parse(this.query);
         // return parsedQueries;
@@ -200,6 +201,17 @@ class GraphQLConverter {
                 }
             }
         }
+
+        try {
+            where = modelutils.applyPermissions({
+                table: table_arr[0] + '.' + table_arr[1],
+                method: 'delete',
+                conditions: where,
+                current_role: this.current_role
+            });
+        } catch(err) {
+            throw new Error('You are not authorized to perform this action');
+        }
     
         var query = v2sql.convert({
             base: base_table_id,
@@ -269,17 +281,15 @@ class GraphQLConverter {
 
     convertInsertToSQL(selection) {
 
-        // return selection;
         var base_table_graphql_name = selection.name.value.replace('_one', '').replace('_many', '').replace('insert_', '');
+
+        if(!this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name]) {
+            throw new Error('Table not found');
+        }
 
         var table_arr = this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name].table_schema;
 
         var base_table_id = this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.id;
-
-        if (!this.currentModel.databases[this.db_id].graphql.tables[base_table_graphql_name]) {
-            // TODO: throw better error
-            throw new Error('Table not found');
-        }
 
         var arg_res = this.extractValuesAndOnConflict({
             arguments: selection.arguments,
@@ -335,8 +345,6 @@ class GraphQLConverter {
             // insert_value_ob: result.insert_value_ob
         });
 
-        // console.log('v2sql query', query)
-
         return {
             query: query,
             body: result.insert_value_ob
@@ -344,7 +352,6 @@ class GraphQLConverter {
     }
 
     extractValuesAndOnConflict(params) {
-        // console.log('extractValuesAndOnConflict', params)
         var args = params.arguments;
         var table_arr = params.table_arr;
         var values;
@@ -407,6 +414,9 @@ class GraphQLConverter {
                 if (selection.selectionSet) {
                     const newPrefix = prefix ? `${prefix}.${selection.name.value}` : selection.name.value;
                     const rel_name = selection.name.value;
+                    if(!this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name]) {
+                        throw new Error('Relation ' + rel_name + ' not found' + ' in ' + table_graphql_name);
+                    }
                     columns = columns.concat(this.handleNestedReturning({
                         returningField: selection,
                         prefix: newPrefix,
@@ -445,6 +455,17 @@ class GraphQLConverter {
         var table_graphql_name = params.table_graphql_name;
         var nested = params.nested || false;
         var table_path_id = params.table_path_id;
+        var nested_alias = params.nested_alias || table_arr[1];
+
+        var permissions = modelutils.getPermissions({
+            table: table_arr[0] + '.' + table_arr[1],
+            method: 'insert',
+            current_role: this.current_role
+        });
+
+        if(permissions.access_type !== 1) {
+            throw new Error('You are not authorized to perform this action');
+        }
 
         params.on_conflict = params.on_conflict || {};
 
@@ -458,7 +479,7 @@ class GraphQLConverter {
         var table_columns = this.currentModel.databases[this.db_id].models[table_arr[0]][table_arr[1]].properties.columns;
 
         var insert_value_ob = {
-            [table_arr[1]]: []
+            [nested_alias]: []
         }
 
         var insert_column_ids = params.insert_column_ids || []
@@ -506,6 +527,7 @@ class GraphQLConverter {
                             values: arg_res.values,
                             // on_conflict: arg_res.on_conflict,
                             // insert_value_ob: insert_value_ob[table_arr[1]][0],
+                            nested_alias: rel_name,
                             insert_column_ids: insert_column_ids,
                             rel_table_def: this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[rel_name],
                         }
@@ -519,7 +541,7 @@ class GraphQLConverter {
 
                         var nested_result = this.handleInsert(nested_table);
 
-                        insert_value[nested_table.table_graphql_name] = nested_result.insert_value_ob[nested_table.table_graphql_name]
+                        insert_value[nested_table.nested_alias] = nested_result.insert_value_ob[nested_table.nested_alias]
 
                     } else {
                         // TODO: throw better error
@@ -530,10 +552,10 @@ class GraphQLConverter {
 
             if (current_rel_type == 'array') {
                 // console.log('array', insert_value_ob, insert_value);
-                insert_value_ob[table_arr[1]].push(insert_value);
+                insert_value_ob[nested_alias].push(insert_value);
             } else {
                 // console.log('object', insert_value_ob, insert_value);
-                insert_value_ob[table_arr[1]] = insert_value;
+                insert_value_ob[nested_alias] = insert_value;
             }
         }
 
@@ -668,13 +690,24 @@ class GraphQLConverter {
             }
         }
 
+        try {
+            where = modelutils.applyPermissions({
+                table: table_arr[0] + '.' + table_arr[1],
+                method: 'select',
+                conditions: where,
+                current_role: this.current_role
+            })
+        } catch(err) {
+            throw new Error('You are not authorized to perform this action');
+        }
+
         if (nested) {
             join_conditions[table_path_id] = modelutils.idToJoinPathOb({
                 id: table_path_id,
                 currentModel: this.currentModel.databases[this.db_id]
             });
 
-            if (where.rules) {
+            if (where.rules && where.rules.length > 0) {
                 join_conditions[table_path_id].rules.push(where);
             }
 
@@ -804,6 +837,17 @@ class GraphQLConverter {
                     }
                 }
             }
+        }
+
+        try {
+            where = modelutils.applyPermissions({
+                table: table_arr[0] + '.' + table_arr[1],
+                method: 'update',
+                conditions: where,
+                current_role: this.current_role
+            });
+        } catch(err) {
+            throw new Error('You are not authorized to perform this action');
         }
 
         var query = v2sql.convert({

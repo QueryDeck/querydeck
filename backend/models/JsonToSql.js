@@ -66,9 +66,13 @@ module.exports = class builder {
 			};
 		}
 
+		this.mutation = false;
+
 		for (var i = 0; i < this.models.length; i++) {
 
 			if (this.models[i].method == 'select') {
+
+				if(this.mutation) throw new Error('cannot select in mutation query')
 
 				var alias = 'q' + this.makeid(3)
 
@@ -88,6 +92,8 @@ module.exports = class builder {
 				
 			} else if(this.models[i].method == 'delete') {
 
+				this.mutation = true;
+
 				this.queries.push({
 					query: this.delete(this.models[i]),
 					alias: 'q' + this.makeid(3)
@@ -95,7 +101,51 @@ module.exports = class builder {
 
 			} else {
 
+				this.mutation = true;
+
 				this.addInupQuery(this.models[i]);
+			}
+		}
+
+		if(this.mutation) {
+			// we are going to iterate over the models again and then add the return_joins to the query
+			for(let i = 0; i < this.models.length; i++) {
+
+				var model = this.models[i];
+
+				var agg_func = ((model.allow_multiple_row || model.method == 'update' || (model.nested_insert && model.table_body_path_arr.length > 1 && model.dynamic_base_index && model.multi_row_insert)) ? 'JSON_AGG' : 'ROW_TO_JSON');
+
+				if(this.models[i].return_joins && this.models[i].return_joins.length > 0) {
+
+					var qq = 'SELECT ' + agg_func + '(main_result) AS "' + ((model.dynamic_base_index && model.nested_insert) ? model.table_body_path + '_' + model.dynamic_base_index : model.table_body_path) + '" FROM (SELECT ' + model.return_arr_user.join(', ') + ' '
+
+					for(let i = 0; i < model.return_joins.length; i++) {
+
+						if(model.return_arr_user.length == 0 && i == 0) {
+							qq += model.return_joins[i].text + ' AS ' + model.return_joins[i].body_key
+						} else {
+							qq += ', ' + model.return_joins[i].text + ' AS ' + model.return_joins[i].body_key
+						}
+
+					}
+
+					qq += ' FROM ' + model.final_alias + '_return' + ') AS main_result' 
+
+					this.queries.push({
+						query: qq,
+						alias: 'q' + this.makeid(3),
+						table_body_path: model.table_body_path
+					});
+
+				} else if(!model.nest_in) {
+
+					this.queries.push({
+						query: 'SELECT ' + agg_func + '(' + model.final_alias + '.*) AS "' + ((model.dynamic_base_index && model.nested_insert) ? model.table_body_path + '_' + model.dynamic_base_index : model.table_body_path) + '" FROM ' + model.final_alias,
+						alias: 'q' + this.makeid(3),
+						table_body_path: model.table_body_path
+					});
+
+				}
 			}
 		}
 
@@ -342,11 +392,14 @@ module.exports = class builder {
 
 		var ob = this[model.method](model);
 
-		if(ob.multiple) {
+		if(ob.nested_insert) {
 			this.qref_map[ob.alias] = this.qref_map[ob.alias] || {};
-			this.qref_map[ob.alias].multiple = true;
+			this.qref_map[ob.alias].nested_insert = true;
 			this.qref_map[ob.alias].table_alias = model.table_alias;
 			this.qref_map[ob.alias].return_arr = ob.return_arr;
+			this.qref_map[ob.alias].nest_in = model.nest_in;
+			this.qref_map[ob.alias].with_alias = model.with_alias;
+			this.qref_map[ob.alias].model = model;
 		}
 
 		var unused_alias = 'q' + this.makeid(3);
@@ -356,54 +409,22 @@ module.exports = class builder {
 			alias: ob.alias
 		});
 
-		//, ROW_NUMBER() OVER () AS idx
+		//, ROW_NUMBER() OVER () AS __q_idx
 
-		if(ob.multiple) {
+		if(ob.nested_insert && model.multi_row_insert) {
+
 			this.queries.push({
-				query: 'SELECT ' + ob.alias + '.*, ROW_NUMBER() OVER () AS idx ' + ' FROM ' + ob.alias,
+				query: 'SELECT join_alias.*, ' + ob.alias + '_data.__q_p_idx FROM (SELECT ' + ob.alias + '.*, (ROW_NUMBER() OVER () - 1) AS __q_idx ' + ' FROM ' + ob.alias + ') join_alias JOIN ' + ob.alias + '_data ON join_alias.__q_idx::smallint = ' + ob.alias + '_data.__q_idx::smallint',
 				// alias: 'q' + this.makeid(3)
 				alias: ob.alias + '_return'
 			});
 		}
-
-		if(model.table_body_path && model.table_body_path != '') {
-
-			var agg_func = ((model.allow_multiple_row || model.method == 'update' || ob.multiple) ? 'JSON_AGG' : 'ROW_TO_JSON')
-
-		if(ob.return_joins && ob.return_joins.length > 0) {
-
-			// console.log(ob.return_joins, this.qref_map)
-
-			var qq = 'SELECT ' + agg_func + '(main_result) AS "' + (model.dynamic_base_index ? model.table_body_path + '_' + model.dynamic_base_index : model.table_body_path) + '" FROM (SELECT *'
-
-			for(let i = 0; i < ob.return_joins.length; i++) {
-				// qq += ' JOIN ' + ob.return_joins[i].text + ' ON ' + ob.return_joins[i].qref + '.idx = ' + ob.alias + '_return.idx'
-				qq += ', ' + ob.return_joins[i].text + ' AS ' + this.qref_map[ob.return_joins[i].qref].table_alias
-			}
-
-			qq += ' FROM ' + ob.alias + '_return' + ') AS main_result' 
-
-			this.queries.push({
-				query: qq,
-				alias: 'q' + this.makeid(3),
-				table_body_path: model.table_body_path
-			});
-		} else {
-			this.queries.push({
-				query: 'SELECT ' + agg_func + '(' + ob.alias + '.*) AS "' + (model.dynamic_base_index ? model.table_body_path + '_' + model.dynamic_base_index : model.table_body_path) + '" FROM ' + ob.alias,
-				alias: 'q' + this.makeid(3),
-				table_body_path: model.table_body_path
-			});
-		}
-			
-		}
-
 		
 		
-		model.queryAlias = (ob.multiple ? unused_alias : ob.alias);
+		model.queryAlias = (ob.nested_insert ? unused_alias : ob.alias);
 		model.toReturn = ob.returnVal;
 		return {
-			queryAlias: (ob.multiple ? unused_alias : ob.alias),
+			queryAlias: (ob.nested_insert ? unused_alias : ob.alias),
 			toReturn: ob.returnVal
 		};
 	}
@@ -428,7 +449,8 @@ module.exports = class builder {
 				' (' + allkeys.join(',') + ') ' +
 				' = ' + this.resolveValues(model.conflict.columns, {
 					conflict: true,
-					dynamic_base_index: model.dynamic_base_index
+					dynamic_base_index: model.dynamic_base_index,
+					nested_insert: model.nested_insert
 				})
 
 		} else {
@@ -436,7 +458,8 @@ module.exports = class builder {
 				' ' + allkeys.join(',') + ' ' +
 				' = ' + this.resolveValues(model.conflict.columns, {
 					conflict: true,
-					dynamic_base_index: model.dynamic_base_index
+					dynamic_base_index: model.dynamic_base_index,
+					nested_insert: model.nested_insert
 				})
 		}
 		return result;
@@ -444,6 +467,14 @@ module.exports = class builder {
 
 
 	insert(model) {
+
+		model.return_joins = [];
+
+		if(Array.isArray(model.columns[0]) && model.columns.length > 1) {
+			model.multi_row_insert = true;
+		} else {
+			model.multi_row_insert = false;
+		}
 
 		// check for extra columns
 		var allkeys = [];
@@ -460,26 +491,24 @@ module.exports = class builder {
 				if (!allkeys.includes(col_name)) allkeys.push(col_name);
 			}
 		}
-		var return_arr = model.returns.user.map(elem => {
+		model.return_arr_user = model.returns.user.map(elem => {
 			let colName = elem.columnName.split('.')[2];
 			if (elem.alias) return `${colName} AS  ${elem.alias}`;
 			else return colName;
 		});
-		return_arr = return_arr.concat(model.returns.qref)
+		
+		var return_arr = model.return_arr_user.concat(model.returns.qref);
 		return_arr = return_arr.filter(this.onlyUnique);
 
 		var q;
-		var multiple = false;
+		var nested_insert = model.nested_insert;
 
-		if(Array.isArray(model.columns[0]) && model.columns.length > 1) {
-			multiple = true;
-		}
 
-		var return_joins = [];
 
-		var current_alias = (model.with_alias ? model.with_alias : ('q' + model.method + '_' + model.table)) + (model.dynamic_base_index ? '_' + model.dynamic_base_index : '')
+		var current_alias = (model.with_alias ? model.with_alias : ('q' + model.method + '_' + model.table)) + ((model.dynamic_base_index && model.nested_insert) ? '_' + model.dynamic_base_index : '')
+		var data_alias = current_alias + '_data';
 		
-		if(model.values_added && model.qref_used && model.table_body_type == 'array' && (model.columns.length > 1 || model.qref_only)) {
+		if(model.values_added && (model.qref_used || model.nest_in) && (model.table_body_type == 'array' || model.multi_row_insert) && (model.columns.length > 1 || model.qref_only)) {
 
 			var joins = [], joins_resolved = [], qref_arr = [];
 
@@ -487,38 +516,61 @@ module.exports = class builder {
 
 			for(let i = 0; i < model.columns[0].length; i++) {
 				let currColValues = model.columns[0][i];
-				// console.log(currColValues)
+				// //console.log(currColValues)
 				if(currColValues.operator == '$req-body') {
 					// val_text += '(' + this.resolveValues(currColValues, {dynamic_base_index: model.dynamic_base_index}) + '),'
 
-					val_text += "(insert_object.value ->> '" + currColValues.columnName.split('.').pop() + "')::" + this.getType(currColValues.columnName);
+					val_text += "(" + data_alias + "." + currColValues.columnName.split('.').pop() + ")::" + this.getType(currColValues.columnName);
 
 				} else {
 					var qref_split = currColValues.value.split('$');
 
-					var qref_dynamic_key = qref_split[0] + (model.dynamic_base_index ? '_' + model.dynamic_base_index : '');
+					var qref_dynamic_key = qref_split[0] + ((model.dynamic_base_index && model.nested_insert) ? '_' + model.dynamic_base_index : '');
 					var qref_dynamic_return_key = qref_dynamic_key;
 					
 					if(joins_resolved.indexOf(qref_dynamic_key) == -1 && !model.qref_only) {
 						joins_resolved.push(qref_dynamic_key);
-						// console.log(this.qref_map, qref_dynamic_key)
-						if(this.qref_map[qref_dynamic_key] && this.qref_map[qref_dynamic_key].multiple) {
+						if(this.qref_map[qref_dynamic_key] && this.qref_map[qref_dynamic_key].nested_insert && this.qref_map[qref_dynamic_key].model.multi_row_insert) {
 							qref_dynamic_return_key = qref_dynamic_key + '_return';
+
+							var lhs_key = '__q_idx';
+							var rhs_key = '__q_p_idx';
+
+							if(this.qref_map[qref_dynamic_key].nest_in && this.qref_map[qref_dynamic_key].nest_in.with_alias == model.with_alias) {
+
+								lhs_key = '__q_p_idx';
+								rhs_key = '__q_idx';
+
+								if(this.qref_map[qref_dynamic_key].model.return_arr_user.length > 0) {
+									var agg_type = this.qref_map[qref_dynamic_key].model.table_body_type == 'array' ? 'JSON_AGG' : 'ROW_TO_JSON';
+									model.return_joins.push({
+										text: " (SELECT " + agg_type + "(joined_result) FROM (SELECT " + this.qref_map[qref_dynamic_key].model.return_arr_user.join(', ') + " FROM " + qref_dynamic_return_key + " WHERE " + qref_dynamic_return_key + ".__q_p_idx::smallint = " + current_alias + '_return' + ".__q_idx::smallint) AS joined_result) ",
+										qref: qref_dynamic_key,
+										body_key: this.qref_map[qref_dynamic_key].model.table_body_path_arr[this.qref_map[qref_dynamic_key].model.table_body_path_arr.length - 1]
+									})
+								}
+							} 
+							else if(model.nest_in && model.nest_in.with_alias == this.qref_map[qref_dynamic_key].with_alias) {
+
+								if(model.return_arr_user.length > 0) {
+									var agg_type = model.table_body_type == 'array' ? 'JSON_AGG' : 'ROW_TO_JSON';
+
+									this.qref_map[qref_dynamic_key].model.return_joins.push({
+										text: " (SELECT " + agg_type + "(joined_result) FROM (SELECT " + model.return_arr_user.join(', ') + " FROM " + current_alias + '_return' + " WHERE " + qref_dynamic_return_key + ".__q_idx::smallint = " + current_alias + '_return' + ".__q_p_idx::smallint) AS joined_result) ",
+										qref: qref_dynamic_key,
+										body_key: model.table_body_path_arr[model.table_body_path_arr.length - 1]
+									})
+								}
+							}
 							joins.push(
-								'JOIN ' + qref_dynamic_return_key + ' ON ' + qref_dynamic_return_key + '.idx = insert_object.idx'
+								'JOIN ' + qref_dynamic_return_key + ' ON ' + qref_dynamic_return_key + '.' + lhs_key + '::smallint = ' + data_alias + '.' + rhs_key + '::smallint'
 							)
-							// console.log('return_joins', this.qref_map)
-							return_joins.push({
-								text: " (SELECT row_to_json(joined_result) FROM (SELECT " + this.qref_map[qref_dynamic_key].return_arr.join(', ') + " FROM " + qref_dynamic_return_key + " WHERE " + qref_dynamic_return_key + ".idx = " + current_alias + '_return' + ".idx) AS joined_result) ",
-								qref: qref_dynamic_key
-							})
 						} else {
 							joins.push(
 								'CROSS JOIN ' + qref_dynamic_key
 							)
 						}
 					}
-					// console.log('new ket', qref_dynamic_return_key)
 
 					qref_arr.push(qref_dynamic_return_key)
 
@@ -529,13 +581,45 @@ module.exports = class builder {
 
 			}
 
-			// console.log(model)
+			var return_idx = false;
 
 			if(!model.qref_only) {
-				val_text += ' FROM json_array_elements(' + this.getParamMapIndex(JSON.stringify(model.body_vals)) + ') WITH ORDINALITY AS insert_object(value, idx) ' + joins.join(' ')
+				var select_query = 'SELECT ';
+				var select_cols = [];
+				
+				for (let key in model.body_vals[0]) {
+					select_cols.push(`value->>'${key}' as ${key}`);
+				}
+				
+				select_query += select_cols.join(', ') + ' FROM json_array_elements(' + this.getParamMapIndex(JSON.stringify(model.body_vals)) + ')';
+
+				this.queries.push({
+					query: select_query,
+					alias: data_alias
+				});
+				
+				val_text += ' FROM ' + data_alias + ' ' + joins.join(' ');
+
+				return_idx = true;
 			} else {
 				val_text += ' FROM ' + qref_arr.join(',')
 			}
+
+			var return_text;
+
+			if(return_idx) {
+				return_text = (return_arr.length > 0 ? return_arr.concat([
+					data_alias + '.__q_p_idx',
+					data_alias + '.__q_idx'
+				]).join(', ') : [
+					data_alias + '.__q_p_idx',
+					data_alias + '.__q_idx'
+				].join(', '));
+			} else {
+				return_text = (return_arr.length > 0 ? return_arr.join(', ') : '*');
+			}
+
+			return_text = (return_arr.length > 0 ? return_arr.join(', ') : '*');
 
 			q = "INSERT INTO " +
 			model.schema + '.' + model.table +
@@ -543,28 +627,28 @@ module.exports = class builder {
 			val_text +
 			this.resolveConflict(model) +
 			' RETURNING ' +
-			(return_arr.length > 0 ? return_arr.join(', ') : '*') 
-			// + (Array.isArray(model.columns[0]) && model.columns.length > 1 && model.values_added ? ' , ROW_NUMBER() OVER () AS idx' : '')
+			return_text
 
 		} else {
-
 
 			q = "INSERT INTO " +
 			model.schema + '.' + model.table +
 			" (" + allkeys.join(', ') + ") " +
-			' VALUES ' + this.resolveValues(model.columns, {dynamic_base_index: model.dynamic_base_index}) + ' ' +
+			' VALUES ' + this.resolveValues(model.columns, {dynamic_base_index: model.dynamic_base_index, nested_insert: model.nested_insert}) + ' ' +
 			this.resolveConflict(model) +
 			' RETURNING ' +
 			(return_arr.length > 0 ? return_arr.join(', ') : '*') 
-			// + (Array.isArray(model.columns[0]) && model.columns.length > 1 && model.values_added ? ' , ROW_NUMBER() OVER () AS idx' : '')
 
 		}
+
+		model.nested_insert = nested_insert;
+		model.final_alias = current_alias;
 
 		return {
 			query: q,
 			alias: current_alias,
-			multiple: multiple,
-			return_joins: return_joins,
+			nested_insert: nested_insert,
+			// return_joins: return_joins,
 			return_arr: return_arr
 		};
 
@@ -594,7 +678,7 @@ module.exports = class builder {
 		if (allkeys.length > 1) {
 			q = 'UPDATE ' + model.schema + '.' + model.table +
 				' SET (' + allkeys.join(',') + ' ) ' +
-				' = ' + this.resolveValues(model.columns, {dynamic_base_index: model.dynamic_base_index}) + ' '
+				' = ' + this.resolveValues(model.columns, {dynamic_base_index: model.dynamic_base_index, nested_insert: model.nested_insert}) + ' '
 				+
 				w +
 				' RETURNING ' +
@@ -602,7 +686,7 @@ module.exports = class builder {
 		} else {
 			q = 'UPDATE ' + model.schema + '.' + model.table +
 				' SET ' + allkeys.join(',') +
-				' = ' + this.resolveValues(model.columns, {dynamic_base_index: model.dynamic_base_index}) + ' ' +
+				' = ' + this.resolveValues(model.columns, {dynamic_base_index: model.dynamic_base_index, nested_insert: model.nested_insert}) + ' ' +
 				w +
 				' RETURNING ' +
 				(return_arr.length > 0 ? return_arr.join(', ') : '*');
@@ -718,7 +802,7 @@ module.exports = class builder {
 					} else if (op == '$qref') {
 						var q_ref_split = v.split && v.split('$') || [v];
 						var ref_col = q_ref_split[q_ref_split.length - 1];
-						var ref_alias = q_ref_split[q_ref_split.length - 2] + (options.dynamic_base_index ? '_' + options.dynamic_base_index : '');
+						var ref_alias = q_ref_split[q_ref_split.length - 2] + ((options.dynamic_base_index && options.nested_insert) ? '_' + options.dynamic_base_index : '');
 						nv = ' (select ' + ref_alias + '.' + ref_col + ' from ' + ref_alias + ') ';
 					} else if (op == '$excluded') { // for conflict columns 
 						nv = 'EXCLUDED.' + columns[i].columnName.split(".").pop();
@@ -829,7 +913,6 @@ module.exports = class builder {
 		for (let i = 0; i < conditions.rules.length; i++) {
 			const element = conditions.rules[i];
 			if((!element.rules) && !conditions.rules[i].operator && !conditions.rules[i].value) continue;
-			// console.log('condition', element)
 			if (conditions.rules[i].rules && conditions.rules[i].condition) {
 
 				// nest
@@ -877,22 +960,22 @@ module.exports = class builder {
 				 else if (conditions.rules[i].values  && conditions.rules[i].values[0]) {
 					val = conditions.rules[i].values[0].value;
 				} else {
-					console.log("oepration not found  frp, JTsql ");
+					//console.log("oepration not found  frp, JTsql ");
 					continue;
 				}
 
 				var param_val = false;
 
 				// this.depthpaths.push
-				if(val !== undefined && 	conditions.rules[i].input_key === undefined  && conditions.rules[i].operator.indexOf('$columnref') == -1){
-					if(conditions.rules[i].operator.indexOf('$columnref') == -1) {
-						// condition  value is static 
+				if(val !== undefined && conditions.rules[i].input_key === undefined  && conditions.rules[i].operator.indexOf('$columnref') == -1){
+
+					if(no_rhs_operators.indexOf(conditions.rules[i].operator) == -1) {
 						val = this.getParamMapIndex(val)
 					}
 				 
 				} else if (val && (!conditions.rules[i].operator || conditions.rules[i].operator.indexOf('$') == -1)) {
 
-					
+
 					if (conditions.rules[i].input_key && conditions.rules[i].input_key.match(/BODY|QUERY|URL|SESSION/)) {
 
 						var key_spl = conditions.rules[i].input_key.split('.');
@@ -938,7 +1021,7 @@ module.exports = class builder {
 
 						this.depthpaths.push(query_path_ob)
 					}else{
-						console.log( 'else not key')
+						//console.log( 'else not key')
 					}
 					val = this.getParamMapIndex(val)
 					param_val = true;
@@ -981,33 +1064,6 @@ module.exports = class builder {
 		// var optype = typeof params.operator;
 		var valtype = typeof params.value;
 
-		var translate = {
-			'equal': '$eq',
-			'not_equal': '$!eq',
-			'less_than': '$lt',
-			'less_or_equal': '$lte',
-			'greater_than': '$gt',
-			'greater_or_equal': '$gte',
-			'is_null': '$null',
-			'is_empty': '$null',
-			'is_not_null': '$!null',
-			'is_not_empty': '$!null',
-			'is_true': '$true',
-			'is_not_true': '$!true',
-			'is_false': '$false',
-			'is_not_false': '$!false',
-			'like': '$regex',
-			'not_like': '$!regex',
-			'ilike': '$ilike', // case insensitive like
-			'not_ilike': '$!ilike', // case  insensitive  not like
-			'regex': '$regex',
-			'not_regex': '$!regex',
-			'contains': '$contains',
-			'contained_by': '$contained_by',
-			'overlaps': '$overlaps',
-			'any': '$any',
-			'in': '$any'
-		};
 		let quotes = this.quotes
 
 		if (params.def) params.columnName = params.def;
@@ -1096,3 +1152,33 @@ module.exports = class builder {
 	}
 
 };
+
+const translate = {
+	'equal': '$eq',
+	'not_equal': '$!eq',
+	'less_than': '$lt',
+	'less_or_equal': '$lte',
+	'greater_than': '$gt',
+	'greater_or_equal': '$gte',
+	'is_null': '$null',
+	'is_empty': '$null',
+	'is_not_null': '$!null',
+	'is_not_empty': '$!null',
+	'is_true': '$true',
+	'is_not_true': '$!true',
+	'is_false': '$false',
+	'is_not_false': '$!false',
+	'like': '$regex',
+	'not_like': '$!regex',
+	'ilike': '$ilike', // case insensitive like
+	'not_ilike': '$!ilike', // case  insensitive  not like
+	'regex': '$regex',
+	'not_regex': '$!regex',
+	'contains': '$contains',
+	'contained_by': '$contained_by',
+	'overlaps': '$overlaps',
+	'any': '$any',
+	'in': '$any'
+};
+
+const no_rhs_operators = ['is_null', 'is_empty', 'is_not_null', 'is_not_empty', 'is_true', 'is_not_true', 'is_false', 'is_not_false'];

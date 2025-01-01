@@ -148,3 +148,59 @@ exports.idToJoinPathText = function(params) {
     }
     return arr;
 }
+
+exports.applyPermissions = function(params) {
+    var table = params.table;
+    var method = params.method;
+    var conditions = params.conditions;
+    var current_role = params.current_role;
+
+    var permissions = getPermissions({
+        table: table,
+        method: method,
+        current_role: current_role
+    });
+
+    if(permissions.access_type == -1) {
+        throw new Error('You are not authorized to perform this action');
+    }
+
+    if(permissions.access_type == 0) {
+        var where_condition = permissions.conditions
+        if(conditions.rules && conditions.rules.length > 0) where_condition.rules.unshift(conditions)
+        return where_condition
+    }
+
+    return conditions;
+}
+
+function getPermissions(params) {
+    var current_role = params.current_role;
+    var table = params.table;
+    var method = params.method;
+
+    if(current_role.role_type_name == 'Admin') {
+        return {access_type: 1};
+    }
+
+    if(
+        current_role.custom_permissions && 
+        current_role.custom_permissions[table] && 
+        current_role.custom_permissions[table][method] && 
+        current_role.custom_permissions[table][method].access_type == 1
+    ) {
+        return {access_type: 1};
+    } else if(
+        current_role.custom_permissions && 
+        current_role.custom_permissions[table] && 
+        current_role.custom_permissions[table][method] && 
+        current_role.custom_permissions[table][method].access_type == 0
+    ) {
+        return {access_type: 0, conditions: current_role.custom_permissions[table][method].conditions};
+    }
+
+    return {access_type: -1};
+
+}
+
+exports.getPermissions = getPermissions;

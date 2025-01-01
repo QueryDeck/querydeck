@@ -3,17 +3,13 @@ const { Pool } = require('pg');
 var envconfig = require.main.require('./envconfig.js').vars;
 
 const pool = new Pool({
-  connectionString: envconfig.PG.Admin
+  connectionString: envconfig.PG.Admin,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
-// console.log(pool)
-// pool.query('SELECT NOW()', (err, res) => {
-//     console.log(err, res)
-//     // pool.end()
-// })
-// function que .
  
 function query(q, callback){
-  // console.log('MAIND', q)
   pool.connect((err, client, done) => {
     if (err) {
       done();
@@ -27,4 +23,3 @@ function query(q, callback){
 }
 
 exports.query = query;
-// exports.query = pool.query;
