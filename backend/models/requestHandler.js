@@ -125,10 +125,7 @@ function handleRequest(params, callback) {
 
 // returns session object or error
 function getSession(params) {
-    return {
-        user_id: 720,
-        role_id: 'admin'
-      }
+    
     var jwt_key = params.jwt_key;
 
     if(!jwt_key) return {error: 'Auth not setup correctly', response_code: 500};
