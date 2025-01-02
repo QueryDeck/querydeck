@@ -203,9 +203,7 @@ module.exports = class builder {
 					finalColumns.push('( ' + this.select(model.joins[i], model.joins[i].agg_type) + ' )');
 				} else {
 					jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table);
-					// if(model.q.joins[i].model.q.as) jtext += ' AS ' + this.identAlias(model.q.joins[i].model.q.as) + ' ';
-					// old
-					// jtext += ' ON ' + this.resolveConditions(this.addSchemaToObKeys(model.q.joins[i].on, model.q.joins[i].model), model.q.joins[i].model);
+
 					// TODO: throw error if on is null
 					jtext += ' ON ' + this.resolveConditions(model.joins[i].on);
 
@@ -222,11 +220,6 @@ module.exports = class builder {
 		if (finalColumns.length == 0) { // wildcard if not columns
 			finalColumns = ['*'];
 		}
-		var aliastext = '';
-
-		// if(model.q.as) aliastext = ' AS ' + this.identAlias(model.q.as) + ' ';
-
-		// if(model.orderby) model.q.orderby.by = this.addSchemaToObKeys(model.q.orderby.by, model, model.q.as);
 
 		var fq = 'SELECT ' +
 			finalColumns.join(',') +
@@ -250,14 +243,12 @@ module.exports = class builder {
 				return ' SELECT JSON_AGG(' + id + '.*) AS ' + model.table_alias + ' FROM (' + fq + ') ' + id;
 			}
 		}
-		// if(model.q.aggArray) return ' SELECT ARRAY_AGG(aggm.' + Object.keys(model.q.columns)[0].split('.').pop() + ') AS ' + model.q.aggArray + ' FROM (' + fq + ') aggm ';
-		// if(model.q.aggregateOne) return ' SELECT ROW_TO_JSON(' + id + '.*) AS ' + this.identAlias(model.q.aggAlias || model.q.as || model.constructor.properties.schema_name + '.' + model.constructor.properties.table_name) + ' FROM ( ' + fq + ' ) ' + id;
+		
 		return fq;
 
 	}
 
 	resolveSelectColumns(model) {
-
 
 		var finalColumns = [];
 		let quotes = this.quotes;
@@ -327,6 +318,7 @@ module.exports = class builder {
 		return finalColumns;
 
 	}
+
 	resolveTimeStampColumn(column, colNameQuotes, ts_type) {
 		let col_name;
 		column.alias = 'tp';
@@ -357,6 +349,7 @@ module.exports = class builder {
 		}
 		return col_name;
 	}
+
 	dateFormat(col_name, ts_gran) {
 
 		if (this.db_type == MYSQL) {
@@ -465,7 +458,6 @@ module.exports = class builder {
 		return result;
 	}
 
-
 	insert(model) {
 
 		model.return_joins = [];
@@ -502,8 +494,6 @@ module.exports = class builder {
 
 		var q;
 		var nested_insert = model.nested_insert;
-
-
 
 		var current_alias = (model.with_alias ? model.with_alias : ('q' + model.method + '_' + model.table)) + ((model.dynamic_base_index && model.nested_insert) ? '_' + model.dynamic_base_index : '')
 		var data_alias = current_alias + '_data';
@@ -700,7 +690,6 @@ module.exports = class builder {
 
 	fomatModelColumn(models, query_values, request) {
 
-
 		for (let i = 0; i < models.length; i++) {
 			let field_input = _.get(query_values, models[i].table_body_path);
 			let table_request_body = _.get(request, models[i].table_body_path);
@@ -755,7 +744,6 @@ module.exports = class builder {
 
 	}
 
-
 	resolveValues(columns_arr, options) {
 
 		var val_arr = [];
@@ -767,7 +755,6 @@ module.exports = class builder {
 			let nv_arr = [];
 			valtext += '(';
 			for (let i = 0; i < columns.length; i++) {
-
 
 				if (options && options.conflict) columns[i].operator = '$excluded'
 
@@ -852,15 +839,13 @@ module.exports = class builder {
 		if (!order || typeof order != 'object' || !Array.isArray(order) || order.length == 0) return '';
 
 		var orderedt = ' ORDER BY ';
-		// var ol  = order.by // orderby option list 
+
 		for (var i = 0; i < order.length; i++) {
-			// orderedt += order[i].name;
 			let col_name = order[i].name;
 			if (order[i].fn === 'date_trunc') {
 				if (order[i].def) order[i].alias = 'tp' // force alias name as 'tp' for custom column timestamp  
 				else if (!order[i].alias) order[i].alias = 'tp'
 			}
-			// orderedt +=   col_name ; 
 			col_name = this.quotes + col_name.split(".").join(this.quotes + "." + this.quotes) + this.quotes;
 			// alias priority order for custom cols  :  alias > lable > def
 			//|| order[i].label
@@ -899,7 +884,6 @@ module.exports = class builder {
 	}
 
 	resolveConditions(conditions, mymodel, dp, depthpath) {
-
 
 		dp = dp || {
 			depth: 0
@@ -974,7 +958,6 @@ module.exports = class builder {
 					}
 				 
 				} else if (val && (!conditions.rules[i].operator || conditions.rules[i].operator.indexOf('$') == -1)) {
-
 
 					if (conditions.rules[i].input_key && conditions.rules[i].input_key.match(/BODY|QUERY|URL|SESSION/)) {
 
@@ -1123,13 +1106,7 @@ module.exports = class builder {
 		} else if (params.operator === '$any') {
 			return params.columnName + ' = ANY(' + params.value + ')';
 		}
-
-		// else if (params.operator.indexOf('$cnq') > -1) return params.columnName + ' @> ARRAY[(' + this.select(params.value) + ')]';
-		// else if (params.operator.indexOf('$cnbq') > -1) return params.columnName + ' <@ ARRAY[(' + this.select(params.value) + ')]';
-		// else if (params.operator.indexOf('$cnb') > -1) return params.columnName + ' <@ ' + (params.value.indexOf('$') > -1 ? params.value : 'ARRAY[' + params.value + ']') + '::' + pgtype + '[]';
-		// else if (params.operator.indexOf('$!cnb') > -1) return ' NOT (' + params.columnName + ' <@ ' + params.value + '::' + pgtype + '[]) ';
-		// else if (params.operator.indexOf('$cn') > -1) return params.columnName + ' @> ' + params.value + '::' + pgtype;
-		// else if (params.operator.indexOf('$!cn') > -1) return ' NOT (' + params.columnName + ' @> ' + params.value + '::' + pgtype + ') ';
+		
 		throw new Error('Operator not found: ' + params.operator)
 	}
 
