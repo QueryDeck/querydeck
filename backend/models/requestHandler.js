@@ -1,4 +1,4 @@
-
+var jwt = require('jsonwebtoken');
 var executeClientRequest = require.main.require('./models/executeClientRequest.js').executeClientRequest;
 
 exports.handleRequest = handleRequest;

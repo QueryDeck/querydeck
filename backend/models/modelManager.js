@@ -349,8 +349,10 @@ var ModelManager = {
           host: params.dbhost,
           port: params.dbport,
           database: params.dbname,
-          connectionTimeoutMillis: 20000, // 20 seconds
-          
+          connectionTimeoutMillis: 30000,
+          ssl: {
+            rejectUnauthorized: false,
+          },
         })
         await client.connect()
 
@@ -372,7 +374,7 @@ var ModelManager = {
     }
 
   },
-  
+
   // #### load project model ##### 
   loadMain: function(callback){
     
