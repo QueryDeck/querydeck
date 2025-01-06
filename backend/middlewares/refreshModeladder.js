@@ -18,7 +18,7 @@ module.exports = function (req, res, next) {
      
       // console.log( " --> res.headersSent " + res.statusCode, status)
   
-      if (status >= 400 && !options.isAlreadySentError) {
+      if (status >= 500 && !options.isAlreadySentError) {
         message = message || 'Something Went Wrong';
         let myError = new Error(message)
         myError.message += ' (status: ' + status + ')'
