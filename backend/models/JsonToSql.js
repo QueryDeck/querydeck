@@ -113,7 +113,7 @@ module.exports = class builder {
 
 				var model = this.models[i];
 
-				var agg_func = ((model.allow_multiple_row || model.method == 'update' || (model.nested_insert && model.table_body_path_arr.length > 1 && model.dynamic_base_index && model.multi_row_insert)) ? 'JSON_AGG' : 'ROW_TO_JSON');
+				var agg_func = ((model.allow_multiple_row || model.method == 'update' || (model.nested_insert && model.table_body_path_arr.length > 1 && model.dynamic_base_index) || model.multi_row_insert) ? 'JSON_AGG' : 'ROW_TO_JSON');
 
 				if(this.models[i].return_joins && this.models[i].return_joins.length > 0) {
 
