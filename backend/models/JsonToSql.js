@@ -138,6 +138,8 @@ module.exports = class builder {
 					});
 
 				} else if(!model.nest_in) {
+					
+					model.final_alias = model.final_alias || model.queryAlias
 
 					this.queries.push({
 						query: 'SELECT ' + agg_func + '(' + model.final_alias + '.*) AS "' + ((model.dynamic_base_index && model.nested_insert) ? model.table_body_path + '_' + model.dynamic_base_index : model.table_body_path) + '" FROM ' + model.final_alias,
