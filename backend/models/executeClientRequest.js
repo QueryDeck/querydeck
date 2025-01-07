@@ -174,7 +174,9 @@ function executeClientRequest(params, callback) {
                 }
                 gq_ob.models = [{
                     method: params.query_model.sqlmethod,
-                    query: params.query_model.query_json,
+                    query: {
+                        model: params.query_model.query_json
+                    },
                     body: params.request.body
                 }];
             }
@@ -261,13 +263,13 @@ function executeClientRequest(params, callback) {
         try {
             query = new json2sql(
                 final_models,
-                params.currentModel.databases[db_id], {useDynamicValues: true}
+                params.currentModel.databases[db_id], {useDynamicValues: true}, params.request
             ).generate();
         } catch(err) {
             console.log('err', err)
             return callback({
                 response_code: 400,
-                error: err
+                error: err.message
             });
         }
 

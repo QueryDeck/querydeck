@@ -122,6 +122,13 @@ function getClientDomain(req) {
     return 'https://app.querydeck.io'
 }
 
+
+function serverType( ) {
+     if(process.env.SELF_DOMAIN === 'api.querydeck.io') return 'prod' ; 
+     if(process.env.SELF_DOMAIN === 'api.querydeck-dev.com') return 'staging' ; 
+     return 'dev' // localhost development
+}
+
 function replaceAllDataFromText(text, dataObj) {
 
   let dataObjKeys = Object.keys( dataObj)
@@ -159,6 +166,8 @@ console.log( "output File : ",finalPath )
   exports.formatJoinGraph = formatJoinGraph;
   exports.replaceAllDataFromText = replaceAllDataFromText;
   exports.logToFile = logToFile;
+  exports.serverType = serverType;
+  
   console.file = logToFile;
   
 

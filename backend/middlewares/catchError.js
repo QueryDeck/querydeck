@@ -25,8 +25,11 @@ function catchError(func) {
                 }
                 if( typeof err !== 'object') err = {err}
                 err.message = message + ' (status: ' +statusCode+ ')'; 
-                Sentry.saveData(req)
-                Sentry.captureError(err)
+                if(statusCode >=500){ 
+                    Sentry.saveData(req)
+                    Sentry.captureError(err)
+                }
+    
                 console.error( err) 
             }
             catch (err) {

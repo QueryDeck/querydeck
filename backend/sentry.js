@@ -93,8 +93,8 @@ function captureError(error) {
 //  console.log( "------------inside sentr-----------")
   if (PROJECT_ENVIRONMENT !== 'prod') return;
 
-  // The request handler must be the first middleware on the app
-  // console.log( error?.message || error)
+// The request handler must be the first middleware on the app
+  //   console.log( error?.message || error)
   Sentry.captureException(error,
     // {
     //   tags: {
@@ -106,6 +106,32 @@ function captureError(error) {
 
 
 }
+
+ 
+
+
+process.on('uncaughtException', (err) => {
+  let newErrr = err  ||  new Error(  "Error: uncaughtException")
+  console.error(newErrr);
+  captureError(newErrr)
+  process.exit(1);  
+});
+
+
+process.on('unhandledRejection', (reason, promise) => {
+  let newErrr =    new Error(  "Error: unhandledRejection  , reason:  " +  reason )
+  console.error(newErrr, promise );
+  captureError(newErrr)
+});
+
+
+process.on('exit', (code) => {
+  let newErrr =    new Error(  "Error: exit   code: " +  code )
+  console.error(newErrr);
+  captureError(newErrr) 
+});
+
+
 
 module.exports = Sentry;
 module.exports.useRequestHandler = useRequestHandler;
