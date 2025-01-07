@@ -20,6 +20,8 @@ create table apps (
     name text not null,
     cors text[],
     api_app boolean default false,
+    -- {enabled: true, tables: []}
+    graphql json,
     created_by text not null references users(user_id),
     created_at int default extract(epoch from now())::int
 );
