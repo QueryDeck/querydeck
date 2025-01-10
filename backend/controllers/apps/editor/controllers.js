@@ -2076,29 +2076,137 @@ module.exports = function (router) {
     const db_id = Object.keys(req.clientModels[req.query.subdomain].databases)[0];
   
     let currentModel = req.clientModels[req.query.subdomain].databases[db_id];
- 
-    let result = Object.values( currentModel.graphql?.tables || {} ).map((table)=>{ 
-      let currTableObj = {
-        relations : [] , 
-        table_name : table.table_schema.join(".") , 
-      } ; 
-      
-         let relation_keys = Object.keys (table.relations)
-         for (let i = 0; i < relation_keys.length; i++) {
-              relation_keys[i];
-              currTableObj.relations.push ( {
-                ...table.relations[relation_keys[i]],
-                relation_name : relation_keys[i],
-              })
-         }
-       return currTableObj ; 
-    })
+    let appGraphql = req.clientModels[req.query.subdomain].appDetails.graphql;
+    let result = {
+      enabled : appGraphql.enabled,
+      tables : []
+    }
+    if(appGraphql.enabled) {
 
+      appGraphql.tables.forEach((table) => {
+
+       let relations = []  ; 
+
+         if(currentModel.graphql?.tables && currentModel.graphql?.tables[table ]){ 
+          let graphQlTableRelation = currentModel.graphql?.tables[table]?.relations || {} ; 
+          let graphQlTableRelationKeys = Object.keys(graphQlTableRelation); 
+          
+          for(let i = 0; i< graphQlTableRelationKeys.length ; i++){ 
+            if( appGraphql.tables.indexOf(graphQlTableRelation[graphQlTableRelationKeys[i]].rel_table_graphql)> -1){
+              relations.push ( {
+                ...graphQlTableRelation[graphQlTableRelationKeys[i]] ,
+                relation_name : graphQlTableRelationKeys[i],
+              })
+            }
+          }
+        
+       }
+       result.tables.push({
+         "table_name": table,
+        "relations": relations,
+      });
+
+
+    
+      });
+
+
+  
+    }
     return res.zend(result);
    
 
   } ) )
 
+
+    // ######  update graphql tables   #####
+  router.put('/graphql/tables', catchError(async function (req, res) {
+
+    if (!req.body.subdomain) return res.zend(null, 400, "Must have field 'subdomain'");
+    if (!req.body.tables || !Array.isArray(req.body.tables)) return res.zend(null, 400, "Must have field 'tables' as array");
+    if (typeof req.body.enabled !== 'boolean') return res.zend(null, 400, "Must have field 'enabled' as boolean");
+
+    if (req.user_id !== req.clientModels[req.body.subdomain].appDetails.created_by) {
+      return res.zend(null, 401, "Login Required");
+    }
+
+    const db_id = Object.keys(req.clientModels[req.body.subdomain].databases)[0];
+    let currentModel = req.clientModels[req.body.subdomain].databases[db_id];
+
+    // Validate tables exist in model and match relations
+    for (let table of req.body.tables) {
+      if (!currentModel.graphql?.tables) {
+        return res.zend(null, 400, `No GraphQL tables defined`);
+      }
+      
+      let found = false;
+      for (const tableKey in currentModel.graphql.tables) {
+        const tableObj = currentModel.graphql.tables[tableKey];
+        for (const relationKey in tableObj.relations) {
+          if (tableObj.relations[relationKey].base_table_graphql === table) {
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
+      }
+
+      if (!found) {
+        return res.zend(null, 400, `Table '${table}' does not exist in GraphQL relations`);
+      }
+    }
+
+    const query = {
+      text: `
+         WITH apps_sel AS(
+            SELECT  
+                apps.app_id
+            FROM  apps
+                INNER JOIN subdomain_gen ON subdomain_gen.app_id = apps.app_id
+            WHERE
+                  subdomain_gen.name = $2
+                  AND apps.created_by = $1
+          )
+          UPDATE apps
+          SET   graphql =    $3::jsonb
+          WHERE 
+            apps.app_id = ( SELECT app_id FROM  apps_sel)
+          RETURNING   app_id, graphql
+ `,
+      values: [
+        req.user_id, 
+        req.body.subdomain,
+        JSON.stringify({
+          enabled: req.body.enabled,
+          tables: req.body.tables
+        }),
+
+   
+      ]
+ 
+    };
+
+    new req.DB({}).executeRaw(query, function(err, result) {
+      if (!req.ErrorHandler({ err: err, line: 0, file: __filename })) {
+        return res.zend(null, 500, "Something went wrong");
+      }
+      if (!result || !result.rows.length) {
+        return res.zend(null, 400, "Invalid subdomain");
+      }
+
+      ModelManager.updateGraphql({
+        subdomain: req.body.subdomain,
+        tables: req.body.tables,
+        enabled: req.body.enabled
+      });
+
+      return res.zend(result.rows[0].graphql, 200, "Successfully updated GraphQL tables configuration");
+    });
+  
+  
+    }));
+
+    
   router.all('/*', (req, res) => {
     res.zend({ method: req.method }, 404, "Not Found",);
   });

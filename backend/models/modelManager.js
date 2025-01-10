@@ -455,6 +455,7 @@ var ModelManager = {
               apps.app_id as app_id,
               apps.name as name, 
               apps.cors, 
+              apps.graphql, 
               created_by, 
               s.name as subdomain,
               auth_details.client_secret_encrypted as jwt_key,
@@ -597,6 +598,10 @@ var ModelManager = {
         name: row.name,
         created_by: row.created_by,
         subdomain: row.subdomain,
+        graphql: row.graphql || {
+          tables: [],
+          enabled: false
+        },
         cors: row.cors,
         auth: {
           jwt_key: row.jwt_key ? cipher.decrypt(row.jwt_key) : null,
@@ -790,6 +795,17 @@ var ModelManager = {
     if(params.user_id_session_key) ModelManager.models[params.subdomain].appDetails.auth.user_id_session_key = params.user_id_session_key;
     if(params.user_id_column_id) ModelManager.models[params.subdomain].appDetails.auth.user_id_column_id = params.user_id_column_id;
     if(params.role_session_key) ModelManager.models[params.subdomain].appDetails.auth.role_session_key = params.role_session_key;
+  },
+
+  updateGraphql(params) {
+    if(!ModelManager.models[params.subdomain] || !ModelManager.models[params.subdomain].appDetails) throw '400';
+    if(!Array.isArray(params.tables)) throw '400';
+    if(typeof params.enabled !== 'boolean') throw '400';
+
+    ModelManager.models[params.subdomain].appDetails.graphql = {
+      tables: params.tables,
+      enabled: params.enabled
+    };
   },
 
   updateRole(params) { 
@@ -1007,6 +1023,15 @@ var ModelManager = {
           rels_new: {}
         };
       }
+      // Handle uindex resolution
+      if(rows[i].uindex) {
+        if(!def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex]) {
+          def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] = [];
+        }
+        if(def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].indexOf(rows[i].name) == -1) {
+          def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].push(rows[i].name);
+        }
+      }
     }
     // console.log( rows)
     for (let i = 0; i < rows.length; i++) {
@@ -1049,10 +1074,6 @@ var ModelManager = {
 
       def[rows[i].nspname][rows[i].relname].properties.columns[rows[i].name].unique = (rows[i].uniquekey == 't' ? true : false);
 
-      if(rows[i].uindex) {
-        if(!def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex]) def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] = [];
-        if(def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].indexOf(rows[i].name) == -1) def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].push(rows[i].name);
-      }
       if (rows[i].primarykey == 't') {
         if(def[rows[i].nspname][rows[i].relname].properties.primary.indexOf(rows[i].name) == -1) def[rows[i].nspname][rows[i].relname].properties.primary.push(rows[i].name);
       }
@@ -1065,8 +1086,8 @@ var ModelManager = {
 
         var rel_id = rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name + '-' + rows[i].foreignkey_schema + '.' + rows[i].foreignkey + '.' + rows[i].foreignkey_fieldname;
         def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id] = def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id] || {};
-        def[rows[i].nspname][rows[i].relname].properties.rels[rel_id] = rows[i].uindex ? '1-1' : 'M-1';
-        def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].type = rows[i].uindex ? '1-1' : 'M-1';
+        def[rows[i].nspname][rows[i].relname].properties.rels[rel_id] = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : 'M-1';
+        def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].type = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : 'M-1';
         def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].direct = 'out';
 
         graphql_tables[graphql_table_name].rel_tables_raw[rows[i].foreignkey_schema + '.' + rows[i].foreignkey] = graphql_tables[graphql_table_name].rel_tables_raw[rows[i].foreignkey_schema + '.' + rows[i].foreignkey] || 0;
@@ -1077,8 +1098,8 @@ var ModelManager = {
 
         var rel_id_rev = rows[i].foreignkey_schema + '.' + rows[i].foreignkey + '.' + rows[i].foreignkey_fieldname + '-' + rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name;
         def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev] = def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev] || {};
-        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels[rel_id_rev] = rows[i].uindex ? '1-1' : '1-M';
-        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].type = rows[i].uindex ? '1-1' : '1-M';
+        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels[rel_id_rev] = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : '1-M';
+        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].type = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : '1-M';
         def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].direct = 'in';
 
         if(def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname].indexOf(rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name) == -1) {
