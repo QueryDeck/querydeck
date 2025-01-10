@@ -2119,7 +2119,7 @@ module.exports = function (router) {
   } ) )
 
 
-    // ######  Save  Cors domains  #####
+    // ######  update graphql tables   #####
   router.put('/graphql/tables', catchError(async function (req, res) {
 
     if (!req.body.subdomain) return res.zend(null, 400, "Must have field 'subdomain'");
