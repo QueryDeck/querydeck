@@ -347,7 +347,7 @@ module.exports = class builder {
           if(typeof v == 'undefined') nv = 'NULL';
           else {
             let vtype = this.getType(model.constructor.properties.schema_name + '.' + model.constructor.properties.table_name + '.' + insertKeys[j]);
-            if(v == '' && (vtype == 'integer' || vtype == 'bigint' || vtype == 'smallint')) {
+            if(v === '' && (vtype == 'integer' || vtype == 'bigint' || vtype == 'smallint')) {
               nv = ' NULL ';
             } else {
               nv = this.getParamIndex(v);
@@ -502,7 +502,7 @@ module.exports = class builder {
         } else {
           val = operator[keys[i]];
         }
-      } else if(keys[i] == '$ident'|| keys[i] == '$null' || keys[i] == '$rawqin' || keys[i] == '$in' || keys[i] == '$!in') {
+      } else if(keys[i] == '$ident'|| keys[i] == '$null' || keys[i] == '$rawqin') {
         // console.log(2)
         val = operator[keys[i]];
       } else if(typeof operator[keys[i]] == 'string' && (operator[keys[i]].indexOf('$req.body.') > -1 || operator[keys[i]].indexOf('$req.body.') > -1)){
@@ -528,7 +528,7 @@ module.exports = class builder {
       else if (keys[i].indexOf('$!cn') > -1) text += ' NOT (' + this.wrapType(columnName, realcname) + ' @> ' + val + '::' + pgtype + ') ';
       else if (keys[i].indexOf('$inq') > -1) text += this.wrapType(columnName, realcname) + ' IN (' + this.select(operator[keys[i]], true) + ')';
       else if (keys[i].indexOf('$!inq') > -1) text += this.wrapType(columnName, realcname) + ' NOT IN (' + this.select(operator[keys[i]], true) + ')';
-      else if (keys[i].indexOf('$in') > -1) text += this.wrapType(columnName, realcname) + ' IN ' + '(' + val.join(',') + ')';
+      else if (keys[i].indexOf('$in') > -1) text += this.wrapType(columnName, realcname) + ' ANY(' + val + ')';
       else if (keys[i].indexOf('$!in') > -1) text += this.wrapType(columnName, realcname) + ' NOT IN ' + '(' + val.join(',') + ')';
       else if (keys[i] === '$null') operator[keys[i]] ? text += this.wrapType(columnName, realcname) + ' IS NULL' : text += this.wrapType(columnName, realcname) + ' IS NOT NULL ';
       else if (keys[i] === '$rawqin') text += columnName + ' IN ' + operator[keys[i]];
