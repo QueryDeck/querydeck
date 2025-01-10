@@ -1023,6 +1023,15 @@ var ModelManager = {
           rels_new: {}
         };
       }
+      // Handle uindex resolution
+      if(rows[i].uindex) {
+        if(!def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex]) {
+          def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] = [];
+        }
+        if(def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].indexOf(rows[i].name) == -1) {
+          def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].push(rows[i].name);
+        }
+      }
     }
     // console.log( rows)
     for (let i = 0; i < rows.length; i++) {
@@ -1065,10 +1074,6 @@ var ModelManager = {
 
       def[rows[i].nspname][rows[i].relname].properties.columns[rows[i].name].unique = (rows[i].uniquekey == 't' ? true : false);
 
-      if(rows[i].uindex) {
-        if(!def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex]) def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] = [];
-        if(def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].indexOf(rows[i].name) == -1) def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].push(rows[i].name);
-      }
       if (rows[i].primarykey == 't') {
         if(def[rows[i].nspname][rows[i].relname].properties.primary.indexOf(rows[i].name) == -1) def[rows[i].nspname][rows[i].relname].properties.primary.push(rows[i].name);
       }
@@ -1081,8 +1086,8 @@ var ModelManager = {
 
         var rel_id = rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name + '-' + rows[i].foreignkey_schema + '.' + rows[i].foreignkey + '.' + rows[i].foreignkey_fieldname;
         def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id] = def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id] || {};
-        def[rows[i].nspname][rows[i].relname].properties.rels[rel_id] = rows[i].uindex ? '1-1' : 'M-1';
-        def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].type = rows[i].uindex ? '1-1' : 'M-1';
+        def[rows[i].nspname][rows[i].relname].properties.rels[rel_id] = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : 'M-1';
+        def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].type = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : 'M-1';
         def[rows[i].nspname][rows[i].relname].properties.rels_new[rel_id].direct = 'out';
 
         graphql_tables[graphql_table_name].rel_tables_raw[rows[i].foreignkey_schema + '.' + rows[i].foreignkey] = graphql_tables[graphql_table_name].rel_tables_raw[rows[i].foreignkey_schema + '.' + rows[i].foreignkey] || 0;
@@ -1093,8 +1098,8 @@ var ModelManager = {
 
         var rel_id_rev = rows[i].foreignkey_schema + '.' + rows[i].foreignkey + '.' + rows[i].foreignkey_fieldname + '-' + rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name;
         def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev] = def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev] || {};
-        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels[rel_id_rev] = rows[i].uindex ? '1-1' : '1-M';
-        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].type = rows[i].uindex ? '1-1' : '1-M';
+        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels[rel_id_rev] = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : '1-M';
+        def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].type = (rows[i].uindex && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex] && def[rows[i].nspname][rows[i].relname].properties.uindex[rows[i].uindex].length == 1) ? '1-1' : '1-M';
         def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.rels_new[rel_id_rev].direct = 'in';
 
         if(def[rows[i].foreignkey_schema][rows[i].foreignkey].properties.referencedBy[rows[i].foreignkey_fieldname].indexOf(rows[i].nspname + '.' + rows[i].relname + '.' + rows[i].name) == -1) {
