@@ -11,6 +11,7 @@ const SetupGraphQL = ({
   closeSetupGraphQLModal,
   setupGraphQLModalState,
   handleSetupGraphQLModalClick,
+  details
 }) => {
   const renderData = () => {
     return (
@@ -22,6 +23,7 @@ const SetupGraphQL = ({
           closeModal={closeSetupGraphQLModal}
           modalState={setupGraphQLModalState}
           handleSetupGraphQLModalClick={handleSetupGraphQLModalClick}
+          details={details}
         />
       </>
     );

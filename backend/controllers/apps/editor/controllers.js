@@ -2079,10 +2079,10 @@ module.exports = function (router) {
     let appGraphql = req.clientModels[req.query.subdomain].appDetails.graphql;
     let result = {
       enabled : appGraphql.enabled,
-      tables : []
+      tables : [],
+      initial : appGraphql.initial
     }
-    if(appGraphql.enabled) {
-
+   
       appGraphql.tables.forEach((table) => {
 
        let relations = []  ; 
@@ -2111,8 +2111,7 @@ module.exports = function (router) {
       });
 
 
-  
-    }
+   
     return res.zend(result);
    
 
@@ -2142,12 +2141,15 @@ module.exports = function (router) {
       let found = false;
       for (const tableKey in currentModel.graphql.tables) {
         const tableObj = currentModel.graphql.tables[tableKey];
-        for (const relationKey in tableObj.relations) {
-          if (tableObj.relations[relationKey].base_table_graphql === table) {
-            found = true;
-            break;
-          }
+        if(tableObj){ 
+          found = true;
         }
+        // for (const relationKey in tableObj.relations) {
+        //   if (tableObj.relations[relationKey].base_table_graphql === table) {
+        //     found = true;
+        //     break;
+        //   }
+        // }
         if (found) break;
       }
 

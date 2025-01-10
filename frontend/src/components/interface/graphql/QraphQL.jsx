@@ -29,7 +29,7 @@ import api, { apiBase } from "../../../api";
 let getDatabasesController;
 let getTablesController;
 let getGraphQLTablesController;
-
+let updateGraphQLTablesController;
 const QraphQL = ({ appid: subdomain }) => {
   // Redux
   const reduxDispatch = useDispatch();
@@ -45,6 +45,9 @@ const QraphQL = ({ appid: subdomain }) => {
     step: 3,
     details: {
       selectedTable: "",
+      tableData: null,
+      enabled : false,
+      initial: true // to check if the graphql is setup first time or not
     },
   };
   const [state, dispatch] = useReducer(qraphQLReducer, initialState);
@@ -64,13 +67,14 @@ const QraphQL = ({ appid: subdomain }) => {
     getDatabasesController = new AbortController();
     getTablesController = new AbortController();
     getGraphQLTablesController = new AbortController();
-
+    updateGraphQLTablesController = new AbortController();
     getDatabases();
     getGraphQLTables();
     return () => {
       getDatabasesController.abort();
       getTablesController.abort();
       getGraphQLTablesController.abort();
+      updateGraphQLTablesController.abort();
     };
     // eslint-disable-next-line
   }, []);
@@ -120,9 +124,8 @@ const QraphQL = ({ appid: subdomain }) => {
     });
   };
 
-  const handleSetupGraphQLModalClick = () => {
-    closeSetupGraphQLModal();
-    updateAttribute("loading", true);
+  const handleSetupGraphQLModalClick = (tables, enabled) => {
+     updateGraphQLTables(tables, enabled)
   };
 
   // Databases List
@@ -151,6 +154,9 @@ const QraphQL = ({ appid: subdomain }) => {
 
   // Fetches a list of  table
   const getTables = async () => {
+    if(state.tableOptions){ 
+      return
+    }
     try {
       updateAttribute("loading", true);
       const response = await api.get("/apps/editor/controllers/ops", {
@@ -185,13 +191,38 @@ const QraphQL = ({ appid: subdomain }) => {
       // setTableOptions(response.data.data )
       dispatch({
         type: "SET_GQL_TABLE",
-        tableData: response.data.data,
+        data: response.data.data,
         //  tables: response.data.data.tables,
       });
     } catch (error) {
       catchError(error);
     }
   };
+
+
+  const updateGraphQLTables = async (tables, enabled) => {
+
+    try {
+
+      const graphQLTables = tables.map(table => {
+        return table.label
+      })
+
+      updateAttribute("loading", true);
+      await api.put("/apps/editor/controllers/graphql/tables", {
+        subdomain: subdomain,
+        tables: graphQLTables,
+        enabled: enabled,
+      }, {
+        signal: updateGraphQLTablesController.signal,
+      });
+      closeSetupGraphQLModal();
+      getGraphQLTables()
+    } catch (error) {
+      catchError(error);
+    }
+  };
+
   const renderData = () => {
     if (state.loading) {
       return (
@@ -216,6 +247,7 @@ const QraphQL = ({ appid: subdomain }) => {
             closeSetupGraphQLModal={closeSetupGraphQLModal}
             setupGraphQLModalState={state.setupGraphQLModalState}
             handleSetupGraphQLModalClick={handleSetupGraphQLModalClick}
+            details={state.details}
           />
         </>
       );

@@ -600,7 +600,8 @@ var ModelManager = {
         subdomain: row.subdomain,
         graphql: row.graphql || {
           tables: [],
-          enabled: false
+          enabled: false,
+          initial : true // to check if the graphql is setup first time or not
         },
         cors: row.cors,
         auth: {

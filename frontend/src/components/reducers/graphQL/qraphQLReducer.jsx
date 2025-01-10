@@ -80,7 +80,9 @@ const qraphQLReducer = (state, action) => {
         loading: false,
         details: {
           ...state.details,
-          tableData: action.tableData,
+          tableData: action.data.tables,
+          enabled : action.data.enabled,
+          initial : action.data.initial,
         },
       };
 
