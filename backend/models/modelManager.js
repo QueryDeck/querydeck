@@ -455,6 +455,7 @@ var ModelManager = {
               apps.app_id as app_id,
               apps.name as name, 
               apps.cors, 
+              apps.graphql, 
               created_by, 
               s.name as subdomain,
               auth_details.client_secret_encrypted as jwt_key,
@@ -597,6 +598,10 @@ var ModelManager = {
         name: row.name,
         created_by: row.created_by,
         subdomain: row.subdomain,
+        graphql: row.graphql || {
+          tables: [],
+          enabled: false
+        },
         cors: row.cors,
         auth: {
           jwt_key: row.jwt_key ? cipher.decrypt(row.jwt_key) : null,
@@ -790,6 +795,17 @@ var ModelManager = {
     if(params.user_id_session_key) ModelManager.models[params.subdomain].appDetails.auth.user_id_session_key = params.user_id_session_key;
     if(params.user_id_column_id) ModelManager.models[params.subdomain].appDetails.auth.user_id_column_id = params.user_id_column_id;
     if(params.role_session_key) ModelManager.models[params.subdomain].appDetails.auth.role_session_key = params.role_session_key;
+  },
+
+  updateGraphql(params) {
+    if(!ModelManager.models[params.subdomain] || !ModelManager.models[params.subdomain].appDetails) throw '400';
+    if(!Array.isArray(params.tables)) throw '400';
+    if(typeof params.enabled !== 'boolean') throw '400';
+
+    ModelManager.models[params.subdomain].appDetails.graphql = {
+      tables: params.tables,
+      enabled: params.enabled
+    };
   },
 
   updateRole(params) { 
