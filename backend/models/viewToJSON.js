@@ -111,7 +111,7 @@ module.exports = class ViewToJSON {
 
                     // iterate over the entire path and make sure all rels are added as columns
                     // todo: this loop is fucked up. figure out a better way later
-                    for (let j = 0; j < (path_split_length); j++) {
+                    for (let j = 1; j < (path_split_length); j++) {
 
                         if (j % 2 == 1) {
                             // path_id_build += path_split[j - 1] + '-' + path_split[j];
@@ -126,7 +126,7 @@ module.exports = class ViewToJSON {
                             this.initColumn(base_table_id, coltab_loop);
                         } else {
                             this.initColumn(path_id_build.join('-'), coltab_loop);
-
+                            
                         }
 
                     }
