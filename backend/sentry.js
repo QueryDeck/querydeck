@@ -94,8 +94,8 @@ function captureError(error) {
   if (PROJECT_ENVIRONMENT !== 'prod') return;
 
 // The request handler must be the first middleware on the app
-    console.log('sending error', error?.message || error)
-  Sentry.captureException(error,
+    console.log('sending error :', error?.message || error)
+   Sentry.captureException(error,
     // {
     //   tags: {
     //     section: "articles",
@@ -108,19 +108,36 @@ function captureError(error) {
 }
 
  
- 
-process.on('beforeExit', (code) => {
-  let newErrr = new Error("Error: 'beforeExit' code: " + code);
-  captureError(newErrr);
+
+
+process.on('uncaughtException', (err) => {
+  console.log ( 'inside  uncaughtException')
+  let newErrr = err  ||  new Error(  "Error: uncaughtException")
   console.error(newErrr);
+  captureError(newErrr)
+  setTimeout(()=>{
+    process.exit(1);  
+  } ,2000)
+
+});
+
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log ( 'inside  unhandledRejection')
+  let newErrr =    new Error(  "Error: unhandledRejection  , reason:  " +  reason )
+  console.error(newErrr, promise );
+  captureError(newErrr)
 });
 
  
-process.on('exit', (code) => {
-  let newErrr =    new Error(  "Error: 'exit'   code: new time " +  code )
+
+process.on('beforeExit', (code) => {
+  console.log ( 'inside  beforeExit')
+  let newErrr = new Error("Error: beforeExit code: " + code);
   console.error(newErrr);
-  captureError(newErrr) ;
+  captureError(newErrr);
 });
+
 
 
 

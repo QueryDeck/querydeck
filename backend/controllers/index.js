@@ -16,13 +16,21 @@ module.exports = function (router) {
       process.emit('beforeExit', 0);
     }
     if (req.query.event === 'exit') {
-      process.emit('exit', 0);
+      process.exit(1)
     }
     if (req.query.event === 'uncaughtException') {
-      process.emit('uncaughtException', new Error('Test uncaughtException'));
+      let error = new Error('Test uncaughtException');
+      error.name = 'UncaughtException';
+      error.message = 'Test uncaughtException error 2';
+      error.stack = error.stack;
+      process.emit('uncaughtException', error);
+      throw error;
     }
     if (req.query.event === 'unhandledRejection') {
-      process.emit('unhandledRejection', new Error('Test unhandledRejection'));
+      // Create a Promise that rejects to trigger unhandledRejection
+      new Promise((resolve, reject) => {
+        reject(new Error('Simulated unhandled rejection error 2'));
+      });
     }
     }
 
