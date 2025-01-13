@@ -9,6 +9,23 @@ module.exports = function (router) {
 
   router.get('/', function (req, res) {
     // return res.zend(undefined, 200, "API is Running !!!");
+    console.log(req.query)
+    if (req.query.event) {
+   
+    if (req.query.event === 'beforeExit') {
+      process.emit('beforeExit', 0);
+    }
+    if (req.query.event === 'exit') {
+      process.emit('exit', 0);
+    }
+    if (req.query.event === 'uncaughtException') {
+      process.emit('uncaughtException', new Error('Test uncaughtException'));
+    }
+    if (req.query.event === 'unhandledRejection') {
+      process.emit('unhandledRejection', new Error('Test unhandledRejection'));
+    }
+    }
+
     let resposne = {
       name: "QuyerDeck !---!",
       session_id: req.sessionID,
