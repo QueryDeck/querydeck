@@ -8,7 +8,7 @@ const modelutils = require.main.require('./models/modelUtils.js');
 exports.executeClientRequest = executeClientRequest;
 
 function executeClientRequest(params, callback) {
-
+ try { 
     if((!params.graphql || !params.graphql.query) && !params.query_model) {
         return callback({
             response_code: 400,
@@ -403,6 +403,12 @@ function executeClientRequest(params, callback) {
         })
     }
 
+    }catch(err){
+        callback({
+            response_code: 500,
+            error:err || "something went wrong"
+    });
+    }
 }
 
 function applyPermissionsToNestedJoins(params) {
