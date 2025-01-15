@@ -268,6 +268,7 @@ class DynamicInsertModels {
 
                     var cols = []
                     var col_ob = {}
+                    sub_loop:
                     for (let l = 0; l < model.columns.length; l++) {
                         const element = model.columns[l];
                         var column = JSON.parse(JSON.stringify(model.columns[l]));
@@ -286,6 +287,10 @@ class DynamicInsertModels {
                                 return {
                                     error: "Value is null for '" + column.columnName.split('.')[2] + "'"
                                 };
+                            }
+
+                            if(typeof current_val_ob[final_key] === 'undefined') {
+                                continue sub_loop;
                             }
 
                             column.value = current_val_ob[final_key]
