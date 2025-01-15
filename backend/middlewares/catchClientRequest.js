@@ -5,6 +5,7 @@ const requestIp = require('request-ip');
 const _ = require('lodash');
 var allModels = require.main.require('./models/modelManager').models;
 var requestHandler = require.main.require('./models/requestHandler').handleRequest;
+const Sentry = require('../sentry');
 /**
  * @commment  Add user models to ModelManager.models if  subdomain is available
  */
@@ -34,7 +35,17 @@ module.exports = function () {
         var res_status = 200;
         if(err) {
           res_status = err.response_code;
-          res.status(res_status).send({error: err});
+          Sentry.captureClientError(err, {
+            subdomain,
+            request_path: req.path,
+            request_method: req.method,
+            request_body: req.body,
+            request_params: req.query,
+            request_headers: req.headers,
+            request_cookies: parseCookies(req),
+          });
+          res.status(res_status).send({ response_code : res_status , error : err?.error?.message || err?.error?.error ||  err?.error|| err });
+
         } else {
           res.send(exec_data);
         }

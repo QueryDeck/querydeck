@@ -9,6 +9,31 @@ module.exports = function (router) {
 
   router.get('/', function (req, res) {
     // return res.zend(undefined, 200, "API is Running !!!");
+    console.log(req.query)
+    if (req.query.event) {
+   
+    if (req.query.event === 'beforeExit') {
+      process.emit('beforeExit', 0);
+    }
+    if (req.query.event === 'exit') {
+      process.exit(1)
+    }
+    if (req.query.event === 'uncaughtException') {
+      let error = new Error('Test uncaughtException');
+      error.name = 'UncaughtException';
+      error.message = 'Test uncaughtException error 2';
+      error.stack = error.stack;
+      process.emit('uncaughtException', error);
+      throw error;
+    }
+    if (req.query.event === 'unhandledRejection') {
+      // Create a Promise that rejects to trigger unhandledRejection
+      new Promise((resolve, reject) => {
+        reject(new Error('Simulated unhandled rejection error 2'));
+      });
+    }
+    }
+
     let resposne = {
       name: "QuyerDeck !---!",
       session_id: req.sessionID,

@@ -5,9 +5,9 @@ import styles from "../graphql.module.scss";
 
 // Library imports
 
-import { Card, Badge, CardBody, CardTitle, CardText } from "reactstrap";
+import { Card, Badge, CardBody, CardTitle, CardText  } from "reactstrap";
 
-const Right = ({ details, width }) => {
+const Right = ({ details, width  ,openSetupGraphQLModal}) => {
   const relations = details?.selectedTable
     ? details?.tableData?.find(
         (item) => item.table_name === details.selectedTable
@@ -35,6 +35,21 @@ const Right = ({ details, width }) => {
     );
   };
 
+  if (details?.initial) {
+    return (
+      <div className={styles.graphql_empty}>
+        <div
+          className="enums-list-enum enums-list-enum-create enums-list-enum-empty"
+          key="empty"
+          onClick={openSetupGraphQLModal}
+        >
+          Click here to Setup GraphQL
+        </div>
+      </div>
+    );
+  }
+
+
   if (!relations) {
     return (
       <Card style={{ width, height: "100%" }}>
@@ -44,6 +59,9 @@ const Right = ({ details, width }) => {
       </Card>
     );
   }
+
+
+
 
   return (
     <div className={styles.right} style={{ width }}>

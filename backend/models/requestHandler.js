@@ -4,7 +4,7 @@ var executeClientRequest = require.main.require('./models/executeClientRequest.j
 exports.handleRequest = handleRequest;
 
 function handleRequest(params, callback) {
-
+ try { 
     var request_path = params.request_path;
 
     var request_method = params.request_method;
@@ -120,7 +120,12 @@ function handleRequest(params, callback) {
         }, callback);
 
     }
-
+  }catch(err){
+      callback({
+           response_code: 500,
+           error:err || "something went wrong"
+ });
+}
 }
 
 // returns session object or error

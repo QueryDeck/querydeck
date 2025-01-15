@@ -43,7 +43,8 @@ const Details = ({ openSetupGraphQLModal, handleSelectedTable, details }) => {
                 maxWidth: "2500px",
               }}
             >
-              <Right details={details} />
+            
+              <Right details={details}  openSetupGraphQLModal={openSetupGraphQLModal} />
             </div>
           </div>
         </div>

@@ -94,8 +94,8 @@ function captureError(error) {
   if (PROJECT_ENVIRONMENT !== 'prod') return;
 
 // The request handler must be the first middleware on the app
-  //   console.log( error?.message || error)
-  Sentry.captureException(error,
+    console.log('sending error :', error?.message || error)
+   Sentry.captureException(error,
     // {
     //   tags: {
     //     section: "articles",
@@ -107,29 +107,62 @@ function captureError(error) {
 
 }
 
- 
+function captureClientError(error, data = {}) {
 
+  if (PROJECT_ENVIRONMENT !== 'prod') return;
+  let message = `${error?.error?.message || error?.error || error?.message || 'Client error occurred on'} | ${data?.subdomain}`
+  Sentry.setTag("clientError", true);
+  Sentry.setTag("subdomain", data?.subdomain)
+  Sentry.setExtra('data', JSON.stringify(data, null, 2))
+
+  let newError ; 
+  // if(error  && error.error instanceof Error){ 
+  //   newError = error.error ; 
+  //   newError.message = message
+  // }else{ 
+
+    newError = new Error(message);
+    newError.stack = error.stack || error.error?.stack;
+    newError.code = error.code || error.error?.code;
+    newError.errno = error.errno || error.error?.errno;
+    newError.syscall = error.syscall || error.error?.syscall;
+  // }
+ 
+  console.log('sending client error :',  newError)
+  Sentry.captureException(newError);
+
+
+
+}
 
 process.on('uncaughtException', (err) => {
+  console.log ( 'inside  uncaughtException')
   let newErrr = err  ||  new Error(  "Error: uncaughtException")
   console.error(newErrr);
   captureError(newErrr)
-  process.exit(1);  
+  setTimeout(()=>{
+    process.exit(1);  
+  } ,2000)
+
 });
 
 
 process.on('unhandledRejection', (reason, promise) => {
+  console.log ( 'inside  unhandledRejection')
   let newErrr =    new Error(  "Error: unhandledRejection  , reason:  " +  reason )
   console.error(newErrr, promise );
   captureError(newErrr)
 });
 
+ 
 
-process.on('exit', (code) => {
-  let newErrr =    new Error(  "Error: exit   code: " +  code )
+process.on('beforeExit', (code) => {
+  console.log ( 'inside  beforeExit')
+  let newErrr = new Error("Error: beforeExit code: " + code);
   console.error(newErrr);
-  captureError(newErrr) 
+  captureError(newErrr);
 });
+
 
 
 
@@ -137,5 +170,6 @@ module.exports = Sentry;
 module.exports.useRequestHandler = useRequestHandler;
 module.exports.useErrorHandler = useErrorHandler;
 module.exports.captureError = captureError;
+module.exports.captureClientError = captureClientError;
 module.exports.saveData = saveData;
 

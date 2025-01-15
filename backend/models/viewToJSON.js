@@ -100,38 +100,6 @@ module.exports = class ViewToJSON {
                 this.initColumn(pathid, tableid + '.' + columnid, {
                     required: params.columns[i].required
                 });
-
-                if (pathid.indexOf('-') > -1) {
-
-                    let path_split = pathid.split('-');
-                    let path_split_length = path_split.length;
-
-
-                    let path_id_build = [];
-
-                    // iterate over the entire path and make sure all rels are added as columns
-                    // todo: this loop is fucked up. figure out a better way later
-                    for (let j = 0; j < (path_split_length); j++) {
-
-                        if (j % 2 == 1) {
-                            // path_id_build += path_split[j - 1] + '-' + path_split[j];
-                            path_id_build.push(path_split[j - 1]);
-                            path_id_build.push(path_split[j]);
-                        }
-
-                        let coltab_loop = path_split[j];
-
-                        if (j == 0) {
-                            // base coltab_loop
-                            this.initColumn(base_table_id, coltab_loop);
-                        } else {
-                            this.initColumn(path_id_build.join('-'), coltab_loop);
-
-                        }
-
-                    }
-
-                }
                 resolvedExtendedPaths.push(pathid);
             }
 
@@ -431,15 +399,9 @@ module.exports = class ViewToJSON {
         if (pathid_split.length == 1) return null;
         let ref_col, base_tab_name_split, ref_col_name_split, base_col_id;
         // let last_path = [];
-        if (false && dir == 'in') {
-            base_col_id = pathid_split[pathid_split.length - 1];
-            // base_tab = pathid_split[pathid_split.length - 1].split('.')[0];
-            ref_col = pathid_split[pathid_split.length - 2];
-        } else {
-            // base_tab = pathid_split[pathid_split.length - 2].split('.')[0];
-            ref_col = pathid_split[pathid_split.length - 1];
-            base_col_id = pathid_split[pathid_split.length - 2];
-        }
+        // path will always be in out direction
+        ref_col = pathid_split[pathid_split.length - 1];
+        base_col_id = pathid_split[pathid_split.length - 2];
 
         base_tab_name_split = this.currentModel.idToName[base_col_id];
         ref_col_name_split = this.currentModel.idToName[ref_col];
@@ -449,28 +411,6 @@ module.exports = class ViewToJSON {
 
         return this.currentModel.models[base_tab_name_split[0]][base_tab_name_split[1]].properties.rels_new[rel_path].alias;
 
-        // console.log('rel_path', rel_path)
-
-        let ref_keys = Object.keys(this.currentModel.models[base_tab_name_split[0]][base_tab_name_split[1]].properties.rels_new);
-
-        // console.log('ref_keys', ref_keys)
-
-        let ref_col_count = 0;
-        let ref_col_alias = null;
-        for (let i = 0; i < ref_keys.length; i++) {
-            const element = ref_keys[i];
-            let ref_key_split = ref_keys[i].split('-');
-            let ref_key_split_rhs = ref_key_split[1].split('.');
-            if (ref_key_split_rhs[0] == ref_col_name_split[0] && ref_key_split_rhs[1] == ref_col_name_split[1]) ++ref_col_count;
-            if (rel_path == element) {
-                ref_col_alias = this.currentModel.models[base_tab_name_split[0]][base_tab_name_split[1]].properties.rels_new[element].alias;
-            }
-        }
-
-        // console.log('ref_col_alias*****************************************', ref_col_alias)
-
-        if (ref_col_count > 1) return ref_col_alias;
-        return null;
     }
 
     initPath(pathid) {
@@ -513,6 +453,24 @@ module.exports = class ViewToJSON {
             },
             table_body_type: (current_rel_type && current_rel_type.charAt(2) == 'M') ? 'array' : 'object'
         };
+
+        // add qref columns
+        if(psplit_init.length > 1){
+            let path_id_build = [];
+            for(let i = 1; i < psplit_init.length; i++) {
+                if(i % 2 == 1) {
+                    path_id_build.push(psplit_init[i - 1]);
+                    path_id_build.push(psplit_init[i]);
+                }
+                let coltab_loop = psplit_init[i];
+                if(i == 0) {
+                    this.initColumn(psplit_init[0].split('.')[0], coltab_loop);
+                } else {
+                    this.initColumn(path_id_build.join('-'), coltab_loop);
+                }
+            }
+        }
+
         // add not nulls
         if (currMethod !== 'update') {
             let nn_arr = this.currentModel.models[tab_name_arr[0]][tab_name_arr[1]].properties.notnulls;
@@ -534,7 +492,6 @@ module.exports = class ViewToJSON {
     initColumn(pathid, coltabid, user_opts) {
 
         if (typeof pathid !== 'string') pathid = pathid.toString();
-        if (!this.insertOb[pathid]) this.initPath(pathid);
         let col_name_split = this.currentModel.idToName[coltabid];
 
         var required = (user_opts && user_opts.required) ? user_opts.required : false;
@@ -544,6 +501,8 @@ module.exports = class ViewToJSON {
         let psplit_init = pathid.split('-');
         // let index_of_coltabid = psplit_init.indexOf(coltabid);
         let val, op;
+
+        if (!this.insertOb[pathid]) this.initPath(pathid);
         if (this.insertOb[pathid].returns.user.length == 0) {
             this.insertOb[pathid].returns.user = this.getAllReturningColumns(pathid)
         }
@@ -636,6 +595,10 @@ module.exports = class ViewToJSON {
 
         if (this.currentModel.models[col_name_split[0]][col_name_split[1]].properties.serials.indexOf(col_name_split[2]) > -1) {
 
+            return;
+        }
+        
+        if(this.currentModel.models[col_name_split[0]][col_name_split[1]].properties.columns[col_name_split[2]].primary && this.currentModel.models[col_name_split[0]][col_name_split[1]].properties.columns[col_name_split[2]].default) {
             return;
         }
 

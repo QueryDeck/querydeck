@@ -1,10 +1,10 @@
 // React imports
-import React, { useState } from "react";
+import React, { useState,useEffect} from "react";
 import { toast } from "react-toastify";
-
-
+import { styled } from '@mui/material/styles';
+import styles from "../graphql.module.scss";
 // Library imports
-import { faTimes, faArrowRight, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faSave, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Button,
@@ -12,15 +12,74 @@ import {
   ModalBody,
   ModalHeader,
   Spinner,
-  ModalFooter
+  ModalFooter,
 } from "reactstrap";
 import CustomSelect from '../../../../components/common/CustomSelect'
+import Switch from '@mui/material/Switch';
 
 
-const SetupRepo = ({ tableOptions, closeModal, modalState, handleSetupGraphQLModalClick }) => {
+
+
+
+
+const Android12Switch = styled(Switch)(({ theme }) => ({
+  padding: 8,
+  '& .MuiSwitch-track': {
+    borderRadius: 22 / 2,
+    '&::before, &::after': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      width: 16,
+      height: 16,
+    },
+    '&::before': {
+      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+        theme.palette.getContrastText(theme.palette.primary.main),
+      )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
+      left: 12,
+    },
+    '&::after': {
+      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+        theme.palette.getContrastText(theme.palette.primary.main),
+      )}" d="M19,13H5V11H19V13Z" /></svg>')`,
+      right: 12,
+    },
+  },
+  '& .MuiSwitch-thumb': {
+    boxShadow: 'none',
+    width: 16,
+    height: 16,
+    margin: 2,
+  },
+}));
+
+const SetupRepo = ({ tableOptions, closeModal, modalState, handleSetupGraphQLModalClick, details}) => {
 
   const [selectedTableList, setSelectedTableList] = useState([])
+  const [enabled, setEnabled] = useState(false)
 
+  useEffect(() => {
+    if(modalState && details?.tableData?.length > 0 && tableOptions?.length > 0){
+      const localSelectedTable = [];
+      details.tableData.forEach((graphqlTable) => {
+
+      tableOptions.forEach(option => {
+        option.options.forEach(table => {
+          if (table.label === graphqlTable.table_name) {
+            localSelectedTable.push(table);
+          }
+        });
+      });
+      })
+      setSelectedTableList(localSelectedTable)
+       
+    }
+    if(modalState){
+      setEnabled(details?.enabled || details?.initial || false)
+    }
+  }, [modalState]);
 
   const addTable = tableObj => {
 
@@ -106,21 +165,29 @@ const SetupRepo = ({ tableOptions, closeModal, modalState, handleSetupGraphQLMod
   // Renders column selector
   const renderToolbar = () => {
     return (
-      <div className='query-modal-columns-vanilla-content mt-3'>
-        <div className='query-modal-columns-vanilla-columns'>
-          <CustomSelect
-            // defaultMenuIsOpen={true}
-            noOptionsMessage={() => 'No columns match the search term'}
-            onChange={addTable}
-            // onChange={value => addTableToList(value)}
-            options={tableOptions || []}
-            placeholder='Select Column'
-          // value={column}
-          />
+      <>
+
+        <div className={styles.graphqlswitch}>
+
+          <span> Enable GraphQL</span>
+          <Android12Switch onChange={() => setEnabled(!enabled)} checked={enabled} />
         </div>
+        <div className='query-modal-columns-vanilla-content mt-3'>
+
+          <div className='query-modal-columns-vanilla-columns'>
+            <CustomSelect
+              // defaultMenuIsOpen={true}
+              noOptionsMessage={() => 'No columns match the search term'}
+              onChange={addTable}
+              // onChange={value => addTableToList(value)}
+              options={tableOptions || []}
+              placeholder='Select Column'
+            // value={column}
+            />
+          </div>
 
 
-        <>
+          <>
           <div className='ml-3'>
             <Button
               color='falcon-primary'
@@ -139,9 +206,12 @@ const SetupRepo = ({ tableOptions, closeModal, modalState, handleSetupGraphQLMod
               Unselect All <FontAwesomeIcon icon={faMinus} />
             </Button>
           </div>
+ 
+       
         </>
 
       </div>
+      </>
     )
   }
   const render = () => {
@@ -175,7 +245,7 @@ const SetupRepo = ({ tableOptions, closeModal, modalState, handleSetupGraphQLMod
     // style={{ top: '6%' }}
     >
       <ModalHeader className="modal-header clearfix">
-        <div className="float-left">Setup QraphQL</div>
+        <div className="float-left">QraphQL Tables</div>
         <Button
           className="float-right"
           color="falcon-danger"
@@ -202,11 +272,11 @@ const SetupRepo = ({ tableOptions, closeModal, modalState, handleSetupGraphQLMod
           <Button
             block
             color="falcon-success"
-            onClick={handleSetupGraphQLModalClick}
+            onClick={()=> handleSetupGraphQLModalClick(selectedTableList, enabled)}
             disabled={false}
           >
-            Next &nbsp;
-            <FontAwesomeIcon icon={faArrowRight} />
+            save &nbsp;
+            <FontAwesomeIcon icon={faSave} />
           </Button>
         </div>
       </ModalFooter>

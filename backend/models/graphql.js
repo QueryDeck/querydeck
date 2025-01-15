@@ -488,20 +488,31 @@ class GraphQLConverter {
             var insert_value = {};
             for (let j = 0; j < params.values[i].fields.length; j++) {
                 var field = params.values[i].fields[j];
-                if (field.value.value) {
+                var field_name = field.name.value;
+                var field_type;
+                if(table_columns[field_name]) {
+                    field_type = 'column';
+                } else if(this.currentModel.databases[this.db_id].graphql.tables[table_graphql_name].relations[field_name]) {
+                    field_type = 'relation';
+                } else {
+                    throw new Error('Field ' + field_name + ' not found in table ' + table_graphql_name);
+                }
+                if (field_type == 'column') {
                     // column value
-                    insert_value[field.name.value] = field.value.value;
+                    insert_value[field_name] = field.value.value;
                     // add to id array
-                    if (table_columns[field.name.value]) {
+                    if (table_columns[field_name]) {
                         var column_id;
                         if (nested) {
-                            column_id = table_path_id + '$' + table_columns[field.name.value].id
+                            column_id = table_path_id + '$' + table_columns[field_name].id
                         } else {
-                            column_id = table_id + '.' + table_columns[field.name.value].id
+                            column_id = table_id + '.' + table_columns[field_name].id
                         }
-                        if (insert_column_ids.indexOf(column_id) == -1) insert_column_ids.push(column_id);
+                        if (insert_column_ids.indexOf(column_id) == -1) {
+                            insert_column_ids.push(column_id);
+                        }
                     }
-                } else if (field.value.fields) {
+                } else if (field_type == 'relation') {
                     // nested object
                     var rel_name = field.name.value;
                     //this.currentModel.databases[this.db_id].graphql.tables[graphql_table].relations[field.name.value]
@@ -536,7 +547,7 @@ class GraphQLConverter {
 
                         if (!nested_table.values || !nested_table.values.length) {
                             // TODO: throw better error
-                            throw new Error('Nested table values not found');
+                            throw new Error('Nested values not found for ' + rel_name);
                         }
 
                         var nested_result = this.handleInsert(nested_table);
