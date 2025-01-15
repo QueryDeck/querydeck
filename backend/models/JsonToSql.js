@@ -796,9 +796,12 @@ module.exports = class builder {
 					} else if (op == '$excluded') { // for conflict columns 
 						nv = 'EXCLUDED.' + columns[i].columnName.split(".").pop();
 					} else {
-						// throw 'unknown insert operator'
-						if (typeof v == 'object' && !Array.isArray(v)) v = JSON.stringify(v)
-						nv = this.getParamMapIndex(v);
+						if(typeof v === 'object' && !v) {
+							nv = 'NULL';
+						} else {
+							if (typeof v == 'object' && !Array.isArray(v)) v = JSON.stringify(v)
+							nv = this.getParamMapIndex(v);
+						}
 					}
 				} else {
 					if (!v) throw "insert value missing";
