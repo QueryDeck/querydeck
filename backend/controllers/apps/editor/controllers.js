@@ -1080,8 +1080,6 @@ module.exports = function (router) {
   /* ##### Generate query and return Query Statement ####  */
   router.post('/sql-gen', catchError(async function (req, res) {
 
-    console.log('/sql-gen')
-
     if (!req.body.subdomain || !req.body.db_id) return res.zend(null, 400, "Must have fields subdomain and db_id");
     if (!req.clientModels[req.body.subdomain] || !req.clientModels[req.body.subdomain].databases[req.body.db_id]) return res.zend(null, 400, "Invalid value for  subdomain and db_id");
     if (req.user_id !== req.clientModels[req.body.subdomain].appDetails.created_by) return res.zend(null, 401, "Login Required");
@@ -1091,10 +1089,7 @@ module.exports = function (router) {
     if (!q) return res.zend(null, 500, "unable to generate");
 
     let currentModel = ModelManager.models[req.body.subdomain].databases[req.body.db_id];
-    // console.file(q)
 
-
-    // console.file(q)
     /*   
        add option to correctly format query text according to dbms 
        available language options   https://github.com/sql-formatter-org/sql-formatter/blob/HEAD/docs/language.md 
@@ -1130,24 +1125,6 @@ module.exports = function (router) {
         title: 'SQL Query',
         content: q.query.text
       },
-      // {
-      //   "id": "forms_linear",
-      //   "title": "SQL Linear Forms",
-      //   // "content": q.final_body || {},
-      //   "content":   {},
-      // },
-      // {
-      //   "id": "forms",
-      //   "title": "SQL Forms",
-      //   "content": q.final_body2 || {}
-
-      // },
-
-      // {
-      //   "id": "enum queries",
-      //   "title": "Enum Query",
-      //   "content": []
-      // },
       {
         "id": "view2json",
         "title": "View to Json",
@@ -1158,11 +1135,6 @@ module.exports = function (router) {
         "title": "Documentation", 
         "content": q.docs , 
       },
-      {
-        "id": "test2",
-        "title": "test2"
-      },
-
     ];
 
     res.zend(tabs);
