@@ -7,7 +7,6 @@ services:
         REACT_APP_OPENREPLAY_KEY: "${REACT_APP_OPENREPLAY_KEY}"
         REACT_APP_PUBLIC_POSTHOG_HOST: "${REACT_APP_PUBLIC_POSTHOG_HOST}"
         REACT_APP_PUBLIC_POSTHOG_KEY: "${REACT_APP_PUBLIC_POSTHOG_KEY}"
-    env_file: "./frontend/.env"
     restart: always
     ports:
       - "5051:5051"
