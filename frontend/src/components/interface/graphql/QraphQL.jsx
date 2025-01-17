@@ -46,8 +46,12 @@ const QraphQL = ({ appid: subdomain }) => {
     details: {
       selectedTable: "",
       tableData: null,
+      tableDataFiltered: [],  // contains sorted or filterd data that is used to display 
       enabled : false,
-      initial: true // to check if the graphql is setup first time or not
+      initial: true, // to check if the graphql is setup first time or not
+      sort: {
+        order: true, // true = ascending, false = descending
+      }
     },
   };
   const [state, dispatch] = useReducer(qraphQLReducer, initialState);
@@ -237,6 +241,7 @@ const QraphQL = ({ appid: subdomain }) => {
             handleSelectedTable={handleSelectedTable}
             details={state.details}
             openSetupGraphQLModal={openSetupGraphQLModal}
+            dispatch={dispatch}
           />
 
           <SetupGraphQL

@@ -75,15 +75,55 @@ const qraphQLReducer = (state, action) => {
 
     // Set selected table
     case "SET_GQL_TABLE":
+      const sortedTablesLocal = action.data.tables.sort((a, b) => a.table_name.localeCompare(b.table_name));
       return {
         ...state,
         loading: false,
         details: {
           ...state.details,
-          tableData: action.data.tables,
-          enabled : action.data.enabled,
-          initial : action.data.initial,
+          tableData: sortedTablesLocal,
+          tableDataFiltered: sortedTablesLocal,
+          enabled: action.data.enabled,
+          initial: action.data.initial,
+          sort: {
+            order: true, // true = ascending, false = descending
+          }
         },
+      };
+
+    case "FILTER_TABLES":
+      const searchTerm = action.search.toLowerCase();
+      const filteredTables = state.details.tableData.filter(item =>
+        item.table_name.toLowerCase().includes(searchTerm)
+      );
+      const sortedFilteredTables = filteredTables.sort((a, b) => {
+        const comparison = a.table_name.localeCompare(b.table_name);
+        return state.details.sort.order ? comparison : -comparison;
+      });
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          tableDataFiltered: sortedFilteredTables
+        }
+      };
+
+    case "SORT_TABLES":
+      const newOrder = !state.details.sort.order;
+      const sortedTables = [...state.details.tableDataFiltered].sort((a, b) => {
+        const comparison = a.table_name.localeCompare(b.table_name);
+        return newOrder ? comparison : -comparison;
+      });
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          tableDataFiltered: sortedTables,
+          sort: {
+            ...state.details.sort,
+            order: newOrder
+          }
+        }
       };
 
     // Updates a single field

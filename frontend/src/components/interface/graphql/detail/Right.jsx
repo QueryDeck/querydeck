@@ -5,16 +5,16 @@ import styles from "../graphql.module.scss";
 
 // Library imports
 
-import { Card, Badge, CardBody, CardTitle, CardText  } from "reactstrap";
+import { Card, Badge, CardBody, CardTitle, CardText } from "reactstrap";
 
-const Right = ({ details, width  ,openSetupGraphQLModal}) => {
+const Right = ({ details, width, openSetupGraphQLModal }) => {
   const relations = details?.selectedTable
     ? details?.tableData?.find(
         (item) => item.table_name === details.selectedTable
       )?.relations
     : null;
 
-  const TableBox = ({ textPath, relationTableName }) => {
+  const TableBox = ({ textPath, relationTableName, type }) => {
     return (
       <div>
         <Card className="my-1">
@@ -22,12 +22,17 @@ const Right = ({ details, width  ,openSetupGraphQLModal}) => {
             <CardTitle tag="h7">
               <span style={{ fontSize: "16px" }}> {relationTableName} </span>
             </CardTitle>
-            <CardText>
-              <span style={{ fontSize: "15px" }}> Join: </span>{" "}
+
+            <CardText style={{ marginBottom: "1px" }}>
+              <span style={{ fontSize: "15px" }}> Join: </span>
               <Badge className={styles.relationbox_badge}>
-                {" "}
-                {textPath.split("-").join(" = ")}{" "}
+                {textPath.split("-").join(" = ")}
               </Badge>
+            </CardText>
+            <CardText>
+              <span style={{ fontSize: "15px" }}> Type: </span>
+              <span> {type} </span>[{type === "1-1" ? "object" : "array"}
+                &nbsp;relation]
             </CardText>
           </CardBody>
         </Card>
@@ -49,7 +54,6 @@ const Right = ({ details, width  ,openSetupGraphQLModal}) => {
     );
   }
 
-
   if (!relations) {
     return (
       <Card style={{ width, height: "100%" }}>
@@ -59,9 +63,6 @@ const Right = ({ details, width  ,openSetupGraphQLModal}) => {
       </Card>
     );
   }
-
-
-
 
   return (
     <div className={styles.right} style={{ width }}>
@@ -73,7 +74,8 @@ const Right = ({ details, width  ,openSetupGraphQLModal}) => {
           <TableBox
             key={item.relation_name}
             textPath={item.text_path}
-            relationTableName={item.rel_table}
+            relationTableName={item.rel_table_graphql}
+            type={item.type}
           />
         ))
       )}
