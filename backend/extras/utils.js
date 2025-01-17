@@ -125,8 +125,8 @@ function getClientDomain(req) {
 
 function serverType( ) {
      if(process.env.SELF_DOMAIN === 'api.querydeck.io') return 'prod' ; 
-     if(process.env.SELF_DOMAIN === 'api.querydeck-dev.com') return 'staging' ; 
-     return 'dev' // localhost development
+     if(process.env.SELF_DOMAIN === 'api.querydeck-dev.com') return 'dev' ; 
+     return 'localhost' // localhost development
 }
 
 function replaceAllDataFromText(text, dataObj) {

@@ -1,9 +1,12 @@
 var axios = require('axios');
+const utils = require('./utils');
 
-async function sendSlackNotification(blocks) {
+async function sendSlackNotification(blocks, options = {}) {
+
+
   try {
     await axios.post(
-      process.env.SLACK_URL,
+      options?.SLACK_URL,
       {
         blocks
       },
@@ -28,10 +31,27 @@ async function sendNewUserNotification(notificationData) {
       },
     },
   ]
-  return sendSlackNotification(blocks)
+  return sendSlackNotification(blocks, { SLACK_URL: process.env.SLACK_URL })
+
+}
+async function sendAppStartedNotification() {
+
+  const serverType = utils.serverType();
+  if (serverType === 'localhost') return;
+  const blocks = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `:steam_locomotive::  App started on  *${serverType}*  at *${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}*`
+
+      },
+    },
+  ]
+  return sendSlackNotification(blocks, { SLACK_URL: process.env.SLACK_APP_STARTED_URL })
 
 }
 
-
 exports.sendSlackNotification = sendSlackNotification;
 exports.sendNewUserNotification = sendNewUserNotification;
+exports.sendAppStartedNotification = sendAppStartedNotification;
