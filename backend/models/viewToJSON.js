@@ -137,7 +137,8 @@ module.exports = class ViewToJSON {
             ) {
                 tabob.conflict = {
                     ...params.on_conflict[this.insertPaths[i]],
-                    columns: []
+                    columns: [],
+                    on_columns: this.currentModel.models[this.insertOb[this.insertPaths[i]].schema][this.insertOb[this.insertPaths[i]].table].properties.uindex[params.on_conflict[this.insertPaths[i]].constraint]
                 }
                 let conflict_columns = params.on_conflict[this.insertPaths[i]].columns;
                 for (let k = 0; k < conflict_columns.length; k++) {

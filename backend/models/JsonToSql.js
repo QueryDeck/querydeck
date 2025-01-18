@@ -94,9 +94,12 @@ module.exports = class builder {
 
 				this.mutation = true;
 
+				var delete_alias = 'qdelete_' + this.models[i].table;
+				this.models[i].final_alias = delete_alias;
+
 				this.queries.push({
 					query: this.delete(this.models[i]),
-					alias: 'q' + this.makeid(3)
+					alias: delete_alias
 				});
 
 			} else {
@@ -182,10 +185,21 @@ module.exports = class builder {
 	}
 
 	delete(model) {
+		
+		var return_arr = model.returns?.user?.map(elem => {
+			let colName = elem.columnName;
+			if (elem.alias) return `${colName} AS ${elem.alias}`;
+			else return colName;
+		}) || [];
+		return_arr = return_arr.concat(model.returns?.qref || []);
+		return_arr = return_arr.filter(this.onlyUnique);
+
+		var return_text = return_arr.length > 0 ? ' RETURNING ' + return_arr.join(', ') : '';
 		var fq = 'DELETE ' +
 			' FROM ' +
 			`${this.quotes}${model.schema}${this.quotes}.${this.quotes}${model.table}${this.quotes}` +
-			this.resolveWhere(model)
+			this.resolveWhere(model) +
+			return_text
 
 		;
 		return fq;
@@ -437,7 +451,7 @@ module.exports = class builder {
 			allkeys.push(model.conflict.columns[i].columnName.split(".").pop())
 		}
 
-		result = ' ON CONFLICT ON CONSTRAINT "' + model.conflict.constraint + '"' +
+		result = ' ON CONFLICT (' + model.conflict.on_columns.join(',') + ')' +
 			' DO UPDATE SET '
 		if (allkeys.length > 1) {
 			result = result +
