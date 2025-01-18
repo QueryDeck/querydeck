@@ -451,6 +451,13 @@ module.exports = class builder {
 			allkeys.push(model.conflict.columns[i].columnName.split(".").pop())
 		}
 
+		if(!model.conflict.on_columns) {
+			model.conflict.on_columns = this.getConstraintColumns({
+				schema: model.schema,
+				table: model.table,
+				constraint: model.conflict.constraint
+			})
+		}
 		result = ' ON CONFLICT (' + model.conflict.on_columns.join(',') + ')' +
 			' DO UPDATE SET '
 		if (allkeys.length > 1) {
@@ -1134,6 +1141,10 @@ module.exports = class builder {
 		var c = columnName.split('.');
 
 		return this.currentModel.models[c[0]][c[1]].properties.columns[c[2]]?.type.toLowerCase() || "";
+	}
+
+	getConstraintColumns(params) {
+		return this.currentModel.models[params.schema][params.table].properties.uindex[params.constraint]
 	}
 
 	makeid(len) {
