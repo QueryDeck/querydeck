@@ -1,5 +1,5 @@
 'use strict';
-
+const net = require('net');
 var ModelManager = require('../models/modelManager');
 
 module.exports = function() {
@@ -7,7 +7,7 @@ module.exports = function() {
 	return function(req, res, next) {
 
 		var host = req.get('host')
-
+    console.log('host = ',host)
 		var subdomain = getSubdomainList(host)
 		if (subdomain) subdomain = subdomain[0];
 
@@ -65,6 +65,12 @@ module.exports = function() {
 };
 
 function getSubdomainList(host) {
+
+	if (host) { 
+		// check if host is an ip address
+		let subdomain = host.split(':')[0];  //'192.168.1.100:3000'
+		if (net.isIPv4(subdomain) || net.isIPv6(subdomain)) return null;
+	}
 	var subdomainList = host ? host.split('.') : null;
 	if (subdomainList)
 		subdomainList.splice(-1, 1);
