@@ -207,12 +207,15 @@ const FilterSection = props => {
 						<div style={{ paddingTop: '16px' }}>
 							<Filters
 								ref={filtersRef}
+								catchError={props.catchError}
+								db_id={state?.database?.value}
 								fields={state?.joinConditions[state?.columnModal]?.filterFields}
 								filters={JSON.parse(state?.joinConditions[state?.columnModal]?.filters)}
 								joinGraphs={state?.joinGraphs}
 								mode='api-select-join-conditions'
 								operators={state?.operators}
 								sessionKeys={(state?.authentication?.value && state?.appAuth?.session_key_values) ? state?.appAuth?.session_key_values : {}}
+								subdomain={props.subdomain}
 							/>
 						</div>
 						:

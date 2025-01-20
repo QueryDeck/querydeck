@@ -53,6 +53,7 @@ const ColumnModal = props => {
           case 'filter':
             return (
               <FilterSection
+                catchError={props.catchError}
                 closeModal={closeModal}
                 mode={props.mode}
                 query_id={props.query_id}

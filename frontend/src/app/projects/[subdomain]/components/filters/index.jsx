@@ -1539,7 +1539,7 @@ const Filters = React.forwardRef((props, ref) => {
       <Group
         data={{
           existsFields: existsFields.current,
-          fields: (mode === 'api-select-filters' || mode === 'api-select-id-filters') ? fields.concat(existsOperators) : fields,
+          fields: (mode === 'api-select-filters' || mode === 'api-select-join-conditions' || mode === 'api-select-id-filters') ? fields.concat(existsOperators) : fields,
           joinedGraphs: {
             base: joinGraphs,
             ...joinedGraphs.current
