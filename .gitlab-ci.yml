@@ -34,7 +34,7 @@ build_prod:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
   script:
-    - ssh -o StrictHostKeyChecking=no $DEV_SERVER_ADDRESS "cd querydeck-prod; git pull; sudo docker build --build-arg REACT_APP_MUI_KEY="$REACT_APP_MUI_KEY" --build-arg REACT_APP_OPENREPLAY_KEY="$REACT_APP_OPENREPLAY_KEY" --build-arg REACT_APP_PUBLIC_POSTHOG_KEY="$REACT_APP_PUBLIC_POSTHOG_KEY" --build-arg REACT_APP_PUBLIC_POSTHOG_HOST="$REACT_APP_PUBLIC_POSTHOG_HOST" . -t querydeckio/querydeck-dev:frontend-latest; sudo docker push querydeckio/querydeck-dev:frontend-latest; sudo docker build . -t querydeckio/querydeck-dev:backend-latest; sudo docker push querydeckio/querydeck-dev:backend-latest"
+    - ssh -o StrictHostKeyChecking=no $DEV_SERVER_ADDRESS "cd querydeck-prod; git pull; cd ~/querydeck-prod/frontend/; sudo docker build --build-arg REACT_APP_MUI_KEY="$REACT_APP_MUI_KEY" --build-arg REACT_APP_OPENREPLAY_KEY="$REACT_APP_OPENREPLAY_KEY" --build-arg REACT_APP_PUBLIC_POSTHOG_KEY="$REACT_APP_PUBLIC_POSTHOG_KEY" --build-arg REACT_APP_PUBLIC_POSTHOG_HOST="$REACT_APP_PUBLIC_POSTHOG_HOST" . -t querydeckio/querydeck-dev:frontend-latest; sudo docker push querydeckio/querydeck-dev:frontend-latest; cd ~/querydeck-prod/backend/; sudo docker build . -t querydeckio/querydeck-dev:backend-latest; sudo docker push querydeckio/querydeck-dev:backend-latest"
 
 deploy_prod:
   image: node:14.17.4-alpine
