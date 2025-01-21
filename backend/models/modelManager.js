@@ -621,98 +621,117 @@ var ModelManager = {
 
       asyncloop(row.databases, function(element, success) {
 
-        element.username = cipher.decrypt(element.username);
-        element.password = cipher.decrypt(element.password);
-        element.host = cipher.decrypt(element.host);
-        element.db_name = cipher.decrypt(element.db_name); 
+        try {
+          element.username = cipher.decrypt(element.username);
+          element.password = cipher.decrypt(element.password);
+          element.host = cipher.decrypt(element.host);
+          element.db_name = cipher.decrypt(element.db_name);
 
-        databases[element.db_id] = databases[element.db_id] || {};
+          databases[element.db_id] = databases[element.db_id] || {};
 
-        if(!databases[element.db_id].query) {
-          let dburl = "postgres://" + element.username + ":" + element.password + "@" + element.host + ":" + element.port_num + "/" + element.db_name;
-          let clientpool = new pg.Pool({   
-            connectionString: dburl, 
-            idleTimeoutMillis: 0, // milliseconds   after which connection terminates.set to 0 for unlimited
-            max: MAX_CONNECTION_POOL,   
-            ssl: {
-              rejectUnauthorized: false,
-            },
-          });  
-          // databases[row.db_id].dburl = dburl;  
-          databases[element.db_id].query = function (q, cb) { 
-            let startTime = Date.now() ; 
-            clientpool.query(q, function (err, result) {
-              cb(err, result, Date.now()- startTime); 
-            }) 
-          }; 
-        }
+          if (!databases[element.db_id].query) {
+            let dburl = "postgres://" + element.username + ":" + element.password + "@" + element.host + ":" + element.port_num + "/" + element.db_name;
+            // console.log('dburl', dburl)
+            let clientpool = new pg.Pool({
+              connectionString: dburl,
+              idleTimeoutMillis: 0, // milliseconds   after which connection terminates.set to 0 for unlimited
+              max: MAX_CONNECTION_POOL,
+              connectionTimeoutMillis: 30000, 
+              ssl: {
+                rejectUnauthorized: false,
+              },
+            });
 
-        var custom = {
-          custom_columns: element.custom_columns,
-          enum_tables: element.enum_tables
-        }
-
-        databases[element.db_id].db_id = element.db_id;
-        databases[element.db_id].custom = custom
-        databases[element.db_id].db_name = element.db_name
-
-        if( options.reSyncSchema || !element.def ) {
-          ModelManager.extractSchema(databases[element.db_id], function(err, rows2){
-            if(err) {
-              ModelManager.schemaResyncFailed({
-                db_id: element.db_id,
-                error: err
-              })
-              return callback(err);
+            clientpool.on('error', (err, client) => { 
+              // prevent app crashing for  for  "error : terminating connection due to administrator command"
+              console.error('Unexpected error ', err)
+              callback(err)
+            })
+    
+            // databases[row.db_id].dburl = dburl;  
+            databases[element.db_id].query = function (q, cb) {
+              try {
+                let startTime = Date.now();
+                clientpool.query(q, function (err, result) {
+                  cb(err, result, Date.now() - startTime);
+                })
+              }
+              catch (err) { 
+                cb(err)
+              }
             }
-            var mod_gen_res = ModelManager.makeModelFromSchema({rows: rows2});
-            databases[element.db_id].models = mod_gen_res.models;
-            databases[element.db_id].idToName = mod_gen_res.idToName;
-            databases[element.db_id].tidToName = mod_gen_res.tidToName; 
-            databases[element.db_id].table_count = mod_gen_res.table_count;
-            databases[element.db_id].schema_count = mod_gen_res.schema_count;
-            databases[element.db_id].graphql_tables = mod_gen_res.graphql_tables;
-  
-            ModelManager.models[subdomain] = {
-              appDetails: appdetails,
-              databases: databases,
-              routes: route_ob
-            }
-            
-            ModelManager.saveSchema({
-              db_id: element.db_id,
-              rows: rows2
-            }, function(err){
-              if(err) {
+          }
+
+          var custom = {
+            custom_columns: element.custom_columns,
+            enum_tables: element.enum_tables
+          }
+
+          databases[element.db_id].db_id = element.db_id;
+          databases[element.db_id].custom = custom
+          databases[element.db_id].db_name = element.db_name
+         
+          if (options.reSyncSchema || !element.def) {
+            ModelManager.extractSchema(databases[element.db_id], function (err, rows2) {
+                
+              if (err) {
                 ModelManager.schemaResyncFailed({
                   db_id: element.db_id,
                   error: err
                 })
                 return callback(err);
               }
-              // console.log(ModelManager.models[subdomain])
-              success()
-            })
-          })
-        } else {
-          var mod_gen_res = ModelManager.makeModelFromSchema({rows: element.def});
-          databases[element.db_id].models = mod_gen_res.models;
-          databases[element.db_id].idToName = mod_gen_res.idToName;
-          databases[element.db_id].tidToName = mod_gen_res.tidToName; 
-          databases[element.db_id].table_count = mod_gen_res.table_count;
-          databases[element.db_id].schema_count = mod_gen_res.schema_count;
-          databases[element.db_id].graphql = {};
-          databases[element.db_id].graphql.tables = mod_gen_res.graphql_tables;
-  
-          ModelManager.models[subdomain] = {
-            appDetails: appdetails,
-            databases: databases,
-            routes: route_ob
-          }
-          // console.log(ModelManager.models[subdomain])
-          success()
-        }
+              var mod_gen_res = ModelManager.makeModelFromSchema({ rows: rows2 });
+              databases[element.db_id].models = mod_gen_res.models;
+              databases[element.db_id].idToName = mod_gen_res.idToName;
+              databases[element.db_id].tidToName = mod_gen_res.tidToName;
+              databases[element.db_id].table_count = mod_gen_res.table_count;
+              databases[element.db_id].schema_count = mod_gen_res.schema_count;
+              databases[element.db_id].graphql_tables = mod_gen_res.graphql_tables;
 
+              ModelManager.models[subdomain] = {
+                appDetails: appdetails,
+                databases: databases,
+                routes: route_ob
+              }
+
+              ModelManager.saveSchema({
+                db_id: element.db_id,
+                rows: rows2
+              }, function (err) {
+                if (err) {
+                  ModelManager.schemaResyncFailed({
+                    db_id: element.db_id,
+                    error: err
+                  })
+                  return callback(err);
+                }
+                // console.log(ModelManager.models[subdomain])
+                success()
+              })
+            })
+          } else {
+            var mod_gen_res = ModelManager.makeModelFromSchema({ rows: element.def });
+            databases[element.db_id].models = mod_gen_res.models;
+            databases[element.db_id].idToName = mod_gen_res.idToName;
+            databases[element.db_id].tidToName = mod_gen_res.tidToName;
+            databases[element.db_id].table_count = mod_gen_res.table_count;
+            databases[element.db_id].schema_count = mod_gen_res.schema_count;
+            databases[element.db_id].graphql = {};
+            databases[element.db_id].graphql.tables = mod_gen_res.graphql_tables;
+
+            ModelManager.models[subdomain] = {
+              appDetails: appdetails,
+              databases: databases,
+              routes: route_ob
+            }
+            // console.log(ModelManager.models[subdomain])
+            success()
+          }
+        }
+        catch (err) { 
+          return callback(err);
+        }
       }, function(){
         callback()
         if(row.github_details && row.github_details.repo_url) {

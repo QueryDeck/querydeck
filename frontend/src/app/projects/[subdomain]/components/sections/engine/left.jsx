@@ -160,6 +160,7 @@ const Left = props => {
     <ColumnModal
       key='column-modal'
       mode={props.mode}
+      catchError={props.catchError}
       query_id={props.query_id}
       searchNodes={props.searchNodes}
       subdomain={props.subdomain}

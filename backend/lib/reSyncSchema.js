@@ -88,10 +88,10 @@ function startSyncing() {
                 ModelManager.loadApp(subdomain, function (err) {
 
                     if (err) {
-                        // Sentry.setExtra('data', JSON.stringify({
-                        //     subdomain: subdomain,
-                        // }))
-                        // Sentry.captureError(err)
+                        Sentry.setExtra('data', JSON.stringify({
+                            subdomain: subdomain,
+                        }))
+                        Sentry.captureError(err)
                         // callSuccess()
                         // return;
                         console.log(err)

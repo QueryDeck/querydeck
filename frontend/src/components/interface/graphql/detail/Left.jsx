@@ -1,13 +1,10 @@
 // React imports
 import React from "react";
-// SCSS module
-// import styles from "../graphql.module.scss";
-
-// Library imports
 import {
-  faSortNumericDown,
-  faPlus,
+  faSortAlphaUp,
+  faSortAlphaDown,
   faTable,
+  faPlus
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Input, ButtonGroup } from "reactstrap";
@@ -17,7 +14,19 @@ const Left = ({
   width,
   details,
   openSetupGraphQLModal,
+  dispatch
 }) => {
+  const handleSearch = (event) => {
+    dispatch({
+      type: "FILTER_TABLES",
+      search: event.target.value
+    });
+  };
+
+  const handleSort = () => {
+    dispatch({ type: "SORT_TABLES" });
+  };
+
   const TableBox = ({ tableName }) => {
     return (
       <div
@@ -29,7 +38,6 @@ const Left = ({
         <div className="api-saved-list-item-api">
           <div
             className="api-saved-list-item-method"
-            // onClick={previewAPI}
             style={{ transform: "translateY(1px)" }}
           >
             <span style={{ paddingLeft: "4px", paddingRight: "2px" }}>
@@ -50,21 +58,15 @@ const Left = ({
       <div className="api-saved-list-search" style={{ paddingRight: "2px" }}>
         <Input
           autoFocus
-          // onChange={event => dispatch(filterAPIlist({
-          //   search: event.target.value,
-          //   subdomain: props.subdomain
-          // }))}
+          onChange={handleSearch}
           placeholder="Search Table"
-          // value={props.search}
         />
         <Button
           color="falcon-primary"
-          // onClick={() => dispatch(sortAPIlist({
-          //   subdomain: props.subdomain
-          // }))}
+          onClick={handleSort}
           size="sm"
         >
-          <FontAwesomeIcon icon={faSortNumericDown} />
+          <FontAwesomeIcon icon={details?.sort?.order ? faSortAlphaDown : faSortAlphaUp} />
         </Button>
         <Button
           color="falcon-primary"
@@ -78,7 +80,7 @@ const Left = ({
         className="api-saved-list"
         style={{ height: "calc(100vh - 170px)", overflowX: "hidden" }}
       >
-        {details?.tableData?.map((item) => (
+        {(details?.tableDataFiltered || []).map((item) => (
           <TableBox key={item.table_name} tableName={item.table_name} />
         ))}
       </div>

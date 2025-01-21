@@ -9,12 +9,14 @@ const bodyParser = require('body-parser');
 const { MYSQL  , REQUEST_BODY_SIZE } = require('./envconfig.js').constant;
 var reSyncSchema = require('./lib/reSyncSchema.js');   
 var refreshGithub = require('./lib/refreshGithub.js');  
+const slack = require('./extras/slack');
 
 app.on('start', function () {
   console.log('Application ready to serve requests.');
   console.log('Environment: %s', app.kraken.get('env:env'));
   reSyncSchema();
   refreshGithub.start();
+  slack.sendAppStartedNotification();
 });
 
 app.use('/.well-known', express.static('.well-known')); //###  for ssl certificate genration 

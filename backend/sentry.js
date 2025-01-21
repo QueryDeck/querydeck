@@ -88,22 +88,22 @@ function saveData(req) {
 }
 
 
-function captureError(error) {
-//  console.log( "------------inside sentr-----------")
-//  console.log( "------------inside sentr-----------")
+function captureError(error ,data) {
   if (PROJECT_ENVIRONMENT !== 'prod') return;
 
-// The request handler must be the first middleware on the app
-    console.log('sending error :', error?.message || error)
-   Sentry.captureException(error,
-    // {
-    //   tags: {
-    //     section: "articles",
-    //   },
-    // }
-  );
-
-
+  if(data){ 
+    Sentry.setExtra('data', JSON.stringify(data, null, 2))
+  }
+  let newError;
+  if (!(error instanceof Error)) {
+    let message = `${error?.error?.message || error?.error || error?.message || 'Some error occurred'}`
+    newError = new Error(message);
+    Sentry.setExtra('Error data', JSON.stringify(error, null, 2))
+  } else {
+    newError = error ;
+  }
+  console.log('sending error :', newError?.message || newError)
+  Sentry.captureException(newError);
 
 }
 
