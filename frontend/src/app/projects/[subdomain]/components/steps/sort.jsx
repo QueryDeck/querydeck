@@ -9,8 +9,6 @@ import {
 import { openSortModal } from '../../../../../lib/data/dataSlice'
 
 // Library imports
-import { faPencilAlt } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from 'reactstrap'
 
 // Sort step at 'apps/app-id/databases/database-id/queries/new'
@@ -25,19 +23,14 @@ const Sort = props => {
         <Button
           className='mr-1'
           color='falcon-primary'
-          size=''
-        >
-          Sort [{state?.sorts?.length}]
-        </Button>
-        <Button
-          color='falcon-success'
           onClick={() => dispatch(openSortModal({
             mode: props.mode,
             query_id: props.query_id,
             subdomain: props.subdomain
           }))}
+          size=''
         >
-          <FontAwesomeIcon icon={faPencilAlt} />
+          {state?.sorts?.length || state?.sorts_dynamic?.length ? `Sorting - ${state?.sorts?.length} | ${state?.sorts_dynamic?.length}` : 'Click to add sorting'}
         </Button>
       </div>
     )

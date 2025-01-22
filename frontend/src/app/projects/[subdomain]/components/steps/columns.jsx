@@ -9,8 +9,6 @@ import {
 import { openColumnModal } from '../../../../../lib/data/dataSlice'
 
 // Library imports
-import { faPencilAlt } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from 'reactstrap'
 
 const Columns = props => {
@@ -26,20 +24,15 @@ const Columns = props => {
       <Button
         className='mr-1'
         color='falcon-primary'
-        size=''
-      >
-        {join.tableName} [{state.columns.filter(element => element.id.split('$')[0] === join.tableID).length}]
-      </Button>
-      <Button
-        color='falcon-success'
         onClick={() => dispatch(openColumnModal({
           columnModal: join.tableID,
           mode: props.mode,
           query_id: props.query_id,
           subdomain: props.subdomain
         }))}
+        size=''
       >
-        <FontAwesomeIcon icon={faPencilAlt} />
+        L{join.tableID.split('-').length/2} | {join.tableName} - {state.columns.filter(element => element.id.split('$')[0] === join.tableID).length}
       </Button>
     </div>
   ))
@@ -55,20 +48,15 @@ const Columns = props => {
           <Button
             className='mr-1'
             color='falcon-primary'
-            size=''
-          >
-            {state.base.label} [{state.method.value === 'delete' ? state.returnColumns.filter(element => !element.id.includes('$')).length : state.columns.filter(element => !element.id.includes('$')).length}]
-          </Button>
-          <Button
-            color='falcon-success'
             onClick={() => dispatch(openColumnModal({
               columnModal: state.base.value,
               mode: props.mode,
               query_id: props.query_id,
               subdomain: props.subdomain
             }))}
+            size=''
           >
-            <FontAwesomeIcon icon={faPencilAlt} />
+            Base | {state.base.label} - {state.method.value === 'delete' ? state.returnColumns.filter(element => !element.id.includes('$')).length : state.columns.filter(element => !element.id.includes('$')).length}
           </Button>
         </div>
         {joins}
