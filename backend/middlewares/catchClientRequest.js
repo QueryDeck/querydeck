@@ -23,6 +23,9 @@ module.exports = function () {
     if(subdomain && subdomain !== 'api' && subdomain !== 'dev-api') {
       var exec_time_start = Date.now();
       var clientip = requestIp.getClientIp(req);
+      if(!allModels[subdomain]){
+        res.status(400).send({ response_code : 400 , error : "Invalid subdomain"});
+      }
       requestHandler({
         request_path: req.path,
         request_method: req.method,
