@@ -9,7 +9,10 @@ import {
 import { openSortModal } from '../../../../../lib/data/dataSlice'
 
 // Library imports
-import { Button } from 'reactstrap'
+import {
+  Button,
+  UncontrolledTooltip
+} from 'reactstrap'
 
 // Sort step at 'apps/app-id/databases/database-id/queries/new'
 const Sort = props => {
@@ -20,9 +23,18 @@ const Sort = props => {
   if (state?.method?.value === 'select') {
     return(
       <div className='query-sort'>
+        <UncontrolledTooltip placement='top' target='sort-step'>
+          <div>
+            Sorting - {state?.sorts?.length}
+          </div>
+          <div>
+            Dynamic Sorting - {state?.sorts_dynamic?.length}
+          </div>
+        </UncontrolledTooltip>
         <Button
           className='mr-1'
           color='falcon-primary'
+          id='sort-step'
           onClick={() => dispatch(openSortModal({
             mode: props.mode,
             query_id: props.query_id,
