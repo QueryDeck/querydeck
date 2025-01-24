@@ -9,8 +9,6 @@ import {
 import { openFilterModal } from '../../../../../lib/data/dataSlice'
 
 // Library imports
-import { faPencilAlt } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from 'reactstrap'
 
 const Filter = props => {
@@ -28,19 +26,14 @@ const Filter = props => {
           <Button
             className='mr-1'
             color='falcon-primary'
-            size=''
-          >
-            Filter [{state?.filtersCount}]
-          </Button>
-          <Button
-            color='falcon-success'
             onClick={() => dispatch(openFilterModal({
               mode: props.mode,
               query_id: props.query_id,
               subdomain: props.subdomain
             }))}
+            size=''
           >
-            <FontAwesomeIcon icon={faPencilAlt} />
+            {state?.filtersCount ? `Filters - ${state?.filtersCount}` : 'Click to add filters'}
           </Button>
         </div>
       )

@@ -223,7 +223,7 @@ module.exports = class builder {
 					// TODO: throw error if on is null
 					jtext += ' ON ' + this.resolveConditions(model.joins[i].on);
 
-					
+
 					finalColumns = finalColumns.concat(this.resolveSelectColumns(model.joins[i]));
 				}
 			}
@@ -977,7 +977,7 @@ module.exports = class builder {
 				var param_val = false;
 
 				// this.depthpaths.push
-				if(val !== undefined && conditions.rules[i].input_key === undefined  && conditions.rules[i].operator.indexOf('$columnref') == -1){
+				if(val !== undefined && conditions.rules[i].input_key === undefined  && conditions.rules[i].operator.indexOf('$columnref') == -1 && conditions.rules[i].operator.indexOf('$inq') == -1){
 
 					if(no_rhs_operators.indexOf(conditions.rules[i].operator) == -1) {
 						val = this.getParamMapIndex(val)
@@ -1102,7 +1102,9 @@ module.exports = class builder {
 		else if (params.operator === '$columnref') { // add quotes to value if value is also a table columnname
 			params.value = quotes + params.value.split(".").join(quotes + "." + quotes) + quotes;
 			return params.columnName + ' = ' + params.value;
-		} else if (params.operator === '$inq') return params.columnName + ' IN (' + this.select(params.value) + ')';
+		} else if (params.operator === '$inq') {
+			return params.columnName + ' IN (' + this.select(params.value) + ')';
+		}
 		// else if (params.operator === '$inq') text += this.wrapType(columnName, realcname) + ' IN (' + this.select(params.value) + ')';
 		// else if (params.operator.indexOf('$cilike') > -1) text += 'LOWER(' + this.wrapType(columnName, realcname) + ') ~ LOWER(' + val + ')';
 		else if (params.operator === '$like') {

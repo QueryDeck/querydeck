@@ -9,8 +9,6 @@ import {
 import { openJoinModal } from '../../../../../lib/data/dataSlice'
 
 // Library imports
-import { faPencilAlt } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from 'reactstrap'
 
 // Join step at 'apps/app-id/databases/database-id/queries/new'
@@ -28,19 +26,14 @@ const Join = props => {
           <Button
             className='mr-1'
             color='falcon-primary'
-            size=''
-          >
-            Join [{state?.checkedKeys?.checked.length}]
-          </Button>
-          <Button
-            color='falcon-success'
             onClick={() => dispatch(openJoinModal({
               mode: props.mode,
               query_id: props.query_id,
               subdomain: props.subdomain
             }))}
+            size=''
           >
-            <FontAwesomeIcon icon={faPencilAlt} />
+            {state?.checkedKeys?.checked.length ? `Joins - ${state?.checkedKeys?.checked.length}` : 'Click to add joins'}
           </Button>
         </div>
       )

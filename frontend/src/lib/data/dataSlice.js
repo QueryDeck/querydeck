@@ -711,6 +711,7 @@ const dataSlice = createSlice({
         id: action.payload.node,
         options: []
       }
+      const nonPrimaryOptions = []
       action.payload.nodes.nodes.forEach(element => {
         node.options.push({
           id: element.id,
@@ -725,6 +726,21 @@ const dataSlice = createSlice({
           uniqueColumns: element.unique_cols,
           value: element.id
         })
+        if (!element.primary) {
+          nonPrimaryOptions.push({
+            id: element.id,
+            label: element.text,
+            optionType: element.optionType ? element.optionType : 'text',
+            primary: element.primary,
+            forceRequired: element.required,
+            required: element.required,
+            tableID: action.payload.node,
+            tableLabel: action.payload.nodes.text,
+            unique: element.unique,
+            uniqueColumns: element.unique_cols,
+            value: element.id
+          })
+        }
       })
       // Adding columns by default, for API
       node.options.sort((a, b) => a.label.localeCompare(b.label))
@@ -736,8 +752,14 @@ const dataSlice = createSlice({
             ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
             nodes: action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].nodes, node] : [node],
             joinTree: action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].joinTree, ...joinTree] : joinTree,
-            columns: action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].columns, ...node.options] : node.options,
-            returnColumns: action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].returnColumns, ...node.options] : node.options,
+            columns:
+              (state[action.payload.mode][action.payload.subdomain][action.payload.query_id].method?.value === 'insert' || state[action.payload.mode][action.payload.subdomain][action.payload.query_id].method?.value === 'update') ?
+              (action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].columns, ...nonPrimaryOptions] : nonPrimaryOptions) :
+              (action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].columns, ...node.options] : node.options),
+            returnColumns:
+              (state[action.payload.mode][action.payload.subdomain][action.payload.query_id].method?.value === 'insert' || state[action.payload.mode][action.payload.subdomain][action.payload.query_id].method?.value === 'update') ?
+              (action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].returnColumns, ...nonPrimaryOptions] : nonPrimaryOptions) :
+              (action.payload.node.includes('.') ? [...state.api[action.payload.mode][action.payload.subdomain][action.payload.query_id].returnColumns, ...node.options] : node.options),
           }
         }
       }

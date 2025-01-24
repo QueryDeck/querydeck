@@ -7,7 +7,6 @@ module.exports = function() {
 	return function(req, res, next) {
 
 		var host = req.get('host')
-    console.log('host = ',host)
 		var subdomain = getSubdomainList(host)
 		if (subdomain) subdomain = subdomain[0];
 

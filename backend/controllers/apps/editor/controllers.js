@@ -1232,11 +1232,24 @@ module.exports = function (router) {
     let qm = 'select';
     if (req.query.qm == 'insert' || req.query.qm == 'update' || req.query.qm == 'delete') qm = req.query.qm;
     let id = req.query.id;
-    let currentModel = req.clientModels[req.query.subdomain].databases[req.query.db_id];
 
-    let Models = currentModel.models;
+
     if (!id) return res.zend(null, 400);
-    let idSplit = id.split('$');
+
+
+      let resultNodes = mhelper.getAllNodes(id, req.query.subdomain, req.query.db_id, req.query.search_body,  )
+      if (resultNodes !== null && resultNodes.nodes.length) {
+        // resultNodes.tableId = id;
+        delete resultNodes.tableId ;  
+        delete resultNodes.table_join_path ;  
+        if(id.indexOf('-') > -1){
+          resultNodes  = resultNodes.nodes 
+        }
+      }
+  
+    return res.zend(resultNodes);
+/* 
+ 
     // let idSplitLength = idSplit.length;
     let currentSchema;
     let path, pathSplit, pathSplitLength, lastel, secondLastEl, currentColumn, currentTable, nodes = [];
@@ -1441,7 +1454,7 @@ module.exports = function (router) {
         return res.zend(nodes);
       }
     }
-    return res.zend(null, 400);
+    return res.zend(null, 400); */
   }));
   router.post('/load-all-nodes', catchError(async function (req, res) {
 
