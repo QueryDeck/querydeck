@@ -687,7 +687,8 @@ var ModelManager = {
               databases[element.db_id].tidToName = mod_gen_res.tidToName;
               databases[element.db_id].table_count = mod_gen_res.table_count;
               databases[element.db_id].schema_count = mod_gen_res.schema_count;
-              databases[element.db_id].graphql_tables = mod_gen_res.graphql_tables;
+              databases[element.db_id].graphql = {};
+              databases[element.db_id].graphql.tables = mod_gen_res.graphql_tables;
 
               ModelManager.models[subdomain] = {
                 appDetails: appdetails,
