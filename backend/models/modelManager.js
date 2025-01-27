@@ -730,6 +730,10 @@ var ModelManager = {
           }
         }
         catch (err) { 
+          ModelManager.schemaResyncFailed({
+            db_id: element.db_id,
+            error: err
+          });
           return callback(err);
         }
       }, function(){
@@ -770,11 +774,11 @@ var ModelManager = {
   // schema resync failed
   schemaResyncFailed(params, callback) {
     if (!params.db_id || !params.error) {
-      return callback(new Error('Missing required parameters'));
+      return callback && callback(new Error('Missing required parameters'));
     }
 
     var unix_sec = Math.round(Date.now()/1000)
-  
+    const error_obj = JSON.stringify({message: params.error.message  , stack: params.error.stack, code: params.error.code , error_body: params.error})
     // Update the schema_defs table to indicate the sync failure
     db.query({
       text: `
@@ -783,7 +787,7 @@ var ModelManager = {
             sync_error = $2
         WHERE db_id = $3
       `,
-      values: [unix_sec, params.error, params.db_id],
+      values: [unix_sec, error_obj, params.db_id],
     }, function(err, result) {
       if (err) {
         Sentry.captureError(err);
