@@ -242,6 +242,7 @@ const QraphQL = ({ appid: subdomain }) => {
             details={state.details}
             openSetupGraphQLModal={openSetupGraphQLModal}
             dispatch={dispatch}
+            subdomain={subdomain}
           />
 
           <SetupGraphQL
