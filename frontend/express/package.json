@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://app.querydeck.io",
   "dependencies": {
+    "compression": "^1.7.5",
     "express": "^4.21.1"
   }
 }

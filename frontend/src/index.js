@@ -21,7 +21,7 @@ import {
 
 import tracker from './tracker'
 
-LicenseInfo.setLicenseKey(process.env.REACT_APP_MUI_KEY);
+LicenseInfo.setLicenseKey('REACT_APP_MUI_KEY');
 
 tracker.start()
 
@@ -54,14 +54,14 @@ if(Cookies.get('session')) {
 }
 
 const options = {
-  api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
+  api_host: 'REACT_APP_PUBLIC_POSTHOG_HOST',
 }
 
 ReactDOM.render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <PostHogProvider 
-        apiKey={process.env.REACT_APP_PUBLIC_POSTHOG_KEY}
+        apiKey='REACT_APP_PUBLIC_POSTHOG_KEY'
         options={options}
       >
         <Main>
