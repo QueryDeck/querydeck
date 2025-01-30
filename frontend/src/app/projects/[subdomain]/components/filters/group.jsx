@@ -4,6 +4,7 @@ import React from 'react'
 // Library imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faCog,
   faPlus,
   faTrash
 } from '@fortawesome/free-solid-svg-icons'
@@ -22,6 +23,7 @@ const Group = props => {
     isDisabledDeleteGroup,
     isDisabledGroup,
     isDisabledNot,
+    isDisabledOptionalRules,
     isNot,
     isRoot,
     isHiddenAddGroup,
@@ -29,6 +31,7 @@ const Group = props => {
     isHiddenConjunction,
     isHiddenDeleteGroup,
     isHiddenNot,
+    isHiddenOptionalRules,
     parentId
   } = props.groupConfig
 
@@ -90,6 +93,19 @@ const Group = props => {
 
   const renderRightToolbar = () => {
     const toolbar = []
+    if (!isHiddenOptionalRules) {
+      toolbar.push(
+        <Button
+          color='falcon-primary'
+          disabled={isDisabledGroup || isDisabledOptionalRules}
+          key='optional rules'
+          onClick={() => console.log(groupId)}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faCog} /> Optional Rules
+        </Button>
+      )
+    }
     if (!isHiddenAddRule) {
       toolbar.push(
         <Button

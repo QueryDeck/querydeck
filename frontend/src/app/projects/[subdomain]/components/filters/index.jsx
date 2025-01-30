@@ -90,12 +90,16 @@ const Filters = React.forwardRef((props, ref) => {
       root: {
         isConjunctionOr: false,
         isDisabledDeleteGroup: true,
+        isDisabledOptionalRules: true,
         isHiddenDeleteGroup: true,
+        isHiddenOptionalRules: true,
         isNot: false,
         isRoot: true
       },
       vanilla: {
         isConjunctionOr: false,
+        isDisabledOptionalRules: false,
+        isHiddenOptionalRules: false,
         isNot: false
       }
     },
@@ -122,7 +126,9 @@ const Filters = React.forwardRef((props, ref) => {
         root: {
           ...defaultConfig.groups.root,
           isDisabledNot: true,
-          isHiddenNot: true
+          isDisabledOptionalRules: false,
+          isHiddenNot: true,
+          isHiddenOptionalRules: false,
         },
         vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -135,11 +141,13 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledAddRule: true,
           isDisabledConjunction: true,
           isDisabledNot: true,
+          isDisabledOptionalRules: true,
           isHiddenConjunction: true,
           isHiddenAddGroup: true,
           isHiddenAddRule: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
+          isHiddenOptionalRules: true
         },
         clause_vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -169,7 +177,7 @@ const Filters = React.forwardRef((props, ref) => {
         clause_exist: {
           ...defaultConfig.rules.vanilla,
           isDisabledField: true,
-        },
+        }
       }
       break
     }
@@ -194,11 +202,13 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledConjunction: true,
           isDisabledGroup: true,
           isDisabledNot: true,
+          isDisabledOptionalRules: true,
           isHiddenConjunction: true,
           isHiddenAddGroup: true,
           isHiddenAddRule: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
+          isHiddenOptionalRules: true
         },
         clause_vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -233,7 +243,7 @@ const Filters = React.forwardRef((props, ref) => {
           ...defaultConfig.rules.vanilla,
           isDisabledRule: true,
           isDisabledField: true,
-        },
+        }
       }
       break
     }
@@ -252,6 +262,27 @@ const Filters = React.forwardRef((props, ref) => {
           ...defaultConfig.groups.vanilla,
           isDisabledNot: true,
           isHiddenNot: true
+        },
+        clause: {
+          ...defaultConfig.groups.vanilla,
+          isDisabledAddGroup: true,
+          isDisabledAddRule: true,
+          isDisabledConjunction: true,
+          isDisabledNot: true,
+          isDisabledOptionalRules: true,
+          isHiddenConjunction: true,
+          isHiddenAddGroup: true,
+          isHiddenAddRule: true,
+          isHiddenDeleteGroup: true,
+          isHiddenNot: true,
+          isHiddenOptionalRules: true
+        },
+        clause_vanilla: {
+          ...defaultConfig.groups.vanilla,
+          isDisabledDeleteGroup: true,
+          isDisabledNot: true,
+          isHiddenDeleteGroup: true,
+          isHiddenNot: true,
         }
       }
       defaultConfig.rules = {
@@ -270,6 +301,10 @@ const Filters = React.forwardRef((props, ref) => {
           ...defaultConfig.rules.vanilla,
           isDisabledMethod: false,
           isHiddenMethod: false
+        },
+        clause_exist: {
+          ...defaultConfig.rules.vanilla,
+          isDisabledField: true,
         }
       }
       break
@@ -296,11 +331,13 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledAddRule: true,
           isDisabledConjunction: true,
           isDisabledNot: true,
+          isDisabledOptionalRules: true,
           isHiddenConjunction: true,
           isHiddenAddGroup: true,
           isHiddenAddRule: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
+          isHiddenOptionalRules: true
         },
         clause_vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -1529,10 +1566,10 @@ const Filters = React.forwardRef((props, ref) => {
     })
   }
 
-  console.log('----------------------------')
-  console.log('State', state)
-  console.log('Filters', getFilters())
-  console.log('----------------------------')
+  // console.log('----------------------------')
+  // console.log('State', state)
+  // console.log('Filters', getFilters())
+  // console.log('----------------------------')
 
   return (
     <div className='filters'>
