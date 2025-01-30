@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 // Components
 import Group from './group'
+import OptionalRules from './optional'
 
 // API
 import api from '../../../../../api'
@@ -613,7 +614,8 @@ const Filters = React.forwardRef((props, ref) => {
           }
         }
       }
-    }
+    },
+    optionalRulesModal: null
   }
 
   // const initialState = {
@@ -838,6 +840,13 @@ const Filters = React.forwardRef((props, ref) => {
     })
   }
 
+  const updateOptionalRulesModal = group => {
+    dispatch({
+      type: 'UPDATE_OPTIONAL_RULES_MODAL',
+      group
+    })
+  }
+
   // Rule
   const updateField = (rule, field) => {
     dispatch({
@@ -856,6 +865,15 @@ const Filters = React.forwardRef((props, ref) => {
     } else {
       return 'root'
     }
+  }
+
+  // toggles disabled rule
+  const toggleDisableRule = (rule, isDisabledRule) => {
+    dispatch({
+      type: 'TOGGLE_DISABLE_RULE', 
+      isDisabledRule,
+      rule
+    })
   }
 
   const updateOperator = (rule, operator) => {
@@ -1608,6 +1626,14 @@ const Filters = React.forwardRef((props, ref) => {
           deleteRule
         }}
         rules={state.rules}
+        updateOptionalRulesModal={updateOptionalRulesModal}
+      />
+      <OptionalRules
+        groups={state.groups}
+        optionalRulesModal={state.optionalRulesModal}
+        rules={state.rules}
+        toggleDisableRule={toggleDisableRule}
+        updateOptionalRulesModal={updateOptionalRulesModal}
       />
     </div>
   )

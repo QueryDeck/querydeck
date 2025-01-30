@@ -394,6 +394,29 @@ const filtersReducer = (state, action) => {
         }
       }
     }
+    // Opens optional rules modal
+    case 'UPDATE_OPTIONAL_RULES_MODAL': {
+      return {
+        ...state,
+        optionalRulesModal: action.group
+      }
+    }
+    // Toggles disabled rule
+    case 'TOGGLE_DISABLE_RULE': {
+      return {
+        ...state,
+        rules: {
+          ...state.rules,
+          [action.rule]: {
+            ...state.rules[action.rule],
+            config: {
+              ...state.rules[action.rule].config,
+              isDisabledRule: action.isDisabledRule
+            }
+          }
+        }
+      }
+    }
     default:
       throw new Error(`Unknown action type in filtersReducer: ${action.type}`)
   }

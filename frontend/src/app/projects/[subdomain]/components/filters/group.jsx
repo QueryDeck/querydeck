@@ -99,10 +99,10 @@ const Group = props => {
           color='falcon-primary'
           disabled={isDisabledGroup || isDisabledOptionalRules}
           key='optional rules'
-          onClick={() => console.log(groupId)}
+          onClick={() => props.updateOptionalRulesModal(groupId)}
           size='sm'
         >
-          <FontAwesomeIcon icon={faCog} /> Optional Rules
+          <FontAwesomeIcon icon={faCog} /> Disable Rules
         </Button>
       )
     }
@@ -180,6 +180,7 @@ const Group = props => {
                 groups={props.groups}
                 ruleFunctions={props.ruleFunctions}
                 rules={props.rules}
+                updateOptionalRulesModal={props.updateOptionalRulesModal}
               />
             </div>
           )
