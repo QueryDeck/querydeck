@@ -31,7 +31,7 @@ const Group = props => {
     isHiddenConjunction,
     isHiddenDeleteGroup,
     isHiddenNot,
-    isHiddenOptionalRules,
+    // isHiddenOptionalRules,
     parentId
   } = props.groupConfig
 
@@ -93,7 +93,8 @@ const Group = props => {
 
   const renderRightToolbar = () => {
     const toolbar = []
-    if (!isHiddenOptionalRules) {
+    // if (!isHiddenOptionalRules) {
+    if (false) {
       toolbar.push(
         <Button
           color='falcon-primary'
