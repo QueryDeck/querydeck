@@ -54,9 +54,9 @@ module.exports = class builder {
 	generate() {
 		this.queries = [];
 
-		if (this.otherOpts.method == 'insert' && this.otherOpts.query_values && this.otherOpts.request) {
-			this.fomatModelColumn(this.models, this.otherOpts.query_values, this.otherOpts.request)
-		}
+		// if (this.otherOpts.method == 'insert' && this.otherOpts.query_values && this.otherOpts.request) {
+		// 	this.fomatModelColumn(this.models, this.otherOpts.query_values, this.otherOpts.request)
+		// }
 		if (this.whereOnly) {
 			return {
 				text: this.resolveWhere(this.models),
@@ -487,6 +487,7 @@ module.exports = class builder {
 
 		if(Array.isArray(model.columns[0]) && model.columns.length > 1) {
 			model.multi_row_insert = true;
+			this.normalizeMultiInsertColumns(model.columns)
 		} else {
 			model.multi_row_insert = false;
 		}
@@ -709,6 +710,35 @@ module.exports = class builder {
 			query: q,
 			alias: current_alias
 		};
+	}
+
+	normalizeMultiInsertColumns(columns, model) {
+
+
+		const pathidMap = new Map();
+
+		// First, map the pathid to the corresponding objects
+		columns.forEach(arr => {
+			arr.forEach(obj => {
+				pathidMap.set(obj.pathid, obj);
+			});
+		});
+		const pathidArray = Array.from(pathidMap.values());
+
+		for (let index = 0; index < columns.length; index++) {
+			const arr = columns[index];
+			for (let i = 0; i < pathidArray.length; i++) {
+
+				if (!arr.find(item => item.pathid === pathidArray[i].pathid)) {
+	        // Create a new object with the same pathid if it doesn't exist
+					arr.push({ ...pathidArray[i], operator: "$default", value: null });
+				}
+	
+
+			}
+		}
+
+
 	}
 
 	fomatModelColumn(models, query_values, request) {
