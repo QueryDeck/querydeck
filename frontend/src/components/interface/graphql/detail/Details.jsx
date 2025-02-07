@@ -10,7 +10,7 @@ import { useResizable } from "@ag_meq/rrl";
 import Left from "./Left";
 import Right from "./Right";
 
-const Details = ({ openSetupGraphQLModal, handleSelectedTable, details, dispatch }) => {
+const Details = ({ openSetupGraphQLModal, handleSelectedTable, details, dispatch ,subdomain }) => {
   const { position, separatorProps } = useResizable({
     axis: "x",
     initial: Math.max(400, (window.innerWidth - 4 - 4) / 5),
@@ -45,7 +45,7 @@ const Details = ({ openSetupGraphQLModal, handleSelectedTable, details, dispatch
               }}
             >
             
-              <Right details={details}  openSetupGraphQLModal={openSetupGraphQLModal} />
+              <Right details={details}  openSetupGraphQLModal={openSetupGraphQLModal}   subdomain={subdomain} />
             </div>
           </div>
         </div>

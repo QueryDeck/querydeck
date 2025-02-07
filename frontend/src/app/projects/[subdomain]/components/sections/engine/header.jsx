@@ -3,7 +3,10 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 
 // Library imports
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import {
+  faArrowLeft,
+  // faSatelliteDish
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Badge,
@@ -51,10 +54,20 @@ const Header = props => {
         {renderUnsavedWarning() && <Badge className={styles.title_warning}>Draft</Badge>}
       </div>
       {(window.location.pathname.endsWith('/api') || window.location.pathname.endsWith('/api/')) &&
+        <>
+          {/* <Button
+            title="Click to create Webhooks"
+            onClick={() => history.push(`/apps/${props.subdomain}/webhook`)}
+            size="sm"
+            color='falcon-primary'
+          >
+            <FontAwesomeIcon  icon={faSatelliteDish} /> Webhook
+          </Button>
+        &nbsp;&nbsp; */}
         <AutoGenerateButton
           mode={props.mode}
           subdomain={props.subdomain}
-        />
+        /></> 
       }
       {props.query_id && <div className={styles.actions}>
         <Save

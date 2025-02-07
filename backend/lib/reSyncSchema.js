@@ -21,12 +21,7 @@ let lastSyncAt = 0;
 function startSyncing() {
     console.log('current time --->', new Date().toLocaleString())
 
-    let data = {
-        lastSyncAt: (Date.now() - lastSyncAt) / 1000,
-    };
     lastSyncAt = Date.now();
-
-
 
     db.query({
         text: `
@@ -83,7 +78,8 @@ function startSyncing() {
                 //     console.log('timeout calling success *****', subdomain)
                 //     callSuccess();
                 // }, 20000)
-
+                
+                let isAlreadyCalledSuccess = false ; 
                 console.log('resync', subdomain)
                 ModelManager.loadApp(subdomain, function (err) {
 
@@ -95,8 +91,11 @@ function startSyncing() {
                         // return;
                         console.log(err)
                     }
-
-                    setTimeout(success, 2000);
+                    if(!isAlreadyCalledSuccess){  // call  success only if not yet called 
+                        isAlreadyCalledSuccess = true ; 
+                        setTimeout(success, 2000);
+                    }
+            
 
                     // console.log('finish: ' ,subdomain)   
                 }, { reSyncSchema: true })

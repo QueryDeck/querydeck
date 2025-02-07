@@ -288,10 +288,10 @@ const filtersReducer = (state, action) => {
               ...state.rules[action.rule].value,
               field: action.field,
               operator: null,
-              value: '',
+              value: `QUERY.${action.field.value.split('.')[action.field.value.split('.').length - 1]}`,
               method: {
-                label: 'Static',
-                value: 'static'
+                label: 'Dynamic',
+                value: 'dynamic'
               }
             }
           }
@@ -328,7 +328,7 @@ const filtersReducer = (state, action) => {
             ...state.rules[action.rule],
             value: {
               ...state.rules[action.rule].value,
-              value: action.value
+              value: state.rules[action.rule].value.method.value === 'dynamic' ? (action.value.startsWith('QUERY.') ? action.value : `QUERY.`) : action.value
             }
           }
         }
@@ -390,6 +390,29 @@ const filtersReducer = (state, action) => {
           [action.group]: {
             ...state.groups[action.group],
             rules: state.groups[action.group].rules.filter(element => element !== action.rule)
+          }
+        }
+      }
+    }
+    // Opens optional rules modal
+    case 'UPDATE_OPTIONAL_RULES_MODAL': {
+      return {
+        ...state,
+        optionalRulesModal: action.group
+      }
+    }
+    // Toggles disabled rule
+    case 'TOGGLE_DISABLE_RULE': {
+      return {
+        ...state,
+        rules: {
+          ...state.rules,
+          [action.rule]: {
+            ...state.rules[action.rule],
+            config: {
+              ...state.rules[action.rule].config,
+              isDisabledRule: action.isDisabledRule
+            }
           }
         }
       }

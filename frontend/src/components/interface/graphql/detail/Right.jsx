@@ -1,18 +1,64 @@
 // React imports
 import React from "react";
+
+// Library imports
+import { 
+  Card, 
+  Badge, 
+  CardBody, 
+  CardTitle, 
+  CardText,
+} from "reactstrap";
+import { toast } from 'react-toastify';
+
 // SCSS module
 import styles from "../graphql.module.scss";
 
-// Library imports
+// API
+import { apiBase } from '../../../../api';
 
-import { Card, Badge, CardBody, CardTitle, CardText } from "reactstrap";
-
-const Right = ({ details, width, openSetupGraphQLModal }) => {
+const Right = ({ details, width, openSetupGraphQLModal  ,subdomain}) => {
   const relations = details?.selectedTable
     ? details?.tableData?.find(
         (item) => item.table_name === details.selectedTable
       )?.relations
     : null;
+
+  const copyAPI = () => {
+    navigator.clipboard.writeText(`https://${subdomain}.${apiBase}${'/graphql'}`).then(() => {
+      toast.success('API copied!')
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const getBadgeData = (status = null) => {
+    if (details?.method === 'insert' || status === 200) {
+      return ({
+        badge: styles.badge_success,
+        heading: styles.script_heading_success,
+        method: 'POST'
+      })
+    } else if (details?.method === 'update' || status === 300) {
+      return ({
+        badge: styles.badge_warning,
+        heading: styles.script_heading_warning,
+        method: 'PUT'
+      })
+    } else if (details?.method === 'delete' || status === 400) {
+      return ({
+        badge: styles.badge_danger,
+        heading: styles.script_heading_danger,
+        method: 'DELETE'
+      })
+    } else {
+      return ({
+        badge: styles.badge_primary,
+        heading: styles.script_heading_primary,
+        method: 'GET'
+      })
+    }
+  }
 
   const TableBox = ({ textPath, relationTableName, type }) => {
     return (
@@ -64,9 +110,25 @@ const Right = ({ details, width, openSetupGraphQLModal }) => {
     );
   }
 
+  const badgeData = getBadgeData(200);
   return (
     <div className={styles.right} style={{ width }}>
-      <div className={styles.relationbox}>Table Relations</div>
+      <div className={styles.relationbox}> 
+        <span> Table Relations </span>
+        <div className={styles.script}>
+          <div
+            className={badgeData?.heading}
+            onClick={copyAPI}
+          >
+            <Badge className={badgeData?.badge}>
+              {badgeData?.method}
+            </Badge>
+            <span>
+              https://{subdomain}.{apiBase}{'/graphql'}
+            </span>
+          </div>
+        </div>
+      </div>
       {relations.length === 0 ? (
         <div style={{ padding: 10 }}>No Relation Exist</div>
       ) : (

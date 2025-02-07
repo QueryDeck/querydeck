@@ -1,7 +1,7 @@
 import OpenReplay from '@openreplay/tracker'
 
 const config = {
-    projectKey: process.env.REACT_APP_OPENREPLAY_KEY,
+    projectKey: 'REACT_APP_OPENREPLAY_KEY',
     ingestPoint: 'https://openreplay.querycharts.com/ingest',
     defaultInputMode: 0,
     network: {

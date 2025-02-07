@@ -10,6 +10,7 @@ const { MYSQL  , REQUEST_BODY_SIZE } = require('./envconfig.js').constant;
 var reSyncSchema = require('./lib/reSyncSchema.js');   
 var refreshGithub = require('./lib/refreshGithub.js');  
 const slack = require('./extras/slack');
+var compression = require('compression');
 
 app.on('start', function () {
   console.log('Application ready to serve requests.');
@@ -21,7 +22,7 @@ app.on('start', function () {
 
 app.use('/.well-known', express.static('.well-known')); //###  for ssl certificate genration 
 app.use(sessions())
-
+app.use(compression())
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: REQUEST_BODY_SIZE }));
 app.use(cookieParser());

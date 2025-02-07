@@ -33,12 +33,16 @@
 
 .relationbox {
   border-bottom: 1px solid hsla(0, 0%, 46.7%, .2);
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-top: 12px;
-  padding-bottom: 6px;
-  padding-left: 8px;
-
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding-top: 9px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    overflow-y:auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 
@@ -90,4 +94,59 @@
  max-width: 800px;
 
 
+}
+
+.badge {
+  &_primary {
+    background-color: #2c7be5;
+  }
+
+  &_success {
+    background-color: #00d27a;
+  }
+
+  &_warning {
+    background-color: #f5803e;
+  }
+
+  &_danger {
+    background-color: #e63757;
+  }
+}
+
+.script_heading {
+  &_primary,
+  &_success,
+  &_warning,
+  &_danger {
+    border: 1px solid #d8e2ef;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    cursor: pointer;
+    font-family: monospace;
+    overflow: auto;
+    white-space: pre;
+    // padding: 8px;
+    padding: 1px 4px 1px 0px;
+    margin: 0px;
+    font-weight: 400;
+    font-size: 16px;
+    transform: translateY(-2px);
+  }
+
+  &_primary {
+    background-color: rgba(44, 123, 229, 0.2);
+  }
+
+  &_success {
+    background-color: rgba(0, 210, 122, 0.2);
+  }
+
+  &_warning {
+    background-color: rgba(245, 128, 62, 0.2);
+  }
+
+  &_danger {
+    background-color: rgba(230, 55, 87, 0.2);
+  }
 }
