@@ -949,7 +949,13 @@ module.exports = class builder {
 		var condt = '';
 
 		var type = (conditions.condition && conditions.condition.toLowerCase() == 'or') ? ' OR ' : ' AND ';
-
+		if (this.useDynamicValues && conditions.conditional_on) {
+			let conditional_on_field = conditions.conditional_on.split('.').slice(1).join('.');
+			var conditional_on_value = _.get(this.dynamicValues.query,conditional_on_field);
+			if (!conditional_on_value || conditional_on_value === '') {
+				return 'true';
+			}
+		}
 		for (let i = 0; i < conditions.rules.length; i++) {
 			const element = conditions.rules[i];
 			if((!element.rules) && !conditions.rules[i].operator && !conditions.rules[i].value) continue;
