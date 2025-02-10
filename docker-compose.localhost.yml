@@ -14,7 +14,7 @@ services:
   be_local:
     build:
       context: './backend'
-      dockerfile: Dockerfile.locahost
+      dockerfile: Dockerfile.localhost
     env_file: "./backend/.env"
     restart: always
     ports:
