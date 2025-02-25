@@ -17,6 +17,9 @@ services:
       dockerfile: Dockerfile.localhost
     env_file: "./backend/.env"
     restart: always
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "3000:3000"
     networks: # adding network
