@@ -158,7 +158,7 @@ const pg_types = [
       {symbol: '<=', value: "less_or_equal", name: 'less than or equal to'},
       {symbol: 'IS NULL',value: "is_empty", rhs: false},
       {symbol: 'IS NOT NULL', value: "is_not_empty",rhs: false},
-      {symbol: 'in', value: "in", name: 'in array', rhs_type: 'array'},
+      {symbol: 'IN (ARRAY)', value: "in", name: 'IN (ARRAY)', rhs_type: 'array'},
     ]
   },
   // {
@@ -197,7 +197,7 @@ const pg_types = [
       {symbol: 'NOT LIKE', 	value: "not_like" , name: 'not like(case sensitive)'},
       {symbol: 'IS NULL', 	value: "is_empty" , rhs: false},
       {symbol: 'IS NOT NULL', 	value: "is_not_empty" , rhs: false},
-      {symbol: 'in', value: "in", name: 'in array', rhs_type: 'array'},
+      {symbol: 'IN (ARRAY)', value: "in", name: 'IN (ARRAY)', rhs_type: 'array'},
     ]
   },
   {
