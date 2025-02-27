@@ -1,13 +1,8 @@
 services:
-  frontend:
-    build: './frontend'
-    env_file: './frontend/.env'
-    restart: always
-    ports:
-      - "5051:5051"
 
   mongo: # container name 
     image: mongo # On which image container will build
+    command: mongod --quiet --logpath /dev/null  # disable logging in terminal
     # ports:
     #   - "27017:27017"
     restart: always
@@ -16,8 +11,10 @@ services:
     volumes:
       - mongo-data:/data/db
 
-  backend:
-    build: './backend'
+  be_local:
+    build:
+      context: './backend'
+      dockerfile: Dockerfile.localhost
     env_file: "./backend/.env"
     restart: always
     dns:
@@ -28,7 +25,11 @@ services:
     networks: # adding network
       - backend_db
     depends_on:
-      - mongo
+    - mongo
+    volumes:
+      - type: bind
+        source: ./backend/
+        target: /app/backend/
 
 networks: # allow services to talk to each other while providing isolation from other docker container, running on the same host
   backend_db:

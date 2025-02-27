@@ -158,6 +158,7 @@ const pg_types = [
       {symbol: '<=', value: "less_or_equal", name: 'less than or equal to'},
       {symbol: 'IS NULL',value: "is_empty", rhs: false},
       {symbol: 'IS NOT NULL', value: "is_not_empty",rhs: false},
+      {symbol: 'IN (ARRAY)', value: "in", name: 'IN (ARRAY)', rhs_type: 'array'},
     ]
   },
   // {
@@ -196,6 +197,7 @@ const pg_types = [
       {symbol: 'NOT LIKE', 	value: "not_like" , name: 'not like(case sensitive)'},
       {symbol: 'IS NULL', 	value: "is_empty" , rhs: false},
       {symbol: 'IS NOT NULL', 	value: "is_not_empty" , rhs: false},
+      {symbol: 'IN (ARRAY)', value: "in", name: 'IN (ARRAY)', rhs_type: 'array'},
     ]
   },
   {
@@ -278,6 +280,23 @@ const pg_types = [
       {symbol: '>', value: "greater_than", name: 'greater than'},
       {symbol: '>=', value: "greater_or_equal", name: 'greater than or equal to'},
       {symbol: '<=', value: "less_or_equal", name: 'less than or equal to'},
+      {symbol: 'IS NULL',  value: "is_empty", rhs: false},
+      {symbol: 'IS NOT NULL',  value: "is_not_empty", rhs: false},
+    ]
+  },
+  {
+    name: 'range',
+    types: ['int8range', 'int4range', 'numrange', 'tsrange', 'tstzrange', 'daterange'],
+    comparison: [
+      {symbol: '=', value: "equal",name: 'equal to' },
+      {symbol: '<>', value: "not_equal", name: 'not equal to'},
+      {symbol: '<', value: "less_than", name: 'less than'},
+      {symbol: '>', value: "greater_than", name: 'greater than'},
+      {symbol: '>=', value: "greater_or_equal", name: 'greater than or equal to'},
+      {symbol: '<=', value: "less_or_equal", name: 'less than or equal to'},
+      {symbol: '@>', value: "contains", name: 'contains range'},
+      {symbol: '<@', value: "contained_by", name: 'contained by range'},
+      {symbol: '&&', value: "overlaps", name: 'overlaps range'},
       {symbol: 'IS NULL',  value: "is_empty", rhs: false},
       {symbol: 'IS NOT NULL',  value: "is_not_empty", rhs: false},
     ]

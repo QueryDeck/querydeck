@@ -1068,6 +1068,10 @@ module.exports = class builder {
 					}else{
 						//console.log( 'else not key')
 					}
+					// check for array
+					if(conditions.rules[i].operator == 'in' && !Array.isArray(val) && this.useDynamicValues) {
+						val = [val]
+					}
 					val = this.getParamMapIndex(val)
 					param_val = true;
 				}

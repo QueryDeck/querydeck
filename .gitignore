@@ -52,3 +52,7 @@ tester.js
 
 /repo-gen/repos
 draft.sql
+[be_local]
+resolve
+exporting
+transferring
