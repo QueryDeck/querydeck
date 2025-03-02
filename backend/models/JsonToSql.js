@@ -54,9 +54,6 @@ module.exports = class builder {
 	generate() {
 		this.queries = [];
 
-		// if (this.otherOpts.method == 'insert' && this.otherOpts.query_values && this.otherOpts.request) {
-		// 	this.fomatModelColumn(this.models, this.otherOpts.query_values, this.otherOpts.request)
-		// }
 		if (this.whereOnly) {
 			return {
 				text: this.resolveWhere(this.models),
@@ -74,13 +71,13 @@ module.exports = class builder {
 
 				if(this.mutation) throw new Error('cannot select in mutation query')
 
-				var alias = 'q' + this.makeid(3)
+				var alias = 'q' + this.makeid()
 
 				if(this.models.length > 1) {
 
 					this.queries.push({
 						query: 'select JSON_AGG(' + alias + '.*) as ' + this.models[i].table_alias + ' from (' + this.select(this.models[i]) + ') ' + alias,
-						alias: 'q' + this.makeid(3)
+						alias: 'q' + this.makeid()
 					});
 					
 				} else {
@@ -136,7 +133,7 @@ module.exports = class builder {
 
 					this.queries.push({
 						query: qq,
-						alias: 'q' + this.makeid(3),
+						alias: 'q' + this.makeid(),
 						table_body_path: model.table_body_path
 					});
 
@@ -146,7 +143,7 @@ module.exports = class builder {
 
 					this.queries.push({
 						query: 'SELECT ' + agg_func + '(' + model.final_alias + '.*) AS "' + ((model.dynamic_base_index && model.nested_insert) ? model.table_body_path + '_' + model.dynamic_base_index : model.table_body_path) + '" FROM ' + model.final_alias,
-						alias: 'q' + this.makeid(3),
+						alias: 'q' + this.makeid(),
 						table_body_path: model.table_body_path
 					});
 
@@ -251,7 +248,7 @@ module.exports = class builder {
 		;
 
 		// if(single) return fq;
-		var id = this.makeid(6);
+		var id = this.makeid();
 		if (agg_type) {
 			if (agg_type == 'row_to_json') {
 				return ' SELECT ROW_TO_JSON(' + id + '.*) AS ' + model.table_alias + ' FROM ( ' + fq + ' ) ' + id;
@@ -397,7 +394,7 @@ module.exports = class builder {
 
 	addInupQuery(model) {
 		if (model.method == 'select') throw 'cannot inup select model';
-		model.aggAlias = model.aggAlias || (model.schema != 'public' ? (model.schema + '.') : '') + model.table + '$' + this.makeid(3);
+		model.aggAlias = model.aggAlias || (model.schema != 'public' ? (model.schema + '.') : '') + model.table + '$' + this.makeid();
 
 		var ob = this[model.method](model);
 
@@ -411,7 +408,7 @@ module.exports = class builder {
 			this.qref_map[ob.alias].model = model;
 		}
 
-		var unused_alias = 'q' + this.makeid(3);
+		var unused_alias = 'q' + this.makeid();
 		
 		this.queries.push({
 			query: ob.query,
@@ -424,7 +421,7 @@ module.exports = class builder {
 
 			this.queries.push({
 				query: 'SELECT join_alias.*, ' + ob.alias + '_data.__q_p_idx FROM (SELECT ' + ob.alias + '.*, (ROW_NUMBER() OVER () - 1) AS __q_idx ' + ' FROM ' + ob.alias + ') join_alias JOIN ' + ob.alias + '_data ON join_alias.__q_idx::smallint = ' + ob.alias + '_data.__q_idx::smallint',
-				// alias: 'q' + this.makeid(3)
+				// alias: 'q' + this.makeid()
 				alias: ob.alias + '_return'
 			});
 		}
@@ -446,9 +443,14 @@ module.exports = class builder {
 
 		if (!model.conflict || model.conflict?.columns?.length === 0) return '';
 		let allkeys = [];
+		let allexcluded = [];
 		let result;
 		for (let i = 0; i < model.conflict.columns.length; i++) {
-			allkeys.push(model.conflict.columns[i].columnName.split(".").pop())
+			var col_name = model.conflict.columns[i].columnName.split(".").pop();
+			if(model.all_column_keys_for_insert.includes(col_name)) {
+				allkeys.push(col_name)
+				allexcluded.push('EXCLUDED.' + col_name)
+			}
 		}
 
 		if(!model.conflict.on_columns) {
@@ -462,21 +464,13 @@ module.exports = class builder {
 			' DO UPDATE SET '
 		if (allkeys.length > 1) {
 			result = result +
-				' (' + allkeys.join(',') + ') ' +
-				' = ' + this.resolveValues(model.conflict.columns, {
-					conflict: true,
-					dynamic_base_index: model.dynamic_base_index,
-					nested_insert: model.nested_insert
-				})
+				' (' + allkeys.join(', ') + ') ' +
+				' = ' + '(' + allexcluded.join(', ') + ')'
 
 		} else {
 			result = result +
-				' ' + allkeys.join(',') + ' ' +
-				' = ' + this.resolveValues(model.conflict.columns, {
-					conflict: true,
-					dynamic_base_index: model.dynamic_base_index,
-					nested_insert: model.nested_insert
-				})
+				' ' + allkeys[0] + ' ' +
+				' = ' + allexcluded[0]
 		}
 		return result;
 	}
@@ -507,6 +501,7 @@ module.exports = class builder {
 				if (!allkeys.includes(col_name)) allkeys.push(col_name);
 			}
 		}
+		model.all_column_keys_for_insert = allkeys;
 		model.return_arr_user = model.returns.user.map(elem => {
 			let colName = elem.columnName.split('.')[2];
 			if (elem.alias) return `${colName} AS  ${elem.alias}`;
@@ -726,73 +721,18 @@ module.exports = class builder {
 		const pathidArray = Array.from(pathidMap.values());
 
 		for (let index = 0; index < columns.length; index++) {
-			const arr = columns[index];
+			var arr = columns[index];
 			for (let i = 0; i < pathidArray.length; i++) {
 
 				if (!arr.find(item => item.pathid === pathidArray[i].pathid)) {
-	        // Create a new object with the same pathid if it doesn't exist
+	        	// Create a new object with the same pathid if it doesn't exist
 					arr.push({ ...pathidArray[i], operator: "$default", value: null });
 				}
 	
 
 			}
-		}
-
-
-	}
-
-	fomatModelColumn(models, query_values, request) {
-
-		for (let i = 0; i < models.length; i++) {
-			let field_input = _.get(query_values, models[i].table_body_path);
-			let table_request_body = _.get(request, models[i].table_body_path);
-
-			let result = [];
-			if (models[i].allow_multiple_row) {
-				if (!Array.isArray(field_input) || field_input.length === 0) {
-					throw new Error(`${models[i].table_body_path} must be of type array  with atleast 1 row values`);
-				}
-				for (let j = 0; j < field_input.length; j++) {
-					let currColumns = normalizeColumns(models[i], field_input, table_request_body[0], j)
-					result.push(currColumns)
-				}
-
-			} else {
-				let currColumns = normalizeColumns(models[i], field_input, table_request_body, )
-				result.push(currColumns)
-			}
-			models[i].columns = result;
-
-		}
-
-		function normalizeColumns(model, input, table_request_body, iteration) {
-			let currColumns = [];
-			for (let j = 0; j < model.columns.length; j++) {
-				let currCol = {
-					...model.columns[j],
-				}
-				let column_name = model.columns[j].columnName.split(".").pop();
-				if (model.columns[j].operator === "$req-body") {
-					if (Array.isArray(input)) { // for array of  object input 
-						if (
-							input[iteration][column_name] === undefined && (
-								table_request_body[column_name].required === false ||
-								table_request_body[column_name].default !== null
-							)
-						) {
-							currCol.operator = "$default"
-						} else {
-							currCol.value = model.columns[j].value + '[' + iteration + ']';
-						}
-					} else { // for object  input
-						if (input[column_name] === undefined) {
-							currCol.operator = "$default"
-						}
-					}
-				}
-				currColumns.push(currCol)
-			}
-			return currColumns;
+			// sort array by pathid so all the columns are in the same order
+			arr.sort((a, b) => a.pathid.localeCompare(b.pathid));
 		}
 
 	}
@@ -1189,13 +1129,15 @@ module.exports = class builder {
 		return this.currentModel.models[params.schema][params.table].properties.uindex[params.constraint]
 	}
 
-	makeid(len) {
-		len = len + 2;
-		var text = "a";
+	makeid() {
+		var text = "d";
 		var possible = "1bc62de3f23gh4ij5k_0_lmno231pq6rst7uvw864xy9z";
 
-		for (var i = 0; i < len; i++)
+		for (var i = 0; i < 6; i++) {
+			// Shuffle the possible string to increase randomness
+			possible = possible.split('').sort(() => Math.random() - 0.5).join('');
 			text += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
 
 		return text;
 	}
