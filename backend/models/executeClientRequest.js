@@ -67,14 +67,14 @@ function executeClientRequest(params, callback) {
 
         if (params.query_model.sqlmethod == 'select' || params.query_model.sqlmethod == 'update' || params.query_model.sqlmethod == 'delete') {
 
-            if(params.query_model.limit_dynamic && params.request.query._limit) {
+            if(params.query_model.query_json.limit_dynamic && params.request.query._limit) {
                 let limit = parseInt(params.request.query._limit);
                 if(!isNaN(limit)) {
                     params.query_model.query_json.limit = limit;
                 }
             }
 
-            if(params.query_model.offset_dynamic && params.request.query._offset) {
+            if(params.query_model.query_json.offset_dynamic && params.request.query._offset) {
                 let offset = parseInt(params.request.query._offset);
                 if(!isNaN(offset)) {
                     params.query_model.query_json.offset = offset;
