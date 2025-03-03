@@ -177,8 +177,8 @@ module.exports = class ViewToJSON {
                 table_body_path = column_value_split.slice(0, column_value_split.length - 1).join('.');
             } else {
                 table_body_path_arr = body_path_split;
+                table_body_path = body_path_split.join('.');
             }
-
 
             tabob.table_body_path = table_body_path;
             tabob.table_body_path_arr = table_body_path_arr;
@@ -512,6 +512,8 @@ module.exports = class ViewToJSON {
 
         var nest_in;
 
+        var column_body_path = this.buildBodyPath(pathid, col_name_split[2]);
+
         if (psplit_init[psplit_init.length - 1] == coltabid) {
 
             let last_ref_path = psplit_init[psplit_init.length - 2] + '-' + psplit_init[psplit_init.length - 1];
@@ -586,7 +588,7 @@ module.exports = class ViewToJSON {
             // req body
             op = '$req-body';
 
-            val = this.buildBodyPath(pathid, col_name_split[2]);
+            val = column_body_path;
         }
 
         if (nest_in) {
@@ -604,21 +606,20 @@ module.exports = class ViewToJSON {
         }
 
         if (!this.insertOb[pathid].columns[col_name]) {
+
+            let column_body_path_split = column_body_path.split('.')
+            column_body_path_split.pop();
+            var table_body_path = column_body_path_split.join('.');
             this.insertOb[pathid].columns[col_name] = {
                 id: coltabid,
                 pathid: pathid + '$' + coltabid.split('.')[1],
                 columnName: col_name,
                 operator: op,
                 value: val,
-                required: required
+                required: required,
+                body_path: table_body_path
             };
 
-            if (this.insertOb[pathid].columns[col_name].operator === '$req-body') {
-                let value_split = this.insertOb[pathid].columns[col_name].value.split('.')
-                value_split.pop();
-                this.insertOb[pathid].columns[col_name].body_path = value_split.join(".");
-
-            }
             if (this.insertOb[pathid].columns[col_name].operator === '$qref') {
                 this.insertOb[pathid].qref_used = true;
             }
