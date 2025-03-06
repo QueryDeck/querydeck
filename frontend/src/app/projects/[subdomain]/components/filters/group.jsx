@@ -23,7 +23,7 @@ const Group = props => {
     isDisabledDeleteGroup,
     isDisabledGroup,
     isDisabledNot,
-    isDisabledOptionalRules,
+    isDisabledConditionalRules,
     isNot,
     isRoot,
     isHiddenAddGroup,
@@ -31,7 +31,7 @@ const Group = props => {
     isHiddenConjunction,
     isHiddenDeleteGroup,
     isHiddenNot,
-    // isHiddenOptionalRules,
+    isHiddenConditionalRules,
     parentId
   } = props.groupConfig
 
@@ -93,17 +93,16 @@ const Group = props => {
 
   const renderRightToolbar = () => {
     const toolbar = []
-    // if (!isHiddenOptionalRules) {
-    if (false) {
+    if (!isHiddenConditionalRules) {
       toolbar.push(
         <Button
           color='falcon-primary'
-          disabled={isDisabledGroup || isDisabledOptionalRules}
-          key='optional rules'
-          onClick={() => props.updateOptionalRulesModal(groupId)}
+          disabled={isDisabledGroup || isDisabledConditionalRules || !props.groups[groupId]?.rules?.length}
+          key='conditional rules'
+          onClick={() => props.updateConditionalRulesModal(groupId)}
           size='sm'
         >
-          <FontAwesomeIcon icon={faCog} /> Disable Rules
+          <FontAwesomeIcon icon={faCog} /> Conditional Rules
         </Button>
       )
     }
@@ -181,7 +180,7 @@ const Group = props => {
                 groups={props.groups}
                 ruleFunctions={props.ruleFunctions}
                 rules={props.rules}
-                updateOptionalRulesModal={props.updateOptionalRulesModal}
+                updateConditionalRulesModal={props.updateConditionalRulesModal}
               />
             </div>
           )

@@ -12,6 +12,32 @@ const filtersReducer = (state, action) => {
         rules: action.rules
       }
     }
+    // Modify conditional rule
+    case 'MODIFY_CONDITIONAL_RULES': {
+      if (action.conditionalRules) {
+        return {
+          ...state,
+          groups: {
+            ...state.groups,
+            [action.group]: {
+              ...state.groups[action.group],
+              conditionalRules: action.conditionalRules
+            }
+          }
+        }
+      } else {
+        delete state.groups[action.group].conditionalRules
+        return {
+          ...state,
+          groups: {
+            ...state.groups,
+            [action.group]: {
+              ...state.groups[action.group]
+            }
+          }
+        }
+      }
+    }
     // Add group
     case 'ADD_GROUP': {
       const groupId = `${action.group}-${uuidv4().slice(0,8)}`
@@ -394,11 +420,11 @@ const filtersReducer = (state, action) => {
         }
       }
     }
-    // Opens optional rules modal
-    case 'UPDATE_OPTIONAL_RULES_MODAL': {
+    // Opens conditional rules modal
+    case 'UPDATE_CONDITIONAL_RULES_MODAL': {
       return {
         ...state,
-        optionalRulesModal: action.group
+        conditionalRulesModal: action.group
       }
     }
     // Toggles disabled rule

@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 // Components
 import Group from './group'
-import OptionalRules from './optional'
+import ConditionalRules from './conditional'
 
 // API
 import api from '../../../../../api'
@@ -91,16 +91,16 @@ const Filters = React.forwardRef((props, ref) => {
       root: {
         isConjunctionOr: false,
         isDisabledDeleteGroup: true,
-        isDisabledOptionalRules: true,
+        isDisabledConditionalRules: true,
         isHiddenDeleteGroup: true,
-        isHiddenOptionalRules: true,
+        isHiddenConditionalRules: true,
         isNot: false,
         isRoot: true
       },
       vanilla: {
         isConjunctionOr: false,
-        isDisabledOptionalRules: false,
-        isHiddenOptionalRules: false,
+        isDisabledConditionalRules: false,
+        isHiddenConditionalRules: false,
         isNot: false
       }
     },
@@ -127,9 +127,9 @@ const Filters = React.forwardRef((props, ref) => {
         root: {
           ...defaultConfig.groups.root,
           isDisabledNot: true,
-          isDisabledOptionalRules: false,
+          isDisabledConditionalRules: false,
           isHiddenNot: true,
-          isHiddenOptionalRules: false,
+          isHiddenConditionalRules: false,
         },
         vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -142,13 +142,13 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledAddRule: true,
           isDisabledConjunction: true,
           isDisabledNot: true,
-          isDisabledOptionalRules: true,
+          isDisabledConditionalRules: true,
           isHiddenConjunction: true,
           isHiddenAddGroup: true,
           isHiddenAddRule: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
-          isHiddenOptionalRules: true
+          isHiddenConditionalRules: true
         },
         clause_vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -156,6 +156,7 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledNot: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
+          isHiddenConditionalRules: true
         }
       }
       defaultConfig.rules = {
@@ -203,13 +204,13 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledConjunction: true,
           isDisabledGroup: true,
           isDisabledNot: true,
-          isDisabledOptionalRules: true,
+          isDisabledConditionalRules: true,
           isHiddenConjunction: true,
           isHiddenAddGroup: true,
           isHiddenAddRule: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
-          isHiddenOptionalRules: true
+          isHiddenConditionalRules: true
         },
         clause_vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -218,6 +219,7 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledNot: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
+          isHiddenConditionalRules: true
         }
       }
       defaultConfig.rules = {
@@ -270,13 +272,13 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledAddRule: true,
           isDisabledConjunction: true,
           isDisabledNot: true,
-          isDisabledOptionalRules: true,
+          isDisabledConditionalRules: true,
           isHiddenConjunction: true,
           isHiddenAddGroup: true,
           isHiddenAddRule: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
-          isHiddenOptionalRules: true
+          isHiddenConditionalRules: true
         },
         clause_vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -284,6 +286,7 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledNot: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
+          isHiddenConditionalRules: true
         }
       }
       defaultConfig.rules = {
@@ -332,13 +335,13 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledAddRule: true,
           isDisabledConjunction: true,
           isDisabledNot: true,
-          isDisabledOptionalRules: true,
+          isDisabledConditionalRules: true,
           isHiddenConjunction: true,
           isHiddenAddGroup: true,
           isHiddenAddRule: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
-          isHiddenOptionalRules: true
+          isHiddenConditionalRules: true
         },
         clause_vanilla: {
           ...defaultConfig.groups.vanilla,
@@ -346,6 +349,7 @@ const Filters = React.forwardRef((props, ref) => {
           isDisabledNot: true,
           isHiddenDeleteGroup: true,
           isHiddenNot: true,
+          isHiddenConditionalRules: true
         }
       }
       defaultConfig.rules = {
@@ -615,7 +619,7 @@ const Filters = React.forwardRef((props, ref) => {
         }
       }
     },
-    optionalRulesModal: null
+    conditionalRulesModal: null
   }
 
   // const initialState = {
@@ -799,7 +803,15 @@ const Filters = React.forwardRef((props, ref) => {
 
   const [state, dispatch] = useReducer(filtersReducer, initialState)
 
-  // Group 
+  // Group
+  const modifyConditionalRules = (group, conditionalRules) => {
+    dispatch({
+      type: 'MODIFY_CONDITIONAL_RULES',
+      group,
+      conditionalRules
+    })
+  }
+
   const addGroup = group => {
     dispatch({
       type: 'ADD_GROUP',
@@ -840,9 +852,9 @@ const Filters = React.forwardRef((props, ref) => {
     })
   }
 
-  const updateOptionalRulesModal = group => {
+  const updateConditionalRulesModal = group => {
     dispatch({
-      type: 'UPDATE_OPTIONAL_RULES_MODAL',
+      type: 'UPDATE_CONDITIONAL_RULES_MODAL',
       group
     })
   }
@@ -1142,6 +1154,10 @@ const Filters = React.forwardRef((props, ref) => {
               isConjunctionOr: rule.condition === 'OR',
               isNot: rule.not
             },
+            conditionalRules: rule.conditional_on ? {
+              label: rule.conditional_on,
+              value: rule.conditional_on
+            } : null,
             rules: []
           }
           // recurses over rules to add rules to the newly added group
@@ -1258,6 +1274,10 @@ const Filters = React.forwardRef((props, ref) => {
           isConjunctionOr: filters.condition === 'OR',
           isNot: filters.not,
         },
+        conditionalRules: filters.conditional_on ? {
+          label: filters.conditional_on,
+          value: filters.conditional_on
+        } : null,
         rules: []
       }
     }
@@ -1375,6 +1395,7 @@ const Filters = React.forwardRef((props, ref) => {
                     // console.log('Not found else')
                     subRule.push({
                       condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+                      conditional_on: state.groups[groupId]?.conditionalRules?.value,
                       id: groupId,
                       rules: [],
                       not: state.groups[groupId].config.isNot
@@ -1422,6 +1443,7 @@ const Filters = React.forwardRef((props, ref) => {
 
                 // subRule[index].exists_where.rules.push({
                 //   condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+                //   conditional_on: state.groups[groupId]?.conditionalRules?.value,
                 //   id: groupId,
                 //   rules: [filterRule],
                 //   not: state.groups[groupId].config.isNot
@@ -1447,6 +1469,7 @@ const Filters = React.forwardRef((props, ref) => {
               // appends a new group with the filter rule
               subRule.push({
                 condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+                conditional_on: state.groups[groupId]?.conditionalRules?.value,
                 id: groupId,
                 rules: [filterRule],
                 not: state.groups[groupId].config.isNot
@@ -1498,6 +1521,7 @@ const Filters = React.forwardRef((props, ref) => {
             // adds a group and recurses in the group rules
             subRule.push({
               condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+              conditional_on: state.groups[groupId]?.conditionalRules?.value,
               id: groupId,
               rules: [],
               not: state.groups[groupId].config.isNot
@@ -1507,6 +1531,7 @@ const Filters = React.forwardRef((props, ref) => {
             // adds a group along with rule to the subgroup
             subRule.push({
               condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+              conditional_on: state.groups[groupId]?.conditionalRules?.value,
               id: groupId,
               rules: [filterRule],
               not: state.groups[groupId].config.isNot
@@ -1550,7 +1575,7 @@ const Filters = React.forwardRef((props, ref) => {
     // rules array in the final object
     const rules = []
     // array of valid rules - having values/operator with value disabled
-    const validRuleIds = Object.keys(state.rules).filter(ruleId => state.rules[ruleId].value.operator?.disable_value || state.rules[ruleId].value.value)
+    const validRuleIds = Object.keys(state.rules).filter(ruleId => (state.rules[ruleId].value.operator?.disable_value || state.rules[ruleId].value.value) && state.rules[ruleId].value.operator)
 
     // iterates over valid rules to add filters
     validRuleIds.forEach(ruleId => {
@@ -1578,6 +1603,7 @@ const Filters = React.forwardRef((props, ref) => {
     // returns the object as per query builder format
     return ({
       condition: state.groups.root.config.isConjunctionOr ? 'OR' : 'AND',
+      conditional_on: state.groups.root?.conditionalRules?.value,
       id: 'root',
       rules,
       not: state.groups.root.config.isNot
@@ -1626,14 +1652,15 @@ const Filters = React.forwardRef((props, ref) => {
           deleteRule
         }}
         rules={state.rules}
-        updateOptionalRulesModal={updateOptionalRulesModal}
+        updateConditionalRulesModal={updateConditionalRulesModal}
       />
-      <OptionalRules
+      <ConditionalRules
         groups={state.groups}
-        optionalRulesModal={state.optionalRulesModal}
+        conditionalRulesModal={state.conditionalRulesModal}
+        modifyConditionalRules={modifyConditionalRules}
         rules={state.rules}
         toggleDisableRule={toggleDisableRule}
-        updateOptionalRulesModal={updateOptionalRulesModal}
+        updateConditionalRulesModal={updateConditionalRulesModal}
       />
     </div>
   )
