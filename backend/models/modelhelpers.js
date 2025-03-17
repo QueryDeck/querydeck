@@ -263,7 +263,6 @@ function getAllNodes(id, subdomain, db_id, search_query = '' , options ={}) {
         // Add session_key field using the helper function
         let columnID = Models[currentSchema][currentTable].properties.id + "." + currentNodeId;
         let relationPath = Models[currentSchema][currentTable].properties.relations[columnKeys[i]];
-        console.log('columnKeys[i]',columnKeys[i])
         currentNode.session_key = getSessionIDOfColumn(
           columnID, 
           relationPath,
