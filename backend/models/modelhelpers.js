@@ -12,7 +12,7 @@ exports.getAllNodes = getAllNodes;
 exports.getAllWhereColumns = getAllWhereColumns;
 exports.getAllJoinTableIds = getAllJoinTableIds;
 exports.getAllTableIdFromPathId = getAllTableIdFromPathId;
-
+exports.getSessionIDOfColumn = getSessionIDOfColumn;
 
 exports.colFullPathToColDetail = colFullPathToColDetail;
 
@@ -258,10 +258,21 @@ function getAllNodes(id, subdomain, db_id, search_query = '' , options ={}) {
           path,
           Models[currentSchema][currentTable].properties.uindex,
           Models[currentSchema][currentTable].properties
-        )
+        );
+        
+        // Add session_key field using the helper function
+        let columnID = Models[currentSchema][currentTable].properties.id + "." + currentNodeId;
+        let relationPath = Models[currentSchema][currentTable].properties.relations[columnKeys[i]];
+        currentNode.session_key = getSessionIDOfColumn(
+          columnID, 
+          relationPath,
+          subdomain, 
+          db_id
+        );
+        
         // currentNode.ts = qutils.istimeseriescol(columnKeys[i], Models[currentSchema][currentTable].properties.columns[columnKeys[i]].type);
         currentNode.optionType = qutils.getSuperType(Models[currentSchema][currentTable].properties.columns[columnKeys[i]].type, currentModel.db_type);
-        if (  Models[currentSchema][currentTable].properties.referencedBy[columnKeys[i]]) {
+        if (Models[currentSchema][currentTable].properties.referencedBy[columnKeys[i]]) {
           currentNode.nodes = [];
 
           for (let j = 0; j < Models[currentSchema][currentTable].properties.referencedBy[columnKeys[i]].length; j++) {
@@ -357,7 +368,18 @@ function getAllNodes(id, subdomain, db_id, search_query = '' , options ={}) {
           path,
           Models[currentSchema][currentTable].properties.uindex,
           Models[currentSchema][currentTable].properties
-        )
+        );
+        
+        // Add session_key field using the helper function
+        let relationPath = Models[currentSchema][currentTable].properties.relations[columnKeys[i]];
+        
+        currentNode.session_key = getSessionIDOfColumn(
+          currentNodeId, 
+          relationPath,
+          subdomain, 
+          db_id
+        );
+        
         if (  Models[currentSchema][currentTable].properties.referencedBy[columnKeys[i]]) {
 
           for (let j = 0; j < Models[currentSchema][currentTable].properties.referencedBy[columnKeys[i]].length; j++) {
@@ -601,4 +623,53 @@ function getAllTableIdFromPathId(pathId) {
 
   }
   return tableIds;
+}
+
+/**
+ * Get session ID for a column if it exists
+ * @param {string} columnID - The column ID to check
+ * @param {string} relationPath - The relation path for the column (if any)
+ * @param {string} subdomain - The subdomain
+ * @param {string} db_id - The database ID
+ * @returns {string|undefined} - The session key or undefined
+ */
+function getSessionIDOfColumn(columnID, relationPath, subdomain, db_id) {
+  // Check if column is directly a session key
+  if (
+    ModelManager.models[subdomain]?.appDetails?.auth?.session_key_values && 
+    ModelManager.models[subdomain].appDetails.auth.session_key_values[columnID]
+  ) {
+    return columnID;
+  }
+  
+  // Check if column is the user ID column
+  if (
+    ModelManager.models[subdomain]?.appDetails?.auth?.user_id_column_id === columnID
+  ) {
+    return columnID;
+  }
+  
+  // Check for relations if relation path is provided
+  if (relationPath) {
+    // Check if relation matches user ID column
+    if (ModelManager.models[subdomain]?.appDetails?.auth?.user_id_column_id) {
+      const user_id_col_arr = ModelManager.models[subdomain].databases[db_id].idToName[ModelManager.models[subdomain].appDetails.auth.user_id_column_id];
+      if (user_id_col_arr && user_id_col_arr.join('.') === relationPath) {
+        return ModelManager.models[subdomain].appDetails.auth.user_id_column_id;
+      }
+    }
+    
+    // Check if relation matches any session key
+    if (ModelManager.models[subdomain]?.appDetails?.auth?.session_key_values) {
+      const session_cols = Object.keys(ModelManager.models[subdomain].appDetails.auth.session_key_values);
+      for (let j = 0; j < session_cols.length; j++) {
+        if (ModelManager.models[subdomain].appDetails.auth.session_key_values[session_cols[j]].column_name === relationPath) {
+          return session_cols[j];
+        }
+      }
+    }
+  }
+  
+  // No session key found
+  return undefined;
 }

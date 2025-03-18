@@ -1,0 +1,11 @@
+{
+  "name": "qd",
+  "version": "1.0.0",
+  "description": "[![GitHub license](https://img.shields.io/github/license/QueryDeck/querydeck)](https://github.com/QueryDeck/querydeck/blob/prod/LICENSE)",
+  "main": "index.js",
+  "scripts": {
+    "be": "docker compose -f docker-compose.localhost.yml up --build"
+  },
+  "author": "",
+  "license": "ISC"
+}
