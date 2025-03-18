@@ -98,7 +98,9 @@ module.exports = class ViewToJSON {
                     tableid = psplit[psplit.length - 1].split('.')[0];
                 }
                 this.initColumn(pathid, tableid + '.' + columnid, {
-                    required: params.columns[i].required
+                    required: params.columns[i].required,
+                    session_input_key: params.columns[i].session_input_key,
+                    session_value_override: params.columns[i].session_value_override
                 });
                 resolvedExtendedPaths.push(pathid);
             }
@@ -614,10 +616,12 @@ module.exports = class ViewToJSON {
                 id: coltabid,
                 pathid: pathid + '$' + coltabid.split('.')[1],
                 columnName: col_name,
-                operator: op,
+                operator: (user_opts && user_opts.session_input_key && user_opts.session_value_override ? '$req-session' : op),
                 value: val,
                 required: required,
-                body_path: table_body_path
+                body_path: table_body_path,
+                session_input_key: user_opts?.session_input_key,
+                session_value_override: user_opts?.session_value_override
             };
 
             if (this.insertOb[pathid].columns[col_name].operator === '$qref') {

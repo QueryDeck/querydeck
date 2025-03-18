@@ -130,7 +130,8 @@ class DynamicInsertModels {
         this.index_map = {};
         this.body_path_map = {};
         
-        this.buildPaths();
+        let build_paths_res = this.buildPaths();
+        if(build_paths_res && build_paths_res.error) return build_paths_res;
         return this.processModels();
     }
 
@@ -152,12 +153,13 @@ class DynamicInsertModels {
             this.sorted_model_map[newIndex] = item.index;
         });
 
-        for (let i = 0; i < this.models.length; i++) {            
-            this.keypathsfromarr({
+        for (let i = 0; i < this.models.length; i++) {
+            let keypaths_res = this.keypathsfromarr({
                 model: this.models[this.sorted_model_map[i]],
                 model_index: this.sorted_model_map[i],
                 base_index: 0
             });
+            if(keypaths_res && keypaths_res.error) return keypaths_res;
         }
     }
 
@@ -175,12 +177,19 @@ class DynamicInsertModels {
             gen_arr.push('.' + model.table_body_path_arr[current_key_index])
         }
 
-        var model_val_arr = _.get(body, gen_arr.join(''));
+        var gen_arr_str = gen_arr.join('')
 
+        var model_val_arr = _.get(body, gen_arr_str);
+
+        if(!model_val_arr) {
+            return {
+                error: `Value is null for ${gen_arr_str}`
+            }
+        }
 
         if (!Array.isArray(model_val_arr)) {
             model_val_arr = [model_val_arr];
-            if (gen_arr.length > 0) _.set(body, gen_arr.join(''), model_val_arr)
+            if (gen_arr.length > 0) _.set(body, gen_arr_str, model_val_arr)
         }
 
         var base_index = params.base_index || 0;

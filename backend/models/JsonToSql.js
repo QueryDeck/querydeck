@@ -768,6 +768,18 @@ module.exports = class builder {
 					} else {
 						nv = '(' + this.select(v) + ')';
 					}
+				} else if(columns[i].session_value_override && columns[i].session_input_key) {
+					var session_val = columns[i].session_input_key;
+					if(this.useDynamicValues) {
+						var key_spl = columns[i].session_input_key.split('.');
+						key_spl.shift();
+						var key = key_spl.join('.');
+						if(_.get(this.dynamicValues.session, key)) session_val = _.get(this.dynamicValues.session, key)
+							else throw new Error(`Session variable ${key} not found`)
+
+						this.session_vars_used.push(key)
+					}
+					nv = this.getParamMapIndex(session_val)
 				} else if (op) {
 					if (v && op == '$append') {
 						nv = 'ARRAY_APPEND(' + columns[i].columnName + ', ' + this.getParamMapIndex(v) + ')';
