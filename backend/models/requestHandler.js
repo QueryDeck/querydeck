@@ -94,6 +94,12 @@ function handleRequest(params, callback) {
         var session;
 
         if(query_model.auth_required) {
+            if(!currentModel.appDetails.auth.roles || currentModel.appDetails.auth.roles.length == 0) {
+                return callback({
+                    response_code: 403,
+                    error: 'Auth roles not setup correctly'
+                });
+            }
             session = getSession({
                 jwt_key: currentModel.appDetails.auth.jwt_key,
                 token_header: currentModel.appDetails.auth.token_header,
