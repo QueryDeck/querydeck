@@ -572,7 +572,9 @@ const ColumnSection = props => {
         {renderToolbar()}
         {renderColumnsList()}
         <SessionModal
+          query_id={props.query_id}
           sessionModal={sessionModal}
+          subdomain={props.subdomain}
           updateSessionModal={setSessionModal}
           toggleSessionOverride={toggleRequired}
         />

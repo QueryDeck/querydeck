@@ -9,6 +9,7 @@ import {
 } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { useSelector } from 'react-redux'
 
 const SessionModal = props => {
   const [sessionOverride, setSessionOverride] = useState(false)
@@ -19,11 +20,13 @@ const SessionModal = props => {
     setSessionOverride(props.sessionModal?.session_value_override)
   }, [props.sessionModal])
 
+  const appAuth = useSelector(state => state.data.api[props.subdomain]?.[props.query_id]?.appAuth)
+
   const closeModal = () => {
     props.toggleSessionOverride({
       ...props.sessionModal,
       session_value_override: sessionOverride,
-      session_input_key: sessionKey.startsWith('SESSION.') ? sessionKey : `SESSION.${props.sessionModal?.label}`
+      session_input_key: sessionKey?.startsWith('SESSION.') ? sessionKey : `SESSION.${appAuth?.session_key_values[props.sessionModal?.id]?.param_key}`
     })
     props.updateSessionModal(null)
   }
@@ -70,7 +73,7 @@ const SessionModal = props => {
               onChange={event => {
                 setSessionOverride(event.target.checked)
                 if (event.target.checked && !sessionKey) {
-                  setSessionKey(`SESSION.${props.sessionModal?.label}`)
+                  setSessionKey(`SESSION.${appAuth?.session_key_values[props.sessionModal?.id]?.param_key}`)
                 }
               }}
               style={{
