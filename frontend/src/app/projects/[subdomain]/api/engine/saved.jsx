@@ -395,6 +395,8 @@ export function APIsaved (props) {
   }, [
     state?.joins?.length,
     state?.columns?.length,
+    state?.columns?.map(column => column.session_input_key).join(''),
+    state?.columns?.filter(column => column.session_value_override).length,
     (state?.agg_paths && Object.keys(state?.agg_paths)?.length),
     joinKeysList,
     (state?.multipleRowsHash && Object.keys(state?.multipleRowsHash)?.length),
@@ -463,7 +465,7 @@ export function APIsaved (props) {
             join_conditions,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
-            limit: state.limit,
+            limit: state.method.value === 'select_id' ? 1 : state.limit,
             limit_dynamic: state.limit_dynamic,
             orderby: state.sorts.map(element => ({
               asc: element.order,

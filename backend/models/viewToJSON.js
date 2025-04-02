@@ -628,6 +628,13 @@ module.exports = class ViewToJSON {
                 this.insertOb[pathid].qref_used = true;
             }
         } else {
+            if(user_opts?.session_input_key && !this.insertOb[pathid].columns[col_name].session_input_key) {
+                // add session input key to the column if it is not already present
+                this.insertOb[pathid].columns[col_name].operator = '$req-session';  
+                this.insertOb[pathid].columns[col_name].session_input_key = user_opts?.session_input_key;  
+                this.insertOb[pathid].columns[col_name].session_value_override = user_opts?.session_value_override;
+
+            }
             if (this.insertOb[pathid].columns[col_name].operator == '$qref') {
                 // TODO: check why value is undefined here. does not make sense
                 this.insertOb[pathid].columns[col_name].value = val;

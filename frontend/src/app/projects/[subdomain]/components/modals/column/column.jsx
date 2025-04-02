@@ -39,6 +39,7 @@ import { toast } from 'react-toastify'
 
 // Components
 import CustomSelect from '../../../../../../components/common/CustomSelect'
+import SessionModal from './sessionModal'
 
 const ColumnSection = props => {
   // Redux
@@ -46,6 +47,7 @@ const ColumnSection = props => {
   const dispatch = useDispatch()
 
   const [column, setColumn] = useState(null)
+  const [sessionModal, setSessionModal] = useState(null)
   // const [alias, setAlias] = useState('')
 
   const columnsList = state?.temporary.columns.data
@@ -380,6 +382,22 @@ const ColumnSection = props => {
             }
           </div>
           {
+            element.session_key && (
+              state?.method?.value === 'insert' ||
+              state?.method?.value === 'update'
+            ) ?
+            <Button
+              className='ml-3'
+              color='falcon-primary'
+              onClick={() => setSessionModal(element)}
+              style={{ transform: 'translateY(-1px)' }}
+            >
+              Session Override {element.session_value_override ? 'Enabled' : 'Disabled'}
+            </Button>
+            :
+            null
+          }
+          {
             state?.method?.value === 'insert'
             ?
             <div className='ml-2 pt-2'>
@@ -553,6 +571,13 @@ const ColumnSection = props => {
         {renderTabs()}
         {renderToolbar()}
         {renderColumnsList()}
+        <SessionModal
+          query_id={props.query_id}
+          sessionModal={sessionModal}
+          subdomain={props.subdomain}
+          updateSessionModal={setSessionModal}
+          toggleSessionOverride={toggleRequired}
+        />
       </ModalBody>
       <ModalFooter>
         <div className='query-modal-columns-vanilla-footer'>
