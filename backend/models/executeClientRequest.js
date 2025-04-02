@@ -253,7 +253,7 @@ function executeClientRequest(params, callback) {
 
            } else if(query_model.method == 'delete') {
 
-                final_models = final_models.push(query_model.query.model)
+                final_models.push(query_model.query.model)
                 all_return_paths.push(query_model.query.model.table_alias);
 
            }
@@ -319,7 +319,7 @@ function executeClientRequest(params, callback) {
                 return dotsInB - dotsInA;
             });            
 
-            var returned_paths = Object.keys(query_res.rows[0])
+            var returned_paths = Object.keys(query_res.rows[0] || {})
 
             for (let i = 0; i < returned_paths.length; i++) {
 
