@@ -91,13 +91,15 @@ const Group = props => {
     )
   }
 
+  const validRuleIds = Object.keys(props.rules).filter(ruleId => (props.rules[ruleId].value.operator?.disable_value || props.rules[ruleId].value.value) && props.rules[ruleId].value.operator)
+
   const renderRightToolbar = () => {
     const toolbar = []
     if (!isHiddenConditionalRules) {
       toolbar.push(
         <Button
           color='falcon-primary'
-          disabled={isDisabledGroup || isDisabledConditionalRules || !props.groups[groupId]?.rules?.length}
+          disabled={isDisabledGroup || isDisabledConditionalRules || !props.groups[groupId]?.rules?.length || !validRuleIds.length}
           key='conditional rules'
           onClick={() => props.updateConditionalRulesModal(groupId)}
           size='sm'

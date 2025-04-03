@@ -379,7 +379,8 @@ const Save = props => {
           }
           break
         }
-        case 'PUT': {
+        case 'PUT':
+        case 'DELETE': {
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
