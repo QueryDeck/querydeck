@@ -26,7 +26,7 @@ const SessionModal = props => {
     props.toggleSessionOverride({
       ...props.sessionModal,
       session_value_override: sessionOverride,
-      session_input_key: sessionKey?.startsWith('SESSION.') ? sessionKey : `SESSION.${appAuth?.session_key_values[props.sessionModal?.id]?.param_key}`
+      session_input_key: sessionKey?.startsWith('SESSION.') ? sessionKey : `SESSION.${appAuth?.session_key_values[props.sessionModal?.session_key]?.param_key}`
     })
     props.updateSessionModal(null)
   }
@@ -73,7 +73,7 @@ const SessionModal = props => {
               onChange={event => {
                 setSessionOverride(event.target.checked)
                 if (event.target.checked && !sessionKey) {
-                  setSessionKey(`SESSION.${appAuth?.session_key_values[props.sessionModal?.id]?.param_key}`)
+                  setSessionKey(`SESSION.${appAuth?.session_key_values[props.sessionModal?.session_key]?.param_key}`)
                 }
               }}
               style={{

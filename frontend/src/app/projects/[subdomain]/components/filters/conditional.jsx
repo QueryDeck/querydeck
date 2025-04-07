@@ -33,14 +33,14 @@ const ConditionalRules = props => {
   rules.forEach(rule => {
     if (props.rules[rule].value.field && props.rules[rule].value.field.label !== 'EXISTS') {
       options.push({
-        label: `QUERY.${props.rules[rule].value.field.label}`,
-        value: `QUERY.${props.rules[rule].value.field.label}`
+        label: props.rules[rule]?.value?.value ? props.rules[rule]?.value?.value : `QUERY.${props.rules[rule].value.field.label}`,
+        value: props.rules[rule]?.value?.value ? props.rules[rule]?.value?.value : `QUERY.${props.rules[rule].value.field.label}`
       })
     }
   })
   // const options = rules.map(rule => ({
-  //   label: `QUERY.${props.rules[rule].value.field.label}`,
-  //   value: `QUERY.${props.rules[rule].value.field.label}`
+  //   label: props.rules[rule]?.value?.value ? props.rules[rule]?.value?.value : `QUERY.${props.rules[rule].value.field.label}`,
+  //   value: props.rules[rule]?.value?.value ? props.rules[rule]?.value?.value : `QUERY.${props.rules[rule].value.field.label}`
   // }))
 
   // const renderRules = () => {
@@ -94,7 +94,7 @@ const ConditionalRules = props => {
         {/* {renderRules()} */}
         <Creatable
           isClearable
-          isValidNewOption={value => value.includes('QUERY.')}
+          isValidNewOption={value => value.includes('QUERY.') || value.includes('SESSION.')}
           options={options}
           placeholder='Select a rule'
           value={props.groups[props.conditionalRulesModal]?.conditionalRules}
