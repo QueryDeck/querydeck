@@ -1386,11 +1386,22 @@ const Filters = React.forwardRef((props, ref) => {
                   const groupParent = filterRule.id.split('-').slice(0, filterRule.id.split('-').length - 1).join('-')
                   if (groupParent.endsWith('@group')) {
                     // console.log('Not found if')
-                    subRule.forEach(element => {
-                      if (element.exists_where.id === groupParent) {
-                        element.exists_where.rules.push(filterRule)
+                    const findAndPushRule = (rules, targetId, ruleToPush) => {
+                      for (const rule of rules) {
+                        if (rule.exists_where?.id === targetId) {
+                          rule.exists_where.rules.push(ruleToPush)
+                          return true
+                        }
+                        if (rule.exists_where?.rules) {
+                          if (findAndPushRule(rule.exists_where.rules, targetId, ruleToPush)) {
+                            return true
+                          }
+                        }
                       }
-                    })
+                      return false
+                    }
+
+                    findAndPushRule(subRule, groupParent, filterRule)
                   } else {
                     // console.log('Not found else')
                     subRule.push({
