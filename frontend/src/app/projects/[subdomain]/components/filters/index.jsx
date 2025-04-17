@@ -1021,6 +1021,7 @@ const Filters = React.forwardRef((props, ref) => {
   // convert filters to state
   const setFilters = () => {
     // number of exists clauses in the filter
+    let loaded = false
     let existsClauseCount = JSON.stringify(filters).split('exists_where').length - 1
 
     // get hash maps of all options
@@ -1063,7 +1064,31 @@ const Filters = React.forwardRef((props, ref) => {
       joinGraphMap[option.value] = option
     })
 
-    const loadExistsFields = async (clause, joinPath, rules) => {
+    const extractExistsPaths = (filters, existsPaths = {}) => {
+      if (filters.rules) {
+        filters.rules.forEach(rule => {
+          if (rule.exists_path) {
+            existsPaths[rule.exists_path] = true
+            getClauseData(rule.exists_path, rule.id)
+            extractExistsPaths(rule.exists_where, existsPaths)
+          } else if (rule.rules) {
+            extractExistsPaths(rule.rules, existsPaths)
+          }
+        })
+      } else if (filters.length) {
+        filters.forEach(filter => {
+          if (filter.exists_path) {
+            existsPaths[filter.exists_path] = true
+            getClauseData(filter.exists_path, filter.id)
+            extractExistsPaths(filter.exists_where, existsPaths)
+          }
+        })
+      }
+      loaded = true
+      return Object.keys(existsPaths)
+    }
+
+    const getClauseData = async (existsPaths, clause) => {
       let flag = 2
 
       let localGraphs = []
@@ -1071,7 +1096,7 @@ const Filters = React.forwardRef((props, ref) => {
         const response = await api.get('/apps/editor/join-graph', {
           params: {
             subdomain,
-            id: joinPath.split('-')[joinPath.split('-').length - 1].split('.')[0],
+            id: existsPaths.split('-')[existsPaths.split('-').length - 1].split('.')[0],
             db_id
           },
           signal: joinedGraphsController.signal
@@ -1086,7 +1111,7 @@ const Filters = React.forwardRef((props, ref) => {
       try {
         const response = await api.post('/apps/editor/controllers/where-cols', {
           agg_paths: [],
-          c: [{ id: `${joinPath}$1` }],
+          c: [{ id: `${existsPaths}$1` }],
           db_id,
           subdomain
         }, {
@@ -1101,23 +1126,23 @@ const Filters = React.forwardRef((props, ref) => {
 
       if (!flag) {
         // adds an object to map inner fields
-        if (!fieldsMap[clause]) {
-          fieldsMap[clause] = {}
+        if (!fieldsMap[`${clause}@group`]) {
+          fieldsMap[`${clause}@group`] = {}
         }
         // adds default type to exists clause group fields
         localFields.columns.forEach(column => {
-          fieldsMap[clause][column.value] = {
+          fieldsMap[`${clause}@group`][column.value] = {
             ...column,
             default_type: column.type
           }
         })
         // appends exists graphs
-        joinedGraphs.current[clause] = localGraphs
+        joinedGraphs.current[`${clause}@group`] = localGraphs
         localGraphs.forEach(option => {
           joinGraphMap[option.value] = option
         })
         // appends exists operators to fields
-        existsFields.current[clause] = [{
+        existsFields.current[`${clause}@group`] = [{
           label: localFields.table,
           options: localFields.columns
         }].concat(existsOperators)
@@ -1127,14 +1152,14 @@ const Filters = React.forwardRef((props, ref) => {
         if (!existsClauseCount) {
           setTimeout(() => {
             // sets filters if all clauses have been added
-            setFilters()
+            resolveFilters(filters)
           }, 10)
         }
-
-        // resolves filters once exists clause group is added
-        resolveFilters(rules)
       }
     }
+
+    // pre fetches all exists clause joins
+    extractExistsPaths(filters)
 
     // resolves filters to state
     const resolveFilters = filters => {
@@ -1203,8 +1228,8 @@ const Filters = React.forwardRef((props, ref) => {
             rules: []
           }
 
-          // loads up exists clause group fields in case there is an exists clause
-          loadExistsFields(`${rule.id}@group`, rule.exists_path, rule.exists_where)
+          // recurses inside exists clause
+          resolveFilters(rule.exists_where)
         } else {
           // parent group id of rule
           const ruleGroupId = rule.id.split('_')[0]
@@ -1263,6 +1288,11 @@ const Filters = React.forwardRef((props, ref) => {
           }
         }
       })
+
+      // sets filters if all clauses have been added
+      if (loaded && !existsClauseCount) {
+        setFilters()
+      }
     }
 
     // initial state config
@@ -1283,19 +1313,12 @@ const Filters = React.forwardRef((props, ref) => {
     }
     const rules = {}
 
-    // recurses over filters to load up state
-    resolveFilters(filters)
-
     const setFilters = () => {
       dispatch({
         type: 'SET_FILTERS',
         groups,
         rules
       })
-    }
-
-    if (!existsClauseCount) {
-      setFilters()
     }
   }
 
@@ -1314,6 +1337,47 @@ const Filters = React.forwardRef((props, ref) => {
       )
     )
 
+    const updateNestedGroup = (groupIds, filterRule, subRule) => {
+      const groupId = groupIds[0]
+      if (filterRule.id === groupId) {
+        subRule.push(filterRule)
+      } else {
+        if (subRule.id === groupId) {
+          if (subRule.rules) {
+            updateNestedGroup(groupIds.slice(1, groupIds.length), filterRule, subRule.rules)
+          }
+        } else if (subRule.length) {
+          subRule.forEach(element => {
+            if (element.exists_where?.id === groupId) {
+              updateNestedGroup(groupIds.slice(1, groupIds.length), filterRule, element.exists_where?.rules)
+            }
+          })
+        } else {
+          if (groupIds.length > 1) {
+            // adds a group and recurses in the group rules
+            subRule.push({
+              condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+              conditional_on: state.groups[groupId]?.conditionalRules?.value,
+              id: groupId,
+              rules: [],
+              not: state.groups[groupId].config.isNot
+            })
+            updateNestedGroup(groupIds.slice(1, groupIds.length), filterRule, subRule[subRule.length - 1].rules)
+          } else {
+            // adds a group along with rule to the subgroup
+            subRule.push({
+              condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+              conditional_on: state.groups[groupId]?.conditionalRules?.value,
+              id: groupId,
+              rules: [filterRule],
+              not: state.groups[groupId].config.isNot
+            })
+          }
+        }
+      }
+      return subRule
+    }
+
     // searches for rules inside exists_where
     const searchRule = (groupIds, filterRule, subRule) => {
       // console.log('Searching rule', groupIds, subRule)
@@ -1331,14 +1395,13 @@ const Filters = React.forwardRef((props, ref) => {
           clauseIndex = index
         }
       })
-
-      if (ruleIndex) {
+      if (ruleIndex && ruleIndex >= 0) {
         // add to existing group
         if (groupIds.length <= 1) {
           // adds rule to a terminal group
           subRule[ruleIndex].rules.push(filterRule)
         }
-      } else if (clauseIndex) {
+      } else if (clauseIndex && clauseIndex >= 0) {
         // add to existing clause
         if (groupIds.length > 1) {
           // recurses over to search the rule inside the exists_where rules
@@ -1383,7 +1446,7 @@ const Filters = React.forwardRef((props, ref) => {
                   // adds a group when there are no sub rules and recurses over
                   // console.log('Not found FR', filterRule.id)
                   // console.log('Not found SR', subRule)
-                  const groupParent = filterRule.id.split('-').slice(0, filterRule.id.split('-').length - 1).join('-')
+                  const groupParent = resolveGroups(filterRule.id)[resolveGroups(filterRule.id).length - 1]
                   if (groupParent.endsWith('@group')) {
                     // console.log('Not found if')
                     const findAndPushRule = (rules, targetId, ruleToPush) => {
@@ -1403,15 +1466,22 @@ const Filters = React.forwardRef((props, ref) => {
 
                     findAndPushRule(subRule, groupParent, filterRule)
                   } else {
-                    // console.log('Not found else')
-                    subRule.push({
-                      condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
-                      conditional_on: state.groups[groupId]?.conditionalRules?.value,
-                      id: groupId,
-                      rules: [],
-                      not: state.groups[groupId].config.isNot
-                    })
-                    searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule[subRule.length - 1].rules)
+                    const ruleGroupIds = resolveGroups(groupId)
+                    let deepCheck = subRule.findIndex(rule => ruleGroupIds.includes(rule.id))
+                    if (deepCheck >= 0) {
+                      // place rule in nested group
+                      updateNestedGroup(groupIds.slice(1, groupIds.length), filterRule, subRule[deepCheck].rules)
+                    } else {
+                      // push to subrule
+                      subRule.push({
+                        condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+                        conditional_on: state.groups[groupId]?.conditionalRules?.value,
+                        id: groupId,
+                        rules: [],
+                        not: state.groups[groupId].config.isNot
+                      })
+                      searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule[subRule.length - 1].rules)
+                    }
                   }
                 }
               }
@@ -1420,24 +1490,18 @@ const Filters = React.forwardRef((props, ref) => {
               // console.log('filterRule', filterRule)
               // console.log('subRule', subRule)
               // console.log('groupIds', groupIds)
-              let flag = true
+              let innerFlag = true
               subRule.forEach((element, index) => {
                 if (element.exists_where?.id === filterRule.id.split('_')[0]) {
                   // rule lies directly under the exists clause
-                  flag = false
+                  innerFlag = false
                   subRule[index].exists_where.rules.push(filterRule)
                 }
               })
-              if (flag) {
+              if (innerFlag) {
                 // rule lies nested under group/s inside exists group
-                // console.log('Something else')
-
-                if (false) {
-                  // append rule to the group
-                } else {
-                  // create a new group and append
-                  searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule)
-                }
+                const innerRule = subRule.find(rule => rule.id === groupId)
+                searchRule(groupIds.slice(1, groupIds.length), filterRule, innerRule.rules)
 
                 // // checks for existing matching sub rule
                 // let ruleIndex = null
