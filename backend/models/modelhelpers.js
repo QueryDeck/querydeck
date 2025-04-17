@@ -281,11 +281,15 @@ function getAllNodes(id, subdomain, db_id, search_query = '' , options ={}) {
             let refbyid = Models[refbysplit[0]][refbysplit[1]].properties.id + '.' + Models[refbysplit[0]][refbysplit[1]].properties.columns[refbysplit[2]].id;
             let join_path_list = pathToText(currentNode.id + '-' + refbyid, subdomain, db_id);
             let currentSubJoinId = currentNode.id + '-' + refbyid;
+
+            let alias = Models[currentSchema][currentTable].properties.rels_new[currentSchema + '.' + currentTable + '.' + columnKeys[i] + '-' + Models[currentSchema][currentTable].properties.referencedBy[columnKeys[i]][j]].alias;
+            
             let nnode = {
               text: refbysplit[0] + '.' + refbysplit[1],
               id: currentSubJoinId,
               nodes: [],
               selectable: undefined,
+              alias: alias,
               // showAgg: true,
               childNodes:  isHaveSubJoin(currentSubJoinId, subdomain, db_id),
               join_path: join_path_list[1].join(".") + ' = ' + join_path_list[0].join("."),
@@ -309,11 +313,13 @@ function getAllNodes(id, subdomain, db_id, search_query = '' , options ={}) {
           let refid = Models[refsplit[0]][refsplit[1]].properties.id + '.' + Models[refsplit[0]][refsplit[1]].properties.columns[refsplit[2]].id;
           let join_path_list = pathToText(currentNode.id + '-' + refid, subdomain, db_id);
           let currentSubJoinId = currentNode.id + '-' + refid;
+          let alias = Models[currentSchema][currentTable].properties.rels_new[currentSchema + '.' + currentTable + '.' + columnKeys[i] + '-' + Models[currentSchema][currentTable].properties.relations[columnKeys[i]]].alias;
           let nnode = {
             text: refsplit[0] + '.' + refsplit[1],
             id: currentSubJoinId,
             nodes: [],
             selectable: undefined,
+            alias: alias,
             // showAgg: true,
             childNodes:  isHaveSubJoin(currentSubJoinId, subdomain, db_id),
             join_path: join_path_list[1].join(".") + ' = ' + join_path_list[0].join("."),
@@ -463,9 +469,12 @@ function getAllWhereColumns(bodyObj) {
 
   bodyObj.agg_paths = bodyObj.agg_paths || [];
   bodyObj.c = bodyObj.c || [];
+  var base_join_path;
   for (let i = 0; i < bodyObj.c.length; i++) {
     const element = bodyObj.c[i];
+    base_join_path = element.join_path;
     if (element.id.indexOf('-') > -1) {
+      base_join_path = element.join_path;
       var id_spl = element.id.split('-');
       element.id = id_spl.pop().split('$')[0]
     }
@@ -479,6 +488,8 @@ function getAllWhereColumns(bodyObj) {
   var col_id = id_spl[id_spl.length - 1];
   var col_name_spl = currentModel.idToName[col_id];
 
+  var order_by_cols = [];
+
   var all_col_names = Object.keys(currentModel.models[col_name_spl[0]][col_name_spl[1]].properties.columns)
 
   let final_where_cols = [];
@@ -487,22 +498,22 @@ function getAllWhereColumns(bodyObj) {
   let colIdSplit;
   for (let i = 0; i < all_col_names.length; i++) {
 
+    var col_name = col_name_spl[0] + "." + col_name_spl[1] + "." + all_col_names[i];
+
     var cur_col_ob = {
       label: all_col_names[i],
       display_name: all_col_names[i],
       primary: currentModel.models[col_name_spl[0]][col_name_spl[1]].properties.columns[all_col_names[i]].primary,
-      type: qutils.getSuperType(currentModel.models[col_name_spl[0]][col_name_spl[1]].properties.columns[all_col_names[i]].type)
+      type: qutils.getSuperType(currentModel.models[col_name_spl[0]][col_name_spl[1]].properties.columns[all_col_names[i]].type),
+      id: col_name,
+      join_path: base_join_path,
+      columnID: colFullPathToColDetail(col_name, bodyObj.subdomain, bodyObj.db_id).columnId
     }
+    order_by_cols.push(cur_col_ob)
 
     if(!cur_col_ob.type) {
       continue;
     }
-
-    cur_col_ob.id = col_name_spl[0] + "." + col_name_spl[1] + "." + all_col_names[i];
-
-
-    colIdSplit = colFullPathToColDetail(cur_col_ob.id, bodyObj.subdomain, bodyObj.db_id).columnId.split(".")
-    cur_col_ob['columnID'] = colIdSplit.join(".");
 
     if (
       (ModelManager.models[bodyObj.subdomain].appDetails.auth && ModelManager.models[bodyObj.subdomain].appDetails.auth.session_key_values && ModelManager.models[bodyObj.subdomain].appDetails.auth.session_key_values[cur_col_ob['columnID']])
@@ -536,6 +547,40 @@ function getAllWhereColumns(bodyObj) {
     
     final_where_cols.push(cur_col_ob)
   }
+  if(bodyObj.joins && bodyObj.c[0].id.indexOf('-') == -1) {
+    // add non agg joins to order by cols
+    var join_paths = Object.keys(bodyObj.joins);
+    join_paths.sort((a, b) => a.length - b.length);
+    var agg_joins = [];
+
+    for(let i = 0; i < join_paths.length; i++) {
+      var join_path = join_paths[i];
+      if(bodyObj.joins[join_path].type == 'agg') {
+        agg_joins.push(join_path);
+      } else {
+        var parent_agg = false;
+        parent_agg_loop:
+        for(let j = 0; j < agg_joins.length; j++) {
+          var agg_join_path = agg_joins[j];
+          if(join_path.indexOf(agg_join_path) == 0) {
+            parent_agg = true;
+            break parent_agg_loop;
+          }
+        }
+        if(!parent_agg) {
+          var current_path_where_cols = getAllWhereColumns({
+            subdomain: bodyObj.subdomain,
+            db_id: bodyObj.db_id,
+            c: [{
+              id: join_path + '$1',
+              join_path: join_path
+            }]
+          }).order_by_columns;
+          order_by_cols = order_by_cols.concat(current_path_where_cols);
+        }
+      }
+    }
+  }
   return {
     columns: final_where_cols.map((item) => ({
       ...item,
@@ -546,6 +591,7 @@ function getAllWhereColumns(bodyObj) {
       "columnID": item.columnID,
       "session_key": item.session_key,
     })),
+    order_by_columns: order_by_cols,
     table: currentModel.models[col_name_spl[0]][col_name_spl[1]].properties.schema_name + '.' + currentModel.models[col_name_spl[0]][col_name_spl[1]].properties.table_name
   }
 

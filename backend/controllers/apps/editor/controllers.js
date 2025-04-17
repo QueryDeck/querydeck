@@ -1157,7 +1157,8 @@ module.exports = function (router) {
       const element = req.body.c[i];
       if (element.id.indexOf('-') > -1) {
         var id_spl = element.id.split('-');
-        element.id = id_spl.pop().split('$')[0]
+        element.join_path = element.id.split('$')[0];
+        element.id = id_spl.pop().split('$')[0];
       }
     }
 

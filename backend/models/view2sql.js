@@ -80,7 +80,9 @@ exports.convert = function(params){
               base: params.base,
               join_conditions: params.join_conditions,
               where: params.w,
-              graphql: params.graphql
+              graphql: params.graphql,
+              joins: params.joins,
+              include_result_count: params.include_result_count
             }
           })[params.select_by_id ? 'convertSelectByID' : 'convertSelect']()
 

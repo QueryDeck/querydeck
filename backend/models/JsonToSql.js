@@ -215,13 +215,18 @@ module.exports = class builder {
 					model.joins[i].where = model.joins[i].on;
 					finalColumns.push('( ' + this.select(model.joins[i], model.joins[i].agg_type) + ' )');
 				} else {
-					jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table);
+					// jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table + ' AS ' + model.joins[i].table_alias);
+
+
+					jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (`${this.quotes}${model.joins[i].schema}${this.quotes}.${this.quotes}${model.joins[i].table}${this.quotes} AS ${this.quotes}${model.joins[i].table_alias}${this.quotes}`);
 
 					// TODO: throw error if on is null
-					jtext += ' ON ' + this.resolveConditions(model.joins[i].on);
+					jtext += ' ON ' + this.resolveConditions(model.joins[i].on, {
+						table_alias: model.joins[i].table_alias,
+						replace_alias: true
+					});
 
-
-					finalColumns = finalColumns.concat(this.resolveSelectColumns(model.joins[i]));
+					finalColumns = finalColumns.concat(this.resolveSelectColumns(model.joins[i], true));
 				}
 			}
 		}
@@ -261,7 +266,7 @@ module.exports = class builder {
 
 	}
 
-	resolveSelectColumns(model) {
+	resolveSelectColumns(model, replace_alias) {
 
 		var finalColumns = [];
 		let quotes = this.quotes;
@@ -274,7 +279,14 @@ module.exports = class builder {
 			}
 
 			var col_name = model.columns[i].columnName;
-			let colNameQuotes = quotes + model.columns[i].columnName.split(".").join(quotes + "." + quotes) + quotes;
+			var col_alias = model.columns[i].alias;
+
+			if(replace_alias) {
+				col_name = model.table_alias + '.' + col_name.split('.').pop();
+				col_alias = model.table_alias + '_' + col_name.split('.').pop();
+			}
+			
+			let colNameQuotes = quotes + col_name.split(".").join(quotes + "." + quotes) + quotes;
 			// var col_name_quotes = quotes +  model.columns[i].columnName.split(".").join(quotes+ "." + quotes) + quotes;
 			if (model.columns[i].fn && !model.columns[i].def) {
 				if (['sum', 'count', 'max', 'min', 'avg'].indexOf(model.columns[i].fn) > -1) {
@@ -319,8 +331,8 @@ module.exports = class builder {
 				finalColumns.push(' 1 ')
 			} else {
 				// col_name = quotes + col_name.split(".").join(quotes + "." + quotes) + quotes;
-				if (model.columns[i].alias) {
-					finalColumns.push(col_name + ' AS ' + quotes + model.columns[i].alias + quotes);
+				if (col_alias) {
+					finalColumns.push(col_name + ' AS ' + quotes + col_alias + quotes);
 				} else {
 					finalColumns.push(col_name + ' AS ' + quotes + model.columns[i].columnName + quotes);
 				}
@@ -964,6 +976,12 @@ module.exports = class builder {
 
 				var param_val = false;
 
+				var column_alias = conditions.rules[i].columnName;
+
+				if(mymodel.replace_alias) {
+					column_alias = mymodel.table_alias + '.' + column_alias.split('.').pop();
+				}
+
 				// this.depthpaths.push
 				if(val !== undefined && conditions.rules[i].input_key === undefined  && conditions.rules[i].operator.indexOf('$columnref') == -1 && conditions.rules[i].operator.indexOf('$inq') == -1){
 
@@ -1029,7 +1047,7 @@ module.exports = class builder {
 				}
                  
 				condt += this.resolveOperators({
-					columnName: conditions.rules[i].columnName || conditions.rules[i].fieldName || conditions.rules[i].id,
+					columnName: column_alias,
 					realcname: conditions.rules[i].columnName || conditions.rules[i].fieldName || conditions.rules[i].id,
 					operator: conditions.rules[i].operator,
 					value: val,

@@ -1211,8 +1211,6 @@ module.exports = class ViewToJSON {
         // let join_paths_where = params.join_paths_where || [];
         let join_paths_where = params.join_paths_where || [];
 
-        let regular_join_paths = params.regular_join_paths || [];
-
         var join_paths_text = {};
 
         let same_tab_refs = this.sametablerels(tab_name_spl);
@@ -1331,8 +1329,23 @@ module.exports = class ViewToJSON {
                     tables_used.push(col_arr[0] + '.' + col_arr[1]);
                 }
 
-                // force agg all joins
-                if (params.agg_paths?.indexOf(id_pure) == -1 && regular_join_paths.indexOf(id_pure) == -1) params.agg_paths.push(id_pure);
+                params.joins = params.joins || {};
+                params.joins[id_pure] = params.joins[id_pure] || {};
+
+                console.log(params.joins)
+
+                // force agg on all joins
+                // if (params.agg_paths?.indexOf(id_pure) == -1) params.agg_paths.push(id_pure);
+
+                // agg, inner, left, right
+                if(!params.joins[id_pure].type || params.joins[id_pure].type == 'agg') {
+                    params.agg_paths.push(id_pure);
+                }
+                if(!params.joins[id_pure].alias) {
+                    params.joins[id_pure].alias = default_alias;
+                } else {
+                    default_alias = params.joins[id_pure].alias;
+                }
 
                 aggloop:
                     for (let j = 0; j < (params.agg_paths && params.agg_paths.length); j++) {
@@ -1427,11 +1440,9 @@ module.exports = class ViewToJSON {
                 }
 
                 let join_type = "INNER"; // default join type 
-                if (params.join_type) {
-                    if (params.join_type[id_pure] == 'right') join_type = "RIGHT";
-                    else if (params.join_type[id_pure] == 'left') join_type = "LEFT";
-                    else if (params.join_type[id_pure] == 'cross') join_type = "CROSS";
-
+                if (params.joins[id_pure].type && params.joins[id_pure].type != 'agg') {
+                    if (params.joins[id_pure].type == 'right') join_type = "RIGHT";
+                    else if (params.joins[id_pure].type == 'left') join_type = "LEFT";
                 }
                 if (!nested[id_pure]) nested[id_pure] = {
                     columns: [],
@@ -1605,7 +1616,8 @@ module.exports = class ViewToJSON {
             ]);
             var on_conditions = modelutils.idToJoinPathOb({
                 id: nested_keys[i],
-                currentModel: this.currentModel
+                currentModel: this.currentModel,
+                joins: params.joins
             });
             join_paths_text[nested_keys[i]] = modelutils.idToJoinPathText({
                 id: nested_keys[i],
@@ -1651,11 +1663,13 @@ module.exports = class ViewToJSON {
                 table: nested[nested_keys[i]].table,
                 columns: nested[nested_keys[i]].columns,
                 // agg_type: nested[nested_keys[i]].agg_type,
+                table_alias: params.joins[nested_keys[i]]?.alias || this.getAlias(nested_keys[i]),
+                default_alias: params.joins[nested_keys[i]]?.alias || this.getAlias(nested_keys[i]),
                 joins: nested[nested_keys[i]].joins,
+                agg_result: nested[nested_keys[i]].agg_result || true,
                 type: nested[nested_keys[i]].join_type,
                 on: on_conditions,
-                alt_alias_prefix: nested[nested_keys[i]].alt_alias_prefix,
-                default_alias: nested[nested_keys[i]].default_alias
+                alt_alias_prefix: nested[nested_keys[i]].alt_alias_prefix
             });
         }
 
@@ -1677,7 +1691,8 @@ module.exports = class ViewToJSON {
             join_paths_where = join_paths_where.concat(agg_complete_return.join_paths_where);
             agg_mod.on = modelutils.idToJoinPathOb({
                 id: agg_keys[i],
-                currentModel: this.currentModel
+                currentModel: this.currentModel,
+                joins: params.joins
             });
             join_paths_text[agg_keys[i]] = modelutils.idToJoinPathText({
                 id: agg_keys[i],
@@ -1744,7 +1759,6 @@ module.exports = class ViewToJSON {
                     });
                 }
             }
-
             main_model.joins.push(agg_mod);
 
             let agg_key_1 = Object.keys(agg_complete_return.response);
