@@ -1021,7 +1021,6 @@ const Filters = React.forwardRef((props, ref) => {
   // convert filters to state
   const setFilters = () => {
     // number of exists clauses in the filter
-    let loaded = false
     let existsClauseCount = JSON.stringify(filters).split('exists_where').length - 1
 
     // get hash maps of all options
@@ -1081,10 +1080,11 @@ const Filters = React.forwardRef((props, ref) => {
             existsPaths[filter.exists_path] = true
             getClauseData(filter.exists_path, filter.id)
             extractExistsPaths(filter.exists_where, existsPaths)
+          } else if (filter.rules) {
+            extractExistsPaths(filter.rules, existsPaths)
           }
         })
       }
-      loaded = true
       return Object.keys(existsPaths)
     }
 
@@ -1290,7 +1290,7 @@ const Filters = React.forwardRef((props, ref) => {
       })
 
       // sets filters if all clauses have been added
-      if (loaded && !existsClauseCount) {
+      if (!existsClauseCount) {
         setFilters()
       }
     }
@@ -1319,6 +1319,10 @@ const Filters = React.forwardRef((props, ref) => {
         groups,
         rules
       })
+    }
+
+    if (!existsClauseCount) {
+      resolveFilters(filters)
     }
   }
 
