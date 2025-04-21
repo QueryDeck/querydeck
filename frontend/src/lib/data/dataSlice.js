@@ -84,6 +84,7 @@ const blank = {
     authorisationModal: null,
 
     // Step 6
+    sortOptions: [],
     sorts: [],
     sorts_dynamic: [],
     sortModal: false,
@@ -1186,6 +1187,18 @@ const dataSlice = createSlice({
         }
       }
     },
+    setSortOptions (state, action) {
+      state[action.payload.mode] = {
+        ...state[action.payload.mode],
+        [action.payload.subdomain]: {
+          ...state[action.payload.mode][action.payload.subdomain],
+          [action.payload.query_id]: {
+            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
+            sortOptions: action.payload.sortOptions
+          }
+        }
+      }
+    },
     updateSorts (state, action) {
       state[action.payload.mode] = {
         ...state[action.payload.mode],
@@ -1466,6 +1479,7 @@ export const {
   updateFilters,
   closeSortModal,
   openSortModal,
+  setSortOptions,
   updateSorts,
   toggleDynamicSorts,
   setPagination,

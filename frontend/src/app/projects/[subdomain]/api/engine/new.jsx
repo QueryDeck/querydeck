@@ -17,7 +17,8 @@ import {
   setNodes,
   setFilterNodes,
   setJoinGraphs,
-  setResult
+  setResult,
+  setSortOptions
 } from '../../../../../lib/data/dataSlice'
 
 // Library imports
@@ -305,16 +306,51 @@ export function APInew (props) {
         agg_paths: Object.keys(state.agg_paths),
         c: [{ id: `${state.base.value}.1` }],
         db_id: state.database.value,
+        joins: state.joinDetails,
         subdomain: props.subdomain
     }, {
       signal: filtersController.signal
     })
     const data = response.data.data
+
+    const schemas = {}
+    const result = []
+
+    data.order_by_columns.forEach(element => {
+      if (schemas[element.id.split('.').slice(0, element.id.split('.').length - 1).join('.')]) {
+        result.forEach(item => {
+          if (item.id === element.columnID.split('.').slice(0, element.columnID.split('.').length - 1).join('.')) {
+            item.options.push({
+              ...element,
+              full_name: element.id,
+              id: element.columnID
+            })
+          }
+        })
+      } else {
+        schemas[element.id.split('.').slice(0, element.id.split('.').length - 1).join('.')] = true
+        result.push({
+          id: element.columnID.split('.').slice(0, element.columnID.split('.').length - 1).join('.'),
+          label: element.id.split('.').slice(0, element.id.split('.').length - 1).join('.'),
+          options: [{
+              ...element,
+              full_name: element.id,
+              id: element.columnID
+            }]
+        })
+      }
+    })
     dispatch(setFilterNodes({
       filterFields: [{
         label: data.table,
         options: data.columns
       }],
+      query_id: 'new',
+      mode: 'api',
+      subdomain: props.subdomain
+    }))
+    dispatch(setSortOptions({
+      sortOptions: result,
       query_id: 'new',
       mode: 'api',
       subdomain: props.subdomain
@@ -368,6 +404,12 @@ export function APInew (props) {
     constraints = constraints.concat(conflictColumns[table].constraint)
     conflictCount += conflictColumns[table].columns?.length
   })
+
+  useEffect(() => {
+    if (state?.base?.value && state?.method?.value) {
+      getFilters()
+    }
+  }, [state?.joinDetails])
 
   useEffect(() => {
     if (state?.columns.length && state?.method.value) {

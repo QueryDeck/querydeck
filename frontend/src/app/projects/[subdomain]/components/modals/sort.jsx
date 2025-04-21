@@ -179,7 +179,7 @@ const SortModal = props => {
 							// defaultMenuIsOpen={true}
 							hideSelectedOptions
 							onChange={value => setSelectedColumn(value)}
-							options={state.nodes.slice(0,1)} // only show sort options for base table
+							options={state?.sortOptions}
 							placeholder='Select Column'
 							value={selectedColumn}
 						/>
@@ -217,7 +217,7 @@ const SortModal = props => {
 							// defaultMenuIsOpen={true}
 							hideSelectedOptions
 							onChange={value => setSelectedDynamicColumn(value)}
-							options={state.nodes.slice(0,1)} // only show sort options for base table
+							options={state?.sortOptions}
 							placeholder='Select Column'
 							value={selectedDynamicColumn}
 						/>

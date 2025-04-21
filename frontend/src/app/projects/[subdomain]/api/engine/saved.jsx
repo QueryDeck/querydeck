@@ -19,6 +19,7 @@ import {
   restoreNodes,
   restoreFilters,
   setResult,
+  setSortOptions,
   setSaved,
   setTablesList,
 } from '../../../../../lib/data/dataSlice'
@@ -48,6 +49,7 @@ let searchNodesController
 let joinGraphsController
 let loadNodesController
 let loadFiltersController
+let sortOptionsController
 let apiController
 let tablesController
 
@@ -74,6 +76,7 @@ export function APIsaved (props) {
     loadDatabaseController = new AbortController()
     loadNodesController = new AbortController()
     loadFiltersController = new AbortController()
+    sortOptionsController = new AbortController()
     loadAPIcontroller = new AbortController()
     searchNodesController = new AbortController()
     tablesController = new AbortController()
@@ -95,6 +98,7 @@ export function APIsaved (props) {
       loadDatabaseController.abort()
       loadNodesController.abort()
       loadFiltersController.abort()
+      sortOptionsController.abort()
       loadAPIcontroller.abort()
       searchNodesController.abort()
       tablesController.abort()
@@ -364,6 +368,64 @@ export function APIsaved (props) {
       }
     }
   }
+
+  // Sort options
+  const getSortOptions = async () => {
+    try {
+      const response = await api.post('/apps/editor/controllers/where-cols', {
+        agg_paths: Object.keys(state.agg_paths),
+        c: [{ id: `${state.base.value}.1` }],
+        db_id: state.database.value,
+        joins: state.joinDetails,
+        subdomain: props.subdomain
+    }, {
+      signal: sortOptionsController.signal
+    })
+    const data = response.data.data
+
+    const schemas = {}
+    const result = []
+
+    data.order_by_columns.forEach(element => {
+      if (schemas[element.id.split('.').slice(0, element.id.split('.').length - 1).join('.')]) {
+        result.forEach(item => {
+          if (item.id === element.columnID.split('.').slice(0, element.columnID.split('.').length - 1).join('.')) {
+            item.options.push({
+              ...element,
+              full_name: element.id,
+              id: element.columnID
+            })
+          }
+        })
+      } else {
+        schemas[element.id.split('.').slice(0, element.id.split('.').length - 1).join('.')] = true
+        result.push({
+          id: element.columnID.split('.').slice(0, element.columnID.split('.').length - 1).join('.'),
+          label: element.id.split('.').slice(0, element.id.split('.').length - 1).join('.'),
+          options: [{
+              ...element,
+              full_name: element.id,
+              id: element.columnID
+            }]
+        })
+      }
+    })
+    dispatch(setSortOptions({
+      sortOptions: result,
+      query_id: props.query_id,
+      mode: 'api',
+      subdomain: props.subdomain
+    }))
+    } catch (error) {
+      catchError(error)
+    }
+  }
+
+  useEffect(() => {
+    if (state?.base?.value && state?.method?.value) {
+      getSortOptions()
+    }
+  }, [state?.joinDetails])
 
   // To trigger sql-gen when joinConditions are modified
   const joinConditions = state?.joinConditions
