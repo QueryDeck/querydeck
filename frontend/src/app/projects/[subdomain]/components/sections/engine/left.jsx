@@ -14,6 +14,7 @@ import Columns from '../../steps/columns'
 import Filter from '../../steps/filter'
 import Sort from '../../steps/sort'
 // import Pagination from '../../steps/pagination'
+import Count from '../../steps/count'
 import Offset from '../../steps/offset'
 import Limit from '../../steps/limit'
 import Authentication from '../../steps/authentication'
@@ -93,6 +94,15 @@ const Left = props => {
   const renderSort = () => (
     <Sort
       key='sort-step'
+      mode={props.mode}
+      query_id={props.query_id}
+      subdomain={props.subdomain}
+    />
+  )
+
+  const renderCount = () => (
+    <Count
+      key='count-step'
       mode={props.mode}
       query_id={props.query_id}
       subdomain={props.subdomain}
@@ -222,6 +232,7 @@ const Left = props => {
           {renderColumns()}
           {renderFilter()}
           {renderSort()}
+          {renderCount()}
           {/* {renderPagination()} */}
           {renderOffset()}
           {renderLimit()}

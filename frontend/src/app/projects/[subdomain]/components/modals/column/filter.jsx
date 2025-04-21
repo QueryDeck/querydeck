@@ -48,6 +48,7 @@ const FilterSection = props => {
 	const dispatch = useDispatch()
 
 	const filtersRef = useRef({})
+	const joinDetailsRef = useRef({})
 
 	const [localAggPaths, setLocalAggPaths] = useState({})
 	const [localJoinKeys, setLocalJoinKeys] = useState({})
@@ -107,6 +108,13 @@ const FilterSection = props => {
           filters: JSON.stringify(filtersRef.current.getFilters()),
         }
       },
+			joinDetails: {
+				...state.joinDetails,
+				[state.columnModal]: {
+					type: joinDetailsRef.current.type ? joinDetailsRef.current.type : state?.joinDetails[state?.columnModal]?.type,
+					alias: joinDetailsRef.current.alias ? joinDetailsRef.current.alias : state?.joinDetails[state?.columnModal]?.alias
+				}
+			},
       query_id: props.query_id,
       mode: props.mode,
       subdomain: props.subdomain,
@@ -192,12 +200,45 @@ const FilterSection = props => {
 		</Nav>
 	)
 
+	const renderJoinDetails = () => {
+		if (state?.method?.value === 'select') {
+			return (
+				<div style={{ display: 'flex', paddingTop: '16px' }}>
+					<div style={{ flex: '1 0 0', marginRight: '16px' }}>
+						<CustomSelect
+							autoFocus
+							classNamePrefix='react-select'
+							defaultValue={state?.joinDetails[state?.columnModal]?.type ? {
+								label: `${state?.joinDetails[state?.columnModal]?.type.toUpperCase()} JOIN`,
+								value: state?.joinDetails[state?.columnModal]?.type
+							} : null}
+							hideSelectedOptions
+							noOptionsMessage={() => 'No join types match the search term'}
+							onChange={option => joinDetailsRef.current.type = option.value}
+							options={['agg', 'inner', 'left', 'right'].map(element => ({ label: `${element.toUpperCase()} JOIN`, value: element }))}
+							placeholder='Select join type'
+						/>
+					</div>
+					<div style={{ flex: '1 0 0' }}>
+						<Input
+							type='text'
+							defaultValue={state?.joinDetails[state?.columnModal]?.alias}
+							onChange={event => joinDetailsRef.current.alias = event.target.value}
+							placeholder='Enter join alias (optional)'
+							value={joinDetailsRef.current.alias}
+						/>
+					</div>
+				</div>
+			)
+		}
+	}
 
 	return(
 		<>
 			<ModalBody className='query-modal-filter-body'>
 				{renderTabs()}
 				<div className='query-modal-filter-body-container'>
+					{renderJoinDetails()}
 					{renderJoinOptions()}
 					{
 						state?.joinConditions[state?.columnModal]?.filterFields &&

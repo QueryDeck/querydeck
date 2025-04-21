@@ -375,6 +375,7 @@ export function APInew (props) {
     }
   }, [
     state?.joins?.length,
+    state?.joinDetails,
     state?.columns?.length,
     state?.columns?.map(column => column.session_input_key).join(''),
     state?.columns?.filter(column => column.session_value_override).length,
@@ -446,6 +447,7 @@ export function APInew (props) {
             ...config,
             include_result_count: state.includeResultCount,
             join_conditions,
+            joins: state.joinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.method.value === 'select_id' ? 1 : state.limit,
@@ -499,6 +501,8 @@ export function APInew (props) {
 
       if (state.method.value === 'select_id') {
         config['select_by_id'] = true
+        delete config.include_result_count
+        delete config.joins
       }
 
       const apiConfig = {

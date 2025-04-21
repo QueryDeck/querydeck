@@ -20,6 +20,7 @@ const blank = {
     joins: [],
     agg_paths: {},
     joinKeys: {},
+    joinDetails: {},
     joinModal: false,
     joinTree: [],
     expandedKeys: [],
@@ -1050,7 +1051,8 @@ const dataSlice = createSlice({
           ...state[action.payload.mode][action.payload.subdomain],
           [action.payload.query_id]: {
             ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
-            joinConditions: action.payload.joinConditions
+            joinConditions: action.payload.joinConditions,
+            joinDetails: action.payload.joinDetails
           }
         }
       }

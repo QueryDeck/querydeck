@@ -156,6 +156,7 @@ const Save = props => {
           checkedKeys: state.checkedKeys,
           columns: state.columns,
           joinConditions: formattedJoinConditions,
+          joinDetails: state.joinDetails,
           conflictColumns: state.conflictColumns,
           returnColumns: state.returnColumns,
           multipleRowsHash: state.multipleRowsHash,
@@ -204,6 +205,7 @@ const Save = props => {
             ...config,
             include_result_count: state.includeResultCount,
             join_conditions,
+            joins: state.joinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.limit,
@@ -254,6 +256,13 @@ const Save = props => {
           console.error(`Unknown method: ${state.method.method}`)
           break
       }
+
+      if (state.method.value === 'select_id') {
+        config['select_by_id'] = true
+        delete config.include_result_count
+        delete config.joins
+      }
+
       const createConfig = {
         method: 'POST',
         url: props.mode === 'api' ? `${apiurl}/apps/editor/controllers/saved-api-query` : `${apiurl}/apps/editor/controllers/saved-query`,
@@ -303,6 +312,7 @@ const Save = props => {
           checkedKeys: state.checkedKeys,
           columns: state.columns,
           joinConditions: formattedJoinConditions,
+          joinDetails: state.joinDetails,
           conflictColumns: state.conflictColumns,
           returnColumns: state.returnColumns,
           multipleRowsHash: state.multipleRowsHash,
@@ -352,6 +362,7 @@ const Save = props => {
             ...config,
             include_result_count: state.includeResultCount,
             join_conditions,
+            joins: state.joinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.limit,
@@ -402,6 +413,13 @@ const Save = props => {
           console.error(`Unknown method: ${state.method.method}`)
           break
       }
+
+      if (state.method.value === 'select_id') {
+        config['select_by_id'] = true
+        delete config.include_result_count
+        delete config.joins
+      }
+
       const updateConfig = {
         method: 'PUT',
         url: props.mode === 'api' ? `${apiurl}/apps/editor/controllers/saved-api-query` : `${apiurl}/apps/editor/controllers/saved-query`,
