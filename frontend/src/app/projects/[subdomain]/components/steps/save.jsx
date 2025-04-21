@@ -164,6 +164,7 @@ const Save = props => {
           authentication: state.authentication,
           sorts: state.sorts,
           sorts_dynamic: state.sorts_dynamic,
+          includeResultCount: state.includeResultCount,
           offset: state.offset,
           offset_dynamic: state.offset_dynamic,
           limit: state.limit,
@@ -201,6 +202,7 @@ const Save = props => {
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
+            include_result_count: state.includeResultCount,
             join_conditions,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
@@ -309,6 +311,7 @@ const Save = props => {
           authentication: state.authentication,
           sorts: state.sorts,
           sorts_dynamic: state.sorts_dynamic,
+          includeResultCount: state.includeResultCount,
           offset: state.offset,
           offset_dynamic: state.offset_dynamic,
           limit: state.limit,
@@ -347,6 +350,7 @@ const Save = props => {
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
+            include_result_count: state.includeResultCount,
             join_conditions,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,

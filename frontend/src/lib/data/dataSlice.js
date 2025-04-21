@@ -86,6 +86,7 @@ const blank = {
     sorts: [],
     sorts_dynamic: [],
     sortModal: false,
+    includeResultCount: false,
 
     // Step 7
     offset: 0,
@@ -1244,7 +1245,18 @@ const dataSlice = createSlice({
         }
       }
     },
-
+    toggleIncludeResultCount(state, action) {
+      state[action.payload.mode] = {
+        ...state[action.payload.mode],
+        [action.payload.subdomain]: {
+          ...state[action.payload.mode][action.payload.subdomain],
+          [action.payload.query_id]: {
+            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
+            includeResultCount: !state[action.payload.mode][action.payload.subdomain][action.payload.query_id].includeResultCount
+          }
+        }
+      }
+    },  
     setOffset(state, action) {
       state[action.payload.mode] = {
         ...state[action.payload.mode],
@@ -1462,6 +1474,7 @@ export const {
   toggleDynamicOffset,
   setLimit,
   toggleDynamicLimit,
+  toggleIncludeResultCount,
   setResult,
   closeWizardModal,
   openAutoGenerateModal,

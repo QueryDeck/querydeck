@@ -388,6 +388,7 @@ export function APInew (props) {
     state?.returnColumns?.length,
     state?.sorts?.length,
     state?.sorts_dynamic?.length,
+    state?.includeResultCount,
     // state?.pagination?.value,
     state?.offset,
     state?.offset_dynamic,
@@ -443,6 +444,7 @@ export function APInew (props) {
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
+            include_result_count: state.includeResultCount,
             join_conditions,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,

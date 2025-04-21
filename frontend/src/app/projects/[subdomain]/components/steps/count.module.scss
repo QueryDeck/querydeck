@@ -1,0 +1,21 @@
+@import '../../../../../assets/scss/theme/variables';
+// @import '../../../../../assets/scss/dark/variables';
+
+.container {
+  background-color: #7771;
+  display: flex;
+  margin: 6px 4px;
+  padding: 6px;
+}
+
+.dynamic {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8px;
+
+  input {
+    margin: unset;
+    position: unset;
+  }
+}
