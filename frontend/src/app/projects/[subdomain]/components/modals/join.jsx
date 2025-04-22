@@ -400,7 +400,7 @@ const JoinModal = props => {
         ...state.joinDetails,
         [table]: {
           type: 'agg',
-          alias: ''
+          alias: data.table
         }
       },
       query_id: props.query_id,
