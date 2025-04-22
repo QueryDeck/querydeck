@@ -1189,6 +1189,7 @@ module.exports = class ViewToJSON {
             limit: params.limit,
             default_where: params.default_where,
             tables_used: tables_used,
+            include_result_count: params.include_result_count ? true : false
         };
 
         let all_col_names = [];

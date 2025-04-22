@@ -398,12 +398,16 @@ function getAllNodes(id, subdomain, db_id, search_query = '' , options ={}) {
             let fid = path + '-' + currentNodeId + '-' + refbyid;
             let join_path_list = pathToText(currentNodeId + '-' + refbyid, subdomain, db_id);
             currentNode.nodes = currentNode.nodes || [];
+
+            let alias = Models[currentSchema][currentTable].properties.rels_new[currentSchema + '.' + currentTable + '.' + columnKeys[i] + '-' + Models[currentSchema][currentTable].properties.referencedBy[columnKeys[i]][j]].alias;
+
             if (pathSplitLength < 6) { // TODO : increase node length 
               let nnode = {
                 text: refbysplit[0] + '.' + refbysplit[1],
                 id: fid,
                 nodes: [],
                 selectable: undefined,
+                alias: alias,
                 // showAgg: true,
                 childNodes:  isHaveSubJoin(fid, subdomain, db_id),
                 join_path: join_path_list[1].join(".") + ' = ' + join_path_list[0].join("."),
@@ -429,12 +433,14 @@ function getAllNodes(id, subdomain, db_id, search_query = '' , options ={}) {
             currentNode.nodes = currentNode.nodes || [];
             let fid = path + '-' + currentNodeId + '-' + refid;
             let join_path_list = pathToText(currentNodeId + '-' + refid, subdomain, db_id);
+            let alias = Models[currentSchema][currentTable].properties.rels_new[currentSchema + '.' + currentTable + '.' + columnKeys[i] + '-' + Models[currentSchema][currentTable].properties.relations[columnKeys[i]]].alias;
             if (pathSplitLength < 6) {
               let nnode = {
                 text: refsplit[0] + '.' + refsplit[1],
                 id: fid,
                 nodes: [],
                 selectable: undefined,
+                alias: alias,
                 // showAgg: true,
                 childNodes:  isHaveSubJoin(fid, subdomain, db_id),
                 join_path: join_path_list[1].join(".") + ' = ' + join_path_list[0].join("."),
