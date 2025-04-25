@@ -213,10 +213,12 @@ const Save = props => {
             orderby: state.sorts.map(element => ({
               asc: element.order,
               id: element.column.id,
+              join_path: element?.column?.join_path,
               label: element.column.label
             })),
             orderby_dynamic_columns: state.sorts_dynamic.map(element => ({
-              id: element.id
+              id: element.id,
+              join_path: element?.join_path
             })),
             pagination: state.pagination.value,
           }
@@ -370,10 +372,12 @@ const Save = props => {
             orderby: state.sorts.map(element => ({
               asc: element.order,
               id: element.column.id,
+              join_path: element?.column?.join_path,
               label: element.column.label
             })),
             orderby_dynamic_columns: state.sorts_dynamic.map(element => ({
-              id: element.id
+              id: element.id,
+              join_path: element?.join_path
             })),
             pagination: state.pagination.value,
           }
