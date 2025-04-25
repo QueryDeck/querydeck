@@ -227,6 +227,7 @@ const JoinModal = props => {
             primary: element.primary,
             forceRequired: element.required,
             required: element.required,
+            session_key: element.session_key,
             tableID: checkedNode.key,
             tableLabel: checkedNode.titleOnly,
             unique: element.unique,
