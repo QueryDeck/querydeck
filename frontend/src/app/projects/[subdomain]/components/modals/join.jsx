@@ -14,6 +14,7 @@ import {
   updateExpandedKeys,
   updateJoinConditions,
   // updateJoinKeys,
+  updateJoinDetails,
   updateJoinTree,
   updateJoins
 } from '../../../../../lib/data/dataSlice'
@@ -138,6 +139,25 @@ const JoinModal = props => {
         signal: nodesController.signal
       })
       const data = response.data.data
+      const aliasMap = JSON.parse(JSON.stringify(state.joinDetails))
+      data.nodes.forEach(node => {
+        if(node.nodes) {
+          node.nodes.forEach(childNode => {
+            if(childNode.alias) {
+              aliasMap[childNode.id] = {
+                alias: childNode.alias,
+                type: 'agg'
+              }
+            }
+          })
+        }
+      })
+      dispatch(updateJoinDetails({
+        joinDetails: aliasMap,
+        mode: props.mode,
+        query_id: props.query_id,
+        subdomain: props.subdomain
+      }))
       let generatedNodes = []
       const nodesHash = {}
       data.forEach(node => {
@@ -398,10 +418,6 @@ const JoinModal = props => {
       },
       joinDetails: {
         ...state.joinDetails,
-        [table]: {
-          type: 'agg',
-          alias: data.table
-        }
       },
       query_id: props.query_id,
       mode: props.mode,

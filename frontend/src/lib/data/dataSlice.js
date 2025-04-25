@@ -817,6 +817,18 @@ const dataSlice = createSlice({
     //     }
     //   }
     // },
+    updateJoinDetails (state, action) {
+      state[action.payload.mode] = {
+        ...state[action.payload.mode],
+        [action.payload.subdomain]: {
+          ...state[action.payload.mode][action.payload.subdomain],
+          [action.payload.query_id]: {
+            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
+            joinDetails: action.payload.joinDetails
+          }
+        }
+      }
+    },
     updateJoinTree (state, action) {
       state[action.payload.mode] = {
         ...state[action.payload.mode],
@@ -1457,6 +1469,7 @@ export const {
   setNodes,
   closeJoinModal,
   openJoinModal,
+  updateJoinDetails,
   updateCheckedKeys,
   updateExpandedKeys,
   updateJoinKeys,

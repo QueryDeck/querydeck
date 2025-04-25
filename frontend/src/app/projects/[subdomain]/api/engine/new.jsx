@@ -18,7 +18,8 @@ import {
   setFilterNodes,
   setJoinGraphs,
   setResult,
-  setSortOptions
+  setSortOptions,
+  updateJoinDetails
 } from '../../../../../lib/data/dataSlice'
 
 // Library imports
@@ -241,6 +242,25 @@ export function APInew (props) {
         signal: nodesController.signal
       })
       const data = response.data.data
+      const aliasMap = {}
+      data.nodes.forEach(node => {
+        if(node.nodes) {
+          node.nodes.forEach(childNode => {
+            if(childNode.alias) {
+              aliasMap[childNode.id] = {
+                alias: childNode.alias,
+                type: 'agg'
+              }
+            }
+          })
+        }
+      })
+      dispatch(updateJoinDetails({
+        joinDetails: aliasMap,
+        mode: 'api',
+        query_id: 'new',
+        subdomain: props.subdomain
+      }))
       dispatch(setNodes({
         query_id: 'new',
         mode: 'api',
