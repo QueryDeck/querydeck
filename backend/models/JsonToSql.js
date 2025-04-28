@@ -174,7 +174,7 @@ module.exports = class builder {
 		var aliasArray = [];
 
 		for (var j = 0; j < this.queries.length; j++) {
-			console.log('this.queries[j]', this.queries[j])
+
 			if (!this.queries[j].alias.match(/insert|update|delete|select/)) {
 				aliasArray.push(this.queries[j].alias);
 			}
@@ -880,18 +880,18 @@ module.exports = class builder {
 				if (order[i].def) order[i].alias = 'tp' // force alias name as 'tp' for custom column timestamp  
 				else if (!order[i].alias) order[i].alias = 'tp'
 			}
+
 			col_name = this.quotes + col_name.split(".").join(this.quotes + "." + this.quotes) + this.quotes;
 			// alias priority order for custom cols  :  alias > lable > def
 			//|| order[i].label
+			var alias = order[i].alias;
 			if (order[i].alias) {
-				order[i].alias = order[i].alias;
-				order[i].alias = this.quotes + order[i].alias.split(".").join(this.quotes + "." + this.quotes) + this.quotes;
+				alias = this.quotes + order[i].alias.split(".").join(this.quotes + "." + this.quotes) + this.quotes;
 			} else if (order[i].def) {
-				order[i].alias = order[i].def;
+				alias = order[i].def;
 			}
 
-
-			orderedt += order[i].alias ? order[i].alias : col_name;
+			orderedt += alias ? alias : col_name;
 
 			if (order[i].asc == false || order[i].desc == true) orderedt += ' DESC';
 			else if (order[i].asc == true || order[i].desc == false) orderedt += ' ASC';
