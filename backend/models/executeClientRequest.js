@@ -96,8 +96,8 @@ function executeClientRequest(params, callback) {
                     order_column_loop:
                     for (let j = 0; j < params.query_model.query_json.orderby_dynamic_columns.length; j++) {
                         var element = params.query_model.query_json.orderby_dynamic_columns[j];
-                        var order_column_alias = element.alias;
-                        if(!element.alias) {
+                        var order_column_alias = element.query_param_alias;
+                        if(!element.query_param_alias) {
                             order_column_alias = element.name.split('.').pop();
                         }
                         if(order_column_alias == columnName) {

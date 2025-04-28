@@ -1546,6 +1546,7 @@ module.exports = class ViewToJSON {
                         if(orderby[i].join_path) {
                             if(!params.joins[orderby[i].join_path]) continue;
                             orderby[i].alias = params.joins[orderby[i].join_path].alias + '.' + colname;
+                            orderby[i].query_param_alias = params.joins[orderby[i].join_path].alias + '_' + colname;
                         }
 
 
