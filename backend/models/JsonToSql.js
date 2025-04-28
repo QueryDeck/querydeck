@@ -885,7 +885,7 @@ module.exports = class builder {
 			//|| order[i].label
 			if (order[i].alias) {
 				order[i].alias = order[i].alias;
-				order[i].alias = this.quotes + order[i].alias + this.quotes;
+				order[i].alias = this.quotes + order[i].alias.split(".").join(this.quotes + "." + this.quotes) + this.quotes;
 			} else if (order[i].def) {
 				order[i].alias = order[i].def;
 			}
