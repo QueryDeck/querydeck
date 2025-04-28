@@ -277,6 +277,7 @@ const JoinModal = props => {
           query_id: props.query_id,
           returnColumns,
           sorts: state.sorts,
+          sorts_dynamic: state.sorts_dynamic,
           subdomain: props.subdomain,
           text: checkedNode.titleOnly
         }))
@@ -314,7 +315,8 @@ const JoinModal = props => {
         nodes: [],
         query_id: props.query_id,
         returnColumns: state.returnColumns.filter(element => !element.id.includes(`${checkedNode.key}$`)),
-        sorts: state.sorts.filter(element => !element.column.id.includes(`${checkedNode.key}$`)),
+        sorts: state.sorts.filter(element => element.column.join_path !== checkedNode.key),
+        sorts_dynamic: state.sorts_dynamic.filter(element => element.join_path !== checkedNode.key),
         subdomain: props.subdomain,
         text: checkedNode.titleOnly
       }))

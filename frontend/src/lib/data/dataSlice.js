@@ -875,7 +875,8 @@ const dataSlice = createSlice({
             joins: action.payload.joins,
             nodes: action.payload.nodes.length ? [...state[action.payload.mode][action.payload.subdomain][action.payload.query_id].nodes, node] : state[action.payload.mode][action.payload.subdomain][action.payload.query_id].nodes.filter(element => element.id !== action.payload.node),
             returnColumns: action.payload.returnColumns,
-            sorts: action.payload.sorts
+            sorts: action.payload.sorts,
+            sorts_dynamic: action.payload.sorts_dynamic
           }
         }
       }

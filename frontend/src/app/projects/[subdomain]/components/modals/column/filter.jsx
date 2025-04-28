@@ -205,21 +205,35 @@ const FilterSection = props => {
 			return (
 				<div style={{ display: 'flex', paddingTop: '16px' }}>
 					<div style={{ flex: '1 0 0', marginRight: '16px' }}>
+						<Label style={{ marginBottom: 0 }}>
+							Join Type
+						</Label>
 						<CustomSelect
 							autoFocus
 							classNamePrefix='react-select'
-							defaultValue={state?.joinDetails[state?.columnModal]?.type ? {
-								label: `${state?.joinDetails[state?.columnModal]?.type.toUpperCase()} JOIN`,
-								value: state?.joinDetails[state?.columnModal]?.type
-							} : null}
+							defaultValue={state?.joinDetails[state?.columnModal]?.type ? (
+								state?.joinDetails[state?.columnModal]?.type === 'agg' ? {
+									label: 'AGGREGATE',
+									value: 'agg'
+								} : {
+									label: `${state?.joinDetails[state?.columnModal]?.type.toUpperCase()} JOIN`,
+									value: state?.joinDetails[state?.columnModal]?.type
+								}
+							) : null}
 							hideSelectedOptions
 							noOptionsMessage={() => 'No join types match the search term'}
 							onChange={option => joinDetailsRef.current.type = option.value}
-							options={['agg', 'inner', 'left', 'right'].map(element => ({ label: `${element.toUpperCase()} JOIN`, value: element }))}
+							options={[{
+								label: 'AGGREGATE',
+								value: 'agg'
+							}].concat(['inner', 'left', 'right'].map(element => ({ label: `${element.toUpperCase()} JOIN`, value: element })))}
 							placeholder='Select join type'
 						/>
 					</div>
 					<div style={{ flex: '1 0 0' }}>
+						<Label style={{ marginBottom: 0 }}>
+							Join Alias
+						</Label>
 						<Input
 							type='text'
 							defaultValue={state?.joinDetails[state?.columnModal]?.alias}
@@ -246,6 +260,7 @@ const FilterSection = props => {
 						state?.operators &&
 						state?.appAuth ?
 						<div style={{ paddingTop: '16px' }}>
+							<Label style={{ marginBottom: 0 }}>Join Conditions</Label>
 							<Filters
 								ref={filtersRef}
 								catchError={props.catchError}
