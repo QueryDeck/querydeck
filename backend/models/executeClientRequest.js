@@ -398,11 +398,11 @@ function executeClientRequest(params, callback) {
             }
             var result_ob = {
                 [query_exec_ob.query.base_alias]: {
-                    data: query_res.rows
+                    data: query_res.rows[0][query_exec_ob.query.base_alias]
                 }
             }
-            if(params.query_model.query_json.include_result_count) {
-                result_ob[query_exec_ob.query.base_alias].total_count = query_res.rows[0][query_exec_ob.query.base_alias + '_count']
+            if(params.query_model.query_json.include_result_count && query_res.rows[0][query_exec_ob.query.base_alias + '_count'] && query_res.rows[0][query_exec_ob.query.base_alias + '_count'][0]) {
+                result_ob[query_exec_ob.query.base_alias].total_count = query_res.rows[0][query_exec_ob.query.base_alias + '_count'][0].count
             }
             if(!isNaN(params.query_model.query_json.limit)) {
                 result_ob[query_exec_ob.query.base_alias].limit = params.query_model.query_json.limit
