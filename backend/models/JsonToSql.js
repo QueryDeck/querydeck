@@ -225,7 +225,9 @@ module.exports = class builder {
 
 				if (model.joins[i].agg_type && agg_types.indexOf(model.joins[i].agg_type) > -1) {
 					model.joins[i].where = model.joins[i].on;
-					finalColumns.push('( ' + this.select(model.joins[i], model.joins[i].agg_type) + ' )');
+					finalColumns.push('( ' + this.select(model.joins[i], {
+						agg_type: model.joins[i].agg_type
+					}) + ' )');
 				} else {
 					// jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table + ' AS ' + model.joins[i].table_alias);
 
@@ -265,14 +267,14 @@ module.exports = class builder {
 		;
 
 		// if(single) return fq;
-		// var id = this.makeid();
-		// if (agg_type) {
-		// 	if (agg_type == 'row_to_json') {
-		// 		return ' SELECT ROW_TO_JSON(' + id + '.*) AS ' + model.table_alias + ' FROM ( ' + fq + ' ) ' + id;
-		// 	} else if (agg_type == 'json_agg') {
-		// 		return ' SELECT JSON_AGG(' + id + '.*) AS ' + model.table_alias + ' FROM (' + fq + ') ' + id;
-		// 	}
-		// }
+		var id = this.makeid();
+		if (options && options.agg_type) {
+			if (options.agg_type == 'row_to_json') {
+				return ' SELECT ROW_TO_JSON(' + id + '.*) AS ' + model.table_alias + ' FROM ( ' + fq + ' ) ' + id;
+			} else if (options.agg_type == 'json_agg') {
+				return ' SELECT JSON_AGG(' + id + '.*) AS ' + model.table_alias + ' FROM (' + fq + ') ' + id;
+			}
+		}
 		
 		return fq;
 
@@ -988,7 +990,7 @@ module.exports = class builder {
 
 				var param_val = false;
 
-				var column_alias = conditions.rules[i].columnName;
+				var column_alias = conditions.rules[i].columnName || conditions.rules[i].fieldName || conditions.rules[i].id;
 
 				if(mymodel.replace_alias) {
 					column_alias = mymodel.table_alias + '.' + column_alias.split('.').pop();
