@@ -73,12 +73,23 @@ module.exports = class builder {
 
 				var alias = 'q' + this.makeid()
 
-				if(this.models.length > 1) {
+				// console.log('this.models[i].include_result_count', this.models[i].include_result_count)
+
+				if(this.models.length > 1 || this.models[i].include_result_count) {
 
 					this.queries.push({
 						query: 'select JSON_AGG(' + alias + '.*) as ' + this.models[i].table_alias + ' from (' + this.select(this.models[i]) + ') ' + alias,
 						alias: 'q' + this.makeid()
 					});
+
+					if(this.models[i].include_result_count) {
+						var count_table_alias = this.models[i].table_alias + '_count';
+						var count_query_alias = 'q' + this.makeid();
+						this.queries.push({
+							query: 'select JSON_AGG(' + count_query_alias + '.*) as ' + count_table_alias + ' from (' + this.select(this.models[i], {result_count_only: true}) + ') ' + count_query_alias,
+							alias: 'q' + this.makeid()
+						});
+					}
 					
 				} else {
 					this.queries.push({
@@ -163,6 +174,7 @@ module.exports = class builder {
 		var aliasArray = [];
 
 		for (var j = 0; j < this.queries.length; j++) {
+			console.log('this.queries[j]', this.queries[j])
 			if (!this.queries[j].alias.match(/insert|update|delete|select/)) {
 				aliasArray.push(this.queries[j].alias);
 			}
@@ -202,7 +214,7 @@ module.exports = class builder {
 		return fq;
 	}
 
-	select(model, agg_type) {
+	select(model, options) {
 
 		var finalColumns = this.resolveSelectColumns(model);
 
@@ -240,27 +252,27 @@ module.exports = class builder {
 		}
 
 		var fq = 'SELECT ' +
-			finalColumns.join(',') +
+			(options && options.result_count_only ? 'COUNT(*)' : finalColumns.join(',')) +
 			' FROM ' +
 			`${this.quotes}${model.schema}${this.quotes}.${this.quotes}${model.table}${this.quotes}` +
 			jtext +
 			this.resolveWhere(model) +
-			this.resolveGroup(model.groupby) +
-			this.resolveOrder(model.orderby) +
-			off +
-			this.resolveLimit(model.limit)
+			(options && options.result_count_only ? '' : this.resolveGroup(model.groupby)) +
+			(options && options.result_count_only ? '' : this.resolveOrder(model.orderby)) +
+			(options && options.result_count_only ? '' : off) +
+			(options && options.result_count_only ? '' : this.resolveLimit(model.limit))
 
 		;
 
 		// if(single) return fq;
-		var id = this.makeid();
-		if (agg_type) {
-			if (agg_type == 'row_to_json') {
-				return ' SELECT ROW_TO_JSON(' + id + '.*) AS ' + model.table_alias + ' FROM ( ' + fq + ' ) ' + id;
-			} else if (agg_type == 'json_agg') {
-				return ' SELECT JSON_AGG(' + id + '.*) AS ' + model.table_alias + ' FROM (' + fq + ') ' + id;
-			}
-		}
+		// var id = this.makeid();
+		// if (agg_type) {
+		// 	if (agg_type == 'row_to_json') {
+		// 		return ' SELECT ROW_TO_JSON(' + id + '.*) AS ' + model.table_alias + ' FROM ( ' + fq + ' ) ' + id;
+		// 	} else if (agg_type == 'json_agg') {
+		// 		return ' SELECT JSON_AGG(' + id + '.*) AS ' + model.table_alias + ' FROM (' + fq + ') ' + id;
+		// 	}
+		// }
 		
 		return fq;
 

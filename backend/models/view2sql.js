@@ -110,7 +110,7 @@ exports.convert = function(params){
             request_query_params._order = {
               type: 'text',
               description: 'Order results by columns. Format: column1:asc,column2:desc. Available columns: ' + 
-                queryob.model.orderby_dynamic_columns.map(col => col.name.split('.').pop()).join(', ')
+                queryob.model.orderby_dynamic_columns.map(col => col.alias).join(', ')
             }
 
             if(queryob.model.orderby && queryob.model.orderby.length > 0) {

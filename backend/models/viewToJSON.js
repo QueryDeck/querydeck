@@ -1166,8 +1166,12 @@ module.exports = class ViewToJSON {
         for (let i = 0; i < params.orderby_dynamic_columns.length; i++) {
             let columnId = params.orderby_dynamic_columns[i].id;
             if (currentModel.idToName[columnId]) {
-                let columnName = currentModel.idToName[columnId].join('.');
-                params.orderby_dynamic_columns[i].name = columnName;
+                let columnNameArr = currentModel.idToName[columnId]
+                params.orderby_dynamic_columns[i].name = columnNameArr.join('.');
+                params.orderby_dynamic_columns[i].alias = columnNameArr[2];
+                if(params.orderby_dynamic_columns[i].join_path) {
+                    params.orderby_dynamic_columns[i].alias = params.joins[params.orderby_dynamic_columns[i].join_path].alias + '_' + columnNameArr[2];
+                }
                 clean_orderby_dynamic_columns.push(params.orderby_dynamic_columns[i]);
             }
         }
@@ -1332,8 +1336,6 @@ module.exports = class ViewToJSON {
 
                 params.joins = params.joins || {};
                 params.joins[id_pure] = params.joins[id_pure] || {};
-
-                console.log(params.joins)
 
                 // force agg on all joins
                 // if (params.agg_paths?.indexOf(id_pure) == -1) params.agg_paths.push(id_pure);
@@ -1520,14 +1522,29 @@ module.exports = class ViewToJSON {
                         // base column
                         let base_col_spl = orderby[i].id.split('.');
                         // base tables must match
-                        if (base_col_spl[0] != base_table) continue;
-                        if (!orderby[i].def && !currentModel.idToName[orderby[i].id]) continue; // move forward only  if orderby column name exist  or it def (custom column ) 
+                        // if (base_col_spl[0] != base_table) continue;
+                        if (!currentModel.idToName[orderby[i].id]) continue; // move forward only  if orderby column name exist  or it def (custom column ) 
 
-                        if (orderby[i].def) {
-                            orderby[i].name = orderby[i].def;
-                        } else {
-                            let col_arr = currentModel.idToName[orderby[i].id];
-                            orderby[i].name = col_arr.join(".");
+                        let col_arr = currentModel.idToName[orderby[i].id];
+
+                        if(!col_arr) continue;
+
+                        // if (orderby[i].def) {
+                        //     orderby[i].name = orderby[i].def;
+                        // } else {
+                        //     let col_arr = currentModel.idToName[orderby[i].id];
+                        //     orderby[i].name = col_arr.join(".");
+                            
+                        // }
+
+                        // let col_arr = currentModel.idToName[orderby[i].id];
+                        orderby[i].name = col_arr.join(".");
+
+                        var colname = col_arr[2];
+                        orderby[i].alias = colname;
+                        
+                        if(orderby[i].join_path) {
+                            orderby[i].alias = params.joins[orderby[i].join_path].alias + '_' + colname;
                         }
 
 
