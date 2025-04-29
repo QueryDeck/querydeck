@@ -323,11 +323,8 @@ const JoinModal = props => {
 
       const updatedJoinConditions = JSON.parse(JSON.stringify(state.joinConditions))
       delete updatedJoinConditions[checkedNode.key]
-      const updatedJoinDetails = JSON.parse(JSON.stringify(state.joinDetails))
-      delete updatedJoinDetails[checkedNode.key]
       dispatch(updateJoinConditions({
         joinConditions: updatedJoinConditions,
-        joinDetails: updatedJoinDetails,
         query_id: props.query_id,
         mode: props.mode,
         subdomain: props.subdomain,
@@ -418,9 +415,6 @@ const JoinModal = props => {
             not: false
           })
         }
-      },
-      joinDetails: {
-        ...state.joinDetails,
       },
       query_id: props.query_id,
       mode: props.mode,

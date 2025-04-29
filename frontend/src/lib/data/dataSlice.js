@@ -1065,8 +1065,7 @@ const dataSlice = createSlice({
           ...state[action.payload.mode][action.payload.subdomain],
           [action.payload.query_id]: {
             ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
-            joinConditions: action.payload.joinConditions,
-            joinDetails: action.payload.joinDetails
+            joinConditions: action.payload.joinConditions
           }
         }
       }

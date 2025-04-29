@@ -15,6 +15,7 @@ import {
 	updateColumnMode,
 	updateJoinOptions,
 	updateJoinConditions,
+	updateJoinDetails,
 	// updateTemporary
 } from '../../../../../../lib/data/dataSlice'
 
@@ -108,6 +109,11 @@ const FilterSection = props => {
           filters: JSON.stringify(filtersRef.current.getFilters()),
         }
       },
+      query_id: props.query_id,
+      mode: props.mode,
+      subdomain: props.subdomain,
+    }))
+		dispatch(updateJoinDetails({
 			joinDetails: {
 				...state.joinDetails,
 				[state.columnModal]: {
@@ -115,10 +121,10 @@ const FilterSection = props => {
 					alias: joinDetailsRef.current.alias ? joinDetailsRef.current.alias : state?.joinDetails[state?.columnModal]?.alias
 				}
 			},
-      query_id: props.query_id,
+			query_id: props.query_id,
       mode: props.mode,
       subdomain: props.subdomain,
-    }))
+		}))
 		dispatch(saveTemporary({
 			mode: props.mode,
 			subdomain: props.subdomain,
