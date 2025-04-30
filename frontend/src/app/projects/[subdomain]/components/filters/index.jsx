@@ -1569,6 +1569,8 @@ const Filters = React.forwardRef((props, ref) => {
                 not: state.groups[groupId].config.isNot
               })
             }
+          } else {
+            subRule.push(filterRule)
           }
         }
       }
