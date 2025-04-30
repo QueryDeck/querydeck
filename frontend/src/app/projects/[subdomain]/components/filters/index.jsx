@@ -1470,11 +1470,26 @@ const Filters = React.forwardRef((props, ref) => {
 
                     findAndPushRule(subRule, groupParent, filterRule)
                   } else {
-                    const ruleGroupIds = resolveGroups(groupId)
+                    const ruleGroupIds = resolveGroups(filterRule.id)
                     let deepCheck = subRule.findIndex(rule => ruleGroupIds.includes(rule.id))
+                    let deepClauseCheck = subRule.findIndex(rule => ruleGroupIds.includes(rule.id))
+                    let deepGroupCheck = subRule.findIndex(rule => ruleGroupIds.includes(rule.exists_where?.id))
                     if (deepCheck >= 0) {
                       // place rule in nested group
                       updateNestedGroup(groupIds.slice(1, groupIds.length), filterRule, subRule[deepCheck].rules)
+                    } else if (deepClauseCheck >= 0) {
+                    } else if (deepGroupCheck >= 0) {
+                      if (subRule[deepGroupCheck].exists_where.rules.length) {
+                      } else {
+                        subRule.push({
+                          condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+                          conditional_on: state.groups[groupId]?.conditionalRules?.value,
+                          id: groupId,
+                          rules: [],
+                          not: state.groups[groupId].config.isNot
+                        })
+                        searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule[subRule.length - 1].rules)
+                      }
                     } else {
                       // push to subrule
                       subRule.push({
@@ -1591,9 +1606,28 @@ const Filters = React.forwardRef((props, ref) => {
             subRule.push(filterRule)
           } else {
             // resolve sub groups of the rule
-            const resolvedGroups = resolveGroups(filterRule.id)
             // searches rule and recursively updates rules array
-            searchRule(resolvedGroups.slice(1, resolvedGroups.length), filterRule, subRule)
+            if (subRule.length) {
+              const resolvedGroups = resolveGroups(filterRule.id)
+              let subRuleIndex = subRule.findIndex(rule => resolvedGroups.includes(rule.id))
+              let subClauseIndex = subRule.findIndex(rule => resolvedGroups.includes(rule.exists_where?.id))
+              if (subRuleIndex >= 0) {
+                searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule[subRuleIndex].rules)
+              } else if (subClauseIndex >= 0) {
+                searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule[subClauseIndex].exists_where.rules)
+              } else {
+                searchRule(groupIds, filterRule, subRule)
+              }
+            } else {
+              subRule.push({
+                condition: state.groups[groupId].config.isConjunctionOr ? 'OR' : 'AND',
+                conditional_on: state.groups[groupId]?.conditionalRules?.value,
+                id: groupId,
+                rules: [],
+                not: state.groups[groupId].config.isNot
+              })
+              searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule[subRule.length - 1].rules)
+            }
           }
         } else {
           if (groupIds.length > 1) {
