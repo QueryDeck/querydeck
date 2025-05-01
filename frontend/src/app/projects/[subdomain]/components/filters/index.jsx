@@ -1404,6 +1404,9 @@ const Filters = React.forwardRef((props, ref) => {
         if (groupIds.length <= 1) {
           // adds rule to a terminal group
           subRule[ruleIndex].rules.push(filterRule)
+        } else {
+          // recurses over to search the rule inside the exists_where rules
+          searchRule(groupIds.slice(1, groupIds.length), filterRule, subRule[ruleIndex].rules)
         }
       } else if (clauseIndex && clauseIndex >= 0) {
         // add to existing clause
