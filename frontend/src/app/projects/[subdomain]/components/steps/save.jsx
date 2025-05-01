@@ -156,6 +156,7 @@ const Save = props => {
           checkedKeys: state.checkedKeys,
           columns: state.columns,
           joinConditions: formattedJoinConditions,
+          joinDetails: state.joinDetails,
           conflictColumns: state.conflictColumns,
           returnColumns: state.returnColumns,
           multipleRowsHash: state.multipleRowsHash,
@@ -164,6 +165,7 @@ const Save = props => {
           authentication: state.authentication,
           sorts: state.sorts,
           sorts_dynamic: state.sorts_dynamic,
+          includeResultCount: state.includeResultCount,
           offset: state.offset,
           offset_dynamic: state.offset_dynamic,
           limit: state.limit,
@@ -201,7 +203,9 @@ const Save = props => {
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
+            include_result_count: state.includeResultCount,
             join_conditions,
+            joins: state.joinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.limit,
@@ -209,10 +213,12 @@ const Save = props => {
             orderby: state.sorts.map(element => ({
               asc: element.order,
               id: element.column.id,
+              join_path: element?.column?.join_path,
               label: element.column.label
             })),
             orderby_dynamic_columns: state.sorts_dynamic.map(element => ({
-              id: element.id
+              id: element.id,
+              join_path: element?.join_path
             })),
             pagination: state.pagination.value,
           }
@@ -252,6 +258,13 @@ const Save = props => {
           console.error(`Unknown method: ${state.method.method}`)
           break
       }
+
+      if (state.method.value === 'select_id') {
+        config['select_by_id'] = true
+        delete config.include_result_count
+        delete config.joins
+      }
+
       const createConfig = {
         method: 'POST',
         url: props.mode === 'api' ? `${apiurl}/apps/editor/controllers/saved-api-query` : `${apiurl}/apps/editor/controllers/saved-query`,
@@ -301,6 +314,7 @@ const Save = props => {
           checkedKeys: state.checkedKeys,
           columns: state.columns,
           joinConditions: formattedJoinConditions,
+          joinDetails: state.joinDetails,
           conflictColumns: state.conflictColumns,
           returnColumns: state.returnColumns,
           multipleRowsHash: state.multipleRowsHash,
@@ -309,6 +323,7 @@ const Save = props => {
           authentication: state.authentication,
           sorts: state.sorts,
           sorts_dynamic: state.sorts_dynamic,
+          includeResultCount: state.includeResultCount,
           offset: state.offset,
           offset_dynamic: state.offset_dynamic,
           limit: state.limit,
@@ -347,7 +362,9 @@ const Save = props => {
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
+            include_result_count: state.includeResultCount,
             join_conditions,
+            joins: state.joinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.limit,
@@ -355,10 +372,12 @@ const Save = props => {
             orderby: state.sorts.map(element => ({
               asc: element.order,
               id: element.column.id,
+              join_path: element?.column?.join_path,
               label: element.column.label
             })),
             orderby_dynamic_columns: state.sorts_dynamic.map(element => ({
-              id: element.id
+              id: element.id,
+              join_path: element?.join_path
             })),
             pagination: state.pagination.value,
           }
@@ -398,6 +417,13 @@ const Save = props => {
           console.error(`Unknown method: ${state.method.method}`)
           break
       }
+
+      if (state.method.value === 'select_id') {
+        config['select_by_id'] = true
+        delete config.include_result_count
+        delete config.joins
+      }
+
       const updateConfig = {
         method: 'PUT',
         url: props.mode === 'api' ? `${apiurl}/apps/editor/controllers/saved-api-query` : `${apiurl}/apps/editor/controllers/saved-query`,

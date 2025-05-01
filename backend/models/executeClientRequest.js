@@ -88,10 +88,23 @@ function executeClientRequest(params, callback) {
                 
                 for(let i = 0; i < orderItems.length; i++) {
                     let [columnName, direction] = orderItems[i].split(':');
+
+                    // var order_column_alias = 
                     
-                    let matchingColumn = params.query_model.query_json.orderby_dynamic_columns.find(
-                        col => col.name.split('.').pop() === columnName
-                    );
+                    let matchingColumn;
+
+                    order_column_loop:
+                    for (let j = 0; j < params.query_model.query_json.orderby_dynamic_columns.length; j++) {
+                        var element = params.query_model.query_json.orderby_dynamic_columns[j];
+                        var order_column_alias = element.query_param_alias;
+                        if(!element.query_param_alias) {
+                            order_column_alias = element.name.split('.').pop();
+                        }
+                        if(order_column_alias == columnName) {
+                            matchingColumn = element;
+                            break order_column_loop;
+                        }
+                    }
 
                     if(matchingColumn) {
                         orderByArr.push({
@@ -383,17 +396,36 @@ function executeClientRequest(params, callback) {
                     error: err
                 })
             }
-            if(query_exec_ob.query.multiple) {
-                return callback(null, {
-                    data: query_res.rows[0]
-                })
-            } else {
-                return callback(null, {
-                    data: {
-                        [query_exec_ob.query.base_alias]: query_res.rows
+
+            if(params.query_model.query_json.include_result_count) {
+                var result_ob = {
+                    [query_exec_ob.query.base_alias]: {
+                        data: query_res.rows[0][query_exec_ob.query.base_alias]
                     }
-                })
+                }
+                if(params.query_model.query_json.include_result_count && query_res.rows[0][query_exec_ob.query.base_alias + '_count'] && query_res.rows[0][query_exec_ob.query.base_alias + '_count'][0]) {
+                    result_ob[query_exec_ob.query.base_alias].total_count = query_res.rows[0][query_exec_ob.query.base_alias + '_count'][0].count
+                }
+                if(!isNaN(params.query_model.query_json.limit)) {
+                    result_ob[query_exec_ob.query.base_alias].limit = params.query_model.query_json.limit
+                }
+                if(!isNaN(params.query_model.query_json.offset)) {
+                    result_ob[query_exec_ob.query.base_alias].offset = params.query_model.query_json.offset
+                }
+                return callback(null, result_ob)
+            } else {
+                var result_ob = {
+                    [query_exec_ob.query.base_alias]: {data: query_res.rows}
+                }
+                if(!isNaN(params.query_model.query_json.limit)) {
+                    result_ob[query_exec_ob.query.base_alias].limit = params.query_model.query_json.limit
+                }
+                if(!isNaN(params.query_model.query_json.offset)) {
+                    result_ob[query_exec_ob.query.base_alias].offset = params.query_model.query_json.offset
+                }
+                return callback(null, result_ob)
             }
+            
         })
 
     } else {

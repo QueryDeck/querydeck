@@ -73,12 +73,23 @@ module.exports = class builder {
 
 				var alias = 'q' + this.makeid()
 
-				if(this.models.length > 1) {
+				// console.log('this.models[i].include_result_count', this.models[i].include_result_count)
+
+				if(this.models.length > 1 || this.models[i].include_result_count) {
 
 					this.queries.push({
 						query: 'select JSON_AGG(' + alias + '.*) as ' + this.models[i].table_alias + ' from (' + this.select(this.models[i]) + ') ' + alias,
 						alias: 'q' + this.makeid()
 					});
+
+					if(this.models[i].include_result_count) {
+						var count_table_alias = this.models[i].table_alias + '_count';
+						var count_query_alias = 'q' + this.makeid();
+						this.queries.push({
+							query: 'select JSON_AGG(' + count_query_alias + '.*) as ' + count_table_alias + ' from (' + this.select(this.models[i], {result_count_only: true}) + ') ' + count_query_alias,
+							alias: 'q' + this.makeid()
+						});
+					}
 					
 				} else {
 					this.queries.push({
@@ -163,6 +174,7 @@ module.exports = class builder {
 		var aliasArray = [];
 
 		for (var j = 0; j < this.queries.length; j++) {
+
 			if (!this.queries[j].alias.match(/insert|update|delete|select/)) {
 				aliasArray.push(this.queries[j].alias);
 			}
@@ -202,7 +214,7 @@ module.exports = class builder {
 		return fq;
 	}
 
-	select(model, agg_type) {
+	select(model, options) {
 
 		var finalColumns = this.resolveSelectColumns(model);
 
@@ -213,15 +225,22 @@ module.exports = class builder {
 
 				if (model.joins[i].agg_type && agg_types.indexOf(model.joins[i].agg_type) > -1) {
 					model.joins[i].where = model.joins[i].on;
-					finalColumns.push('( ' + this.select(model.joins[i], model.joins[i].agg_type) + ' )');
+					finalColumns.push('( ' + this.select(model.joins[i], {
+						agg_type: model.joins[i].agg_type
+					}) + ' )');
 				} else {
-					jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table);
+					// jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (model.joins[i].schema + '.' + model.joins[i].table + ' AS ' + model.joins[i].table_alias);
+
+
+					jtext += ' ' + (model.joins[i].type || 'INNER') + ' JOIN ' + (`${this.quotes}${model.joins[i].schema}${this.quotes}.${this.quotes}${model.joins[i].table}${this.quotes} AS ${this.quotes}${model.joins[i].table_alias}${this.quotes}`);
 
 					// TODO: throw error if on is null
-					jtext += ' ON ' + this.resolveConditions(model.joins[i].on);
+					jtext += ' ON ' + this.resolveConditions(model.joins[i].on, {
+						table_alias: model.joins[i].table_alias,
+						replace_alias: true
+					});
 
-
-					finalColumns = finalColumns.concat(this.resolveSelectColumns(model.joins[i]));
+					finalColumns = finalColumns.concat(this.resolveSelectColumns(model.joins[i], true));
 				}
 			}
 		}
@@ -235,24 +254,24 @@ module.exports = class builder {
 		}
 
 		var fq = 'SELECT ' +
-			finalColumns.join(',') +
+			(options && options.result_count_only ? 'COUNT(*)' : finalColumns.join(',')) +
 			' FROM ' +
 			`${this.quotes}${model.schema}${this.quotes}.${this.quotes}${model.table}${this.quotes}` +
 			jtext +
 			this.resolveWhere(model) +
-			this.resolveGroup(model.groupby) +
-			this.resolveOrder(model.orderby) +
-			off +
-			this.resolveLimit(model.limit)
+			(options && options.result_count_only ? '' : this.resolveGroup(model.groupby)) +
+			(options && options.result_count_only ? '' : this.resolveOrder(model.orderby)) +
+			(options && options.result_count_only ? '' : off) +
+			(options && options.result_count_only ? '' : this.resolveLimit(model.limit))
 
 		;
 
 		// if(single) return fq;
 		var id = this.makeid();
-		if (agg_type) {
-			if (agg_type == 'row_to_json') {
+		if (options && options.agg_type) {
+			if (options.agg_type == 'row_to_json') {
 				return ' SELECT ROW_TO_JSON(' + id + '.*) AS ' + model.table_alias + ' FROM ( ' + fq + ' ) ' + id;
-			} else if (agg_type == 'json_agg') {
+			} else if (options.agg_type == 'json_agg') {
 				return ' SELECT JSON_AGG(' + id + '.*) AS ' + model.table_alias + ' FROM (' + fq + ') ' + id;
 			}
 		}
@@ -261,7 +280,7 @@ module.exports = class builder {
 
 	}
 
-	resolveSelectColumns(model) {
+	resolveSelectColumns(model, replace_alias) {
 
 		var finalColumns = [];
 		let quotes = this.quotes;
@@ -274,7 +293,14 @@ module.exports = class builder {
 			}
 
 			var col_name = model.columns[i].columnName;
-			let colNameQuotes = quotes + model.columns[i].columnName.split(".").join(quotes + "." + quotes) + quotes;
+			var col_alias = model.columns[i].alias;
+
+			if(replace_alias) {
+				col_name = model.table_alias + '.' + col_name.split('.').pop();
+				col_alias = model.table_alias + '_' + col_name.split('.').pop();
+			}
+			
+			let colNameQuotes = quotes + col_name.split(".").join(quotes + "." + quotes) + quotes;
 			// var col_name_quotes = quotes +  model.columns[i].columnName.split(".").join(quotes+ "." + quotes) + quotes;
 			if (model.columns[i].fn && !model.columns[i].def) {
 				if (['sum', 'count', 'max', 'min', 'avg'].indexOf(model.columns[i].fn) > -1) {
@@ -319,8 +345,8 @@ module.exports = class builder {
 				finalColumns.push(' 1 ')
 			} else {
 				// col_name = quotes + col_name.split(".").join(quotes + "." + quotes) + quotes;
-				if (model.columns[i].alias) {
-					finalColumns.push(col_name + ' AS ' + quotes + model.columns[i].alias + quotes);
+				if (col_alias) {
+					finalColumns.push(col_name + ' AS ' + quotes + col_alias + quotes);
 				} else {
 					finalColumns.push(col_name + ' AS ' + quotes + model.columns[i].columnName + quotes);
 				}
@@ -854,18 +880,18 @@ module.exports = class builder {
 				if (order[i].def) order[i].alias = 'tp' // force alias name as 'tp' for custom column timestamp  
 				else if (!order[i].alias) order[i].alias = 'tp'
 			}
+
 			col_name = this.quotes + col_name.split(".").join(this.quotes + "." + this.quotes) + this.quotes;
 			// alias priority order for custom cols  :  alias > lable > def
 			//|| order[i].label
+			var alias = order[i].alias;
 			if (order[i].alias) {
-				order[i].alias = order[i].alias;
-				order[i].alias = this.quotes + order[i].alias + this.quotes;
+				alias = this.quotes + order[i].alias.split(".").join(this.quotes + "." + this.quotes) + this.quotes;
 			} else if (order[i].def) {
-				order[i].alias = order[i].def;
+				alias = order[i].def;
 			}
 
-
-			orderedt += order[i].alias ? order[i].alias : col_name;
+			orderedt += alias ? alias : col_name;
 
 			if (order[i].asc == false || order[i].desc == true) orderedt += ' DESC';
 			else if (order[i].asc == true || order[i].desc == false) orderedt += ' ASC';
@@ -964,6 +990,12 @@ module.exports = class builder {
 
 				var param_val = false;
 
+				var column_alias = conditions.rules[i].columnName || conditions.rules[i].fieldName || conditions.rules[i].id;
+
+				if(mymodel.replace_alias) {
+					column_alias = mymodel.table_alias + '.' + column_alias.split('.').pop();
+				}
+
 				// this.depthpaths.push
 				if(val !== undefined && conditions.rules[i].input_key === undefined  && conditions.rules[i].operator.indexOf('$columnref') == -1 && conditions.rules[i].operator.indexOf('$inq') == -1){
 
@@ -1029,7 +1061,7 @@ module.exports = class builder {
 				}
                  
 				condt += this.resolveOperators({
-					columnName: conditions.rules[i].columnName || conditions.rules[i].fieldName || conditions.rules[i].id,
+					columnName: column_alias,
 					realcname: conditions.rules[i].columnName || conditions.rules[i].fieldName || conditions.rules[i].id,
 					operator: conditions.rules[i].operator,
 					value: val,

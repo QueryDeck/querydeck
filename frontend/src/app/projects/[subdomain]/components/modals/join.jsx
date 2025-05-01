@@ -14,6 +14,7 @@ import {
   updateExpandedKeys,
   updateJoinConditions,
   // updateJoinKeys,
+  updateJoinDetails,
   updateJoinTree,
   updateJoins
 } from '../../../../../lib/data/dataSlice'
@@ -138,6 +139,25 @@ const JoinModal = props => {
         signal: nodesController.signal
       })
       const data = response.data.data
+      const aliasMap = JSON.parse(JSON.stringify(state.joinDetails))
+      data.nodes.forEach(node => {
+        if(node.nodes) {
+          node.nodes.forEach(childNode => {
+            if(childNode.alias) {
+              aliasMap[childNode.id] = {
+                alias: childNode.alias,
+                type: 'agg'
+              }
+            }
+          })
+        }
+      })
+      dispatch(updateJoinDetails({
+        joinDetails: aliasMap,
+        mode: props.mode,
+        query_id: props.query_id,
+        subdomain: props.subdomain
+      }))
       let generatedNodes = []
       const nodesHash = {}
       data.forEach(node => {
@@ -207,6 +227,7 @@ const JoinModal = props => {
             primary: element.primary,
             forceRequired: element.required,
             required: element.required,
+            session_key: element.session_key,
             tableID: checkedNode.key,
             tableLabel: checkedNode.titleOnly,
             unique: element.unique,
@@ -256,6 +277,7 @@ const JoinModal = props => {
           query_id: props.query_id,
           returnColumns,
           sorts: state.sorts,
+          sorts_dynamic: state.sorts_dynamic,
           subdomain: props.subdomain,
           text: checkedNode.titleOnly
         }))
@@ -293,7 +315,8 @@ const JoinModal = props => {
         nodes: [],
         query_id: props.query_id,
         returnColumns: state.returnColumns.filter(element => !element.id.includes(`${checkedNode.key}$`)),
-        sorts: state.sorts.filter(element => !element.column.id.includes(`${checkedNode.key}$`)),
+        sorts: state.sorts.filter(element => element.column.join_path !== checkedNode.key),
+        sorts_dynamic: state.sorts_dynamic.filter(element => element.join_path !== checkedNode.key),
         subdomain: props.subdomain,
         text: checkedNode.titleOnly
       }))

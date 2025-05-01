@@ -17,7 +17,9 @@ import {
   setNodes,
   setFilterNodes,
   setJoinGraphs,
-  setResult
+  setResult,
+  setSortOptions,
+  updateJoinDetails
 } from '../../../../../lib/data/dataSlice'
 
 // Library imports
@@ -240,6 +242,25 @@ export function APInew (props) {
         signal: nodesController.signal
       })
       const data = response.data.data
+      const aliasMap = {}
+      data.nodes.forEach(node => {
+        if(node.nodes) {
+          node.nodes.forEach(childNode => {
+            if(childNode.alias) {
+              aliasMap[childNode.id] = {
+                alias: childNode.alias,
+                type: 'agg'
+              }
+            }
+          })
+        }
+      })
+      dispatch(updateJoinDetails({
+        joinDetails: aliasMap,
+        mode: 'api',
+        query_id: 'new',
+        subdomain: props.subdomain
+      }))
       dispatch(setNodes({
         query_id: 'new',
         mode: 'api',
@@ -305,16 +326,51 @@ export function APInew (props) {
         agg_paths: Object.keys(state.agg_paths),
         c: [{ id: `${state.base.value}.1` }],
         db_id: state.database.value,
+        joins: state.joinDetails,
         subdomain: props.subdomain
     }, {
       signal: filtersController.signal
     })
     const data = response.data.data
+
+    const schemas = {}
+    const result = []
+
+    data.order_by_columns.forEach(element => {
+      if (schemas[element.id.split('.').slice(0, element.id.split('.').length - 1).join('.')]) {
+        result.forEach(item => {
+          if (item.id === element.columnID.split('.').slice(0, element.columnID.split('.').length - 1).join('.')) {
+            item.options.push({
+              ...element,
+              full_name: element.id,
+              id: element.columnID
+            })
+          }
+        })
+      } else {
+        schemas[element.id.split('.').slice(0, element.id.split('.').length - 1).join('.')] = true
+        result.push({
+          id: element.columnID.split('.').slice(0, element.columnID.split('.').length - 1).join('.'),
+          label: element.id.split('.').slice(0, element.id.split('.').length - 1).join('.'),
+          options: [{
+              ...element,
+              full_name: element.id,
+              id: element.columnID
+            }]
+        })
+      }
+    })
     dispatch(setFilterNodes({
       filterFields: [{
         label: data.table,
         options: data.columns
       }],
+      query_id: 'new',
+      mode: 'api',
+      subdomain: props.subdomain
+    }))
+    dispatch(setSortOptions({
+      sortOptions: result,
       query_id: 'new',
       mode: 'api',
       subdomain: props.subdomain
@@ -370,11 +426,18 @@ export function APInew (props) {
   })
 
   useEffect(() => {
+    if (state?.base?.value && state?.method?.value) {
+      getFilters()
+    }
+  }, [state?.joinDetails])
+
+  useEffect(() => {
     if (state?.columns.length && state?.method.value) {
       generateAPI()
     }
   }, [
     state?.joins?.length,
+    state?.joinDetails,
     state?.columns?.length,
     state?.columns?.map(column => column.session_input_key).join(''),
     state?.columns?.filter(column => column.session_value_override).length,
@@ -388,6 +451,7 @@ export function APInew (props) {
     state?.returnColumns?.length,
     state?.sorts?.length,
     state?.sorts_dynamic?.length,
+    state?.includeResultCount,
     // state?.pagination?.value,
     state?.offset,
     state?.offset_dynamic,
@@ -443,7 +507,9 @@ export function APInew (props) {
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
+            include_result_count: state.includeResultCount,
             join_conditions,
+            joins: state.joinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.method.value === 'select_id' ? 1 : state.limit,
@@ -451,10 +517,12 @@ export function APInew (props) {
             orderby: state.sorts.map(element => ({
               asc: element.order,
               id: element.column.id,
+              join_path: element?.column?.join_path,
               label: element.column.label
             })),
             orderby_dynamic_columns: state.sorts_dynamic.map(element => ({
-              id: element.id
+              id: element.id,
+              join_path: element?.join_path
             })),
             // pagination: state.pagination.value
           }
@@ -497,6 +565,8 @@ export function APInew (props) {
 
       if (state.method.value === 'select_id') {
         config['select_by_id'] = true
+        delete config.include_result_count
+        delete config.joins
       }
 
       const apiConfig = {

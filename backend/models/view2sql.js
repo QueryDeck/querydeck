@@ -80,7 +80,9 @@ exports.convert = function(params){
               base: params.base,
               join_conditions: params.join_conditions,
               where: params.w,
-              graphql: params.graphql
+              graphql: params.graphql,
+              joins: params.joins,
+              include_result_count: params.include_result_count
             }
           })[params.select_by_id ? 'convertSelectByID' : 'convertSelect']()
 
@@ -108,7 +110,7 @@ exports.convert = function(params){
             request_query_params._order = {
               type: 'text',
               description: 'Order results by columns. Format: column1:asc,column2:desc. Available columns: ' + 
-                queryob.model.orderby_dynamic_columns.map(col => col.name.split('.').pop()).join(', ')
+                queryob.model.orderby_dynamic_columns.map(col => col.alias).join(', ')
             }
 
             if(queryob.model.orderby && queryob.model.orderby.length > 0) {

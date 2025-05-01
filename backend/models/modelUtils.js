@@ -61,13 +61,11 @@ exports.idToJoinPathOb = function(params) {
         let init_w = {
             condition: 'AND'
         };
-        // ////console.log(id_spl.length)
+
         for (let i = 0; i < id_spl.length; i = i + 2) {
             const element = id_spl[i];
             if (i == 0) {
-                // ////console.log("P1")
-                // init where
-                // init_w[allModels['cd00ac2a-79d7-4cdb-a7d5-9258590ab899'].test.idToName[id_spl[0]].join('.')] = {$columnref: allModels['cd00ac2a-79d7-4cdb-a7d5-9258590ab899'].test.idToName[id_spl[1]].join('.')};
+                
                 init_w.rules = [{
                     columnName: currentModel.idToName[id_spl[1]].join('.'),
                     operator: '$columnref',
@@ -78,8 +76,11 @@ exports.idToJoinPathOb = function(params) {
                 let n1 = currentModel.idToName[id_spl[i]];
                 let n2 = currentModel.idToName[id_spl[i + 1]];
                 let n3 = currentModel.idToName[id_spl[i + 2]];
-                if (on_models.length == 0) {
+                
+                var n1_id_full = id_spl.slice(0, i).join('-');
+                var n2_id_full = id_spl.slice(0, i + 2).join('-');
 
+                if (on_models.length == 0) {
 
                     on_models.push({
                         schema: n1[0],
@@ -91,6 +92,18 @@ exports.idToJoinPathOb = function(params) {
                     });
                 }
                 if (!n3) {
+                    if(params.joins[n1_id_full] && params.joins[n1_id_full].alias) {
+                        return {
+                            condition: 'AND',
+                            rules: [{
+                                columnName: n2.join('.'),
+                                operator: '$columnref',
+                                // value: n1.join('.'),
+                                value: params.joins[n1_id_full].alias + '.' + n1[n1.length - 1],
+                                alias: params.joins[n1_id_full].alias + '.' + n1[n1.length - 1]
+                            }]
+                        }
+                    }
                     on_models.push({
                         condition: 'AND',
                         rules: [{
@@ -101,7 +114,17 @@ exports.idToJoinPathOb = function(params) {
                     });
                 } else {
 
-
+                    if(params.joins[n2_id_full] && params.joins[n2_id_full].alias) {
+                        return {
+                            condition: 'AND',
+                            rules: [{
+                                columnName: n3.join('.'),
+                                operator: '$columnref',
+                                value: params.joins[n2_id_full].alias + '.' + n2[n2.length - 1],
+                                alias: params.joins[n2_id_full].alias + '.' + n2[n2.length - 1]
+                            }]
+                        }
+                    }
                     on_models.push(
 
                         {
