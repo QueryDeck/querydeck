@@ -259,12 +259,6 @@ const Save = props => {
           break
       }
 
-      if (state.method.value === 'select_id') {
-        config['select_by_id'] = true
-        delete config.include_result_count
-        delete config.joins
-      }
-
       const createConfig = {
         method: 'POST',
         url: props.mode === 'api' ? `${apiurl}/apps/editor/controllers/saved-api-query` : `${apiurl}/apps/editor/controllers/saved-query`,
@@ -416,12 +410,6 @@ const Save = props => {
         default:
           console.error(`Unknown method: ${state.method.method}`)
           break
-      }
-
-      if (state.method.value === 'select_id') {
-        config['select_by_id'] = true
-        delete config.include_result_count
-        delete config.joins
       }
 
       const updateConfig = {

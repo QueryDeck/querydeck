@@ -207,7 +207,7 @@ const FilterSection = props => {
 	)
 
 	const renderJoinDetails = () => {
-		if (state?.method?.value === 'select') {
+		if (state?.method?.value === 'select' || state?.method?.value === 'select_id') {
 			return (
 				<div style={{ display: 'flex', paddingTop: '16px' }}>
 					<div style={{ flex: '1 0 0', marginRight: '16px' }}>
