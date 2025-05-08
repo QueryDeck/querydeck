@@ -563,12 +563,6 @@ export function APInew (props) {
           break
       }
 
-      if (state.method.value === 'select_id') {
-        config['select_by_id'] = true
-        delete config.include_result_count
-        delete config.joins
-      }
-
       const apiConfig = {
         method: 'POST',
         url: `${apiurl}/apps/editor/controllers/sql-gen`,
