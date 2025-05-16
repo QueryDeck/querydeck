@@ -371,12 +371,18 @@ export function APIsaved (props) {
 
   // Sort options
   const getSortOptions = async () => {
+		const filteredJoinDetails = {}
+		if (state?.joins) {
+			state.joins.forEach(join => {
+				filteredJoinDetails[join.tableID] = state.joinDetails[join.tableID]
+			})
+		}
     try {
       const response = await api.post('/apps/editor/controllers/where-cols', {
         agg_paths: Object.keys(state.agg_paths),
         c: [{ id: `${state.base.value}.1` }],
         db_id: state.database.value,
-        joins: state.joinDetails,
+        joins: filteredJoinDetails,
         subdomain: props.subdomain
     }, {
       signal: sortOptionsController.signal
@@ -425,7 +431,7 @@ export function APIsaved (props) {
     if (state?.base?.value && state?.method?.value) {
       getSortOptions()
     }
-  }, [state?.joinDetails])
+  }, [state?.joinDetails, state?.joins])
 
   // To trigger sql-gen when joinConditions are modified
   const joinConditions = state?.joinConditions
@@ -523,12 +529,18 @@ export function APIsaved (props) {
               join_conditions[table] = JSON.parse(joinConditions[table].filters)
             }
           })
+					const filteredJoinDetails = {}
+					if (state?.joins) {
+						state.joins.forEach(join => {
+							filteredJoinDetails[join.tableID] = state.joinDetails[join.tableID]
+						})
+					}
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
             include_result_count: state.includeResultCount,
             join_conditions,
-            joins: state.joinDetails,
+            joins: filteredJoinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.method.value === 'select_id' ? 1 : state.limit,

@@ -200,12 +200,18 @@ const Save = props => {
               join_conditions[table] = JSON.parse(joinConditions[table].filters)
             }
           })
+					const filteredJoinDetails = {}
+					if (state?.joins) {
+						state.joins.forEach(join => {
+							filteredJoinDetails[join.tableID] = state.joinDetails[join.tableID]
+						})
+					}
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
             include_result_count: state.includeResultCount,
             join_conditions,
-            joins: state.joinDetails,
+            joins: filteredJoinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.limit,
@@ -353,12 +359,18 @@ const Save = props => {
               join_conditions[table] = JSON.parse(joinConditions[table].filters)
             }
           })
+					const filteredJoinDetails = {}
+					if (state?.joins) {
+						state.joins.forEach(join => {
+							filteredJoinDetails[join.tableID] = state.joinDetails[join.tableID]
+						})
+					}
           const w = Object.keys(JSON.parse(state?.filters)).length
           config = {
             ...config,
             include_result_count: state.includeResultCount,
             join_conditions,
-            joins: state.joinDetails,
+            joins: filteredJoinDetails,
             offset: state.offset,
             offset_dynamic: state.offset_dynamic,
             limit: state.limit,
