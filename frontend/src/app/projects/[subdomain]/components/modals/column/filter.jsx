@@ -253,6 +253,9 @@ const FilterSection = props => {
 		}
 	}
 
+	const truncatedTable = state?.columnModal.split('-')[state?.columnModal.split('-').length - 1].split('.')[0]
+
+	if (state?.joinedGraphs?.[truncatedTable]) {
 	return(
 		<>
 			<ModalBody className='query-modal-filter-body'>
@@ -273,7 +276,7 @@ const FilterSection = props => {
 								db_id={state?.database?.value}
 								fields={state?.joinConditions[state?.columnModal]?.filterFields}
 								filters={JSON.parse(state?.joinConditions[state?.columnModal]?.filters)}
-								joinGraphs={state?.joinGraphs}
+								joinGraphs={state?.joinedGraphs?.[truncatedTable]}
 								mode='api-select-join-conditions'
 								operators={state?.operators}
 								sessionKeys={(state?.authentication?.value && state?.appAuth?.session_key_values) ? state?.appAuth?.session_key_values : {}}
@@ -313,7 +316,10 @@ const FilterSection = props => {
 				</div>
 			</ModalFooter>
 		</>
-	)
+		)
+	}
+
+	return null
 }
 
 export default FilterSection
