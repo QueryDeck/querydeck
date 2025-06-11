@@ -70,6 +70,7 @@ const blank = {
     filterFields: null,
     filterModal: false,
     joinGraphs: [],
+		joinedGraphs: {},
 
     pagination: {
       label: 'False',
@@ -1163,6 +1164,18 @@ const dataSlice = createSlice({
         }
       }
     },
+    setJoinedGraphs (state, action) {
+      state[action.payload.mode] = {
+        ...state[action.payload.mode],
+        [action.payload.subdomain]: {
+          ...state[action.payload.mode][action.payload.subdomain],
+          [action.payload.query_id]: {
+            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
+            joinedGraphs: action.payload.joinedGraphs
+          }
+        }
+      }
+    },
     updateFilters (state, action) {
       state[action.payload.mode] = {
         ...state[action.payload.mode],
@@ -1489,6 +1502,7 @@ export const {
   openFilterModal,
   setFilterNodes,
   setJoinGraphs,
+  setJoinedGraphs,
   updateFilters,
   closeSortModal,
   openSortModal,

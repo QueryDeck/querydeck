@@ -14,6 +14,7 @@ import {
   updateExpandedKeys,
   updateJoinConditions,
   // updateJoinKeys,
+  setJoinedGraphs,
   updateJoinDetails,
   updateJoinTree,
   updateJoins
@@ -48,6 +49,7 @@ import api from '../../../../../api'
 // Controllers
 let filtersController
 let joinsController
+let joinGraphsController
 let nodesController
 
 const JoinModal = props => {
@@ -63,11 +65,13 @@ const JoinModal = props => {
   useEffect(() => {
     filtersController = new AbortController()
     joinsController = new AbortController()
+    joinGraphsController = new AbortController()
     nodesController = new AbortController()
 
     return () => {
       filtersController.abort()
       joinsController.abort()
+      joinGraphsController.abort()
       nodesController.abort()
     }
   }, [])
@@ -284,6 +288,7 @@ const JoinModal = props => {
           text: checkedNode.titleOnly
         }))
         getJoinConditionColumns(checkedNode.key, checkedNode.join_path.split(' = ')[0], checkedNode.join_path.split(' = ')[1])
+        getJoinGraphs(checkedNode.key)
       } catch (error) {
         props.catchError(error)
       }
@@ -330,6 +335,16 @@ const JoinModal = props => {
         query_id: props.query_id,
         mode: props.mode,
         subdomain: props.subdomain,
+      }))
+
+			const truncatedTable = checkedNode.key.split('-')[checkedNode.key.split('-').length - 1].split('.')[0]
+			const updatedJoinedGraphs = JSON.parse(JSON.stringify(state.joinedGraphs))
+			delete updatedJoinedGraphs[truncatedTable]
+			dispatch(setJoinedGraphs({
+        joinedGraphs: updatedJoinedGraphs,
+        query_id: props.query_id,
+        mode: props.mode,
+        subdomain: props.subdomain
       }))
     } else {
       // Big Problem
@@ -380,6 +395,29 @@ const JoinModal = props => {
         resolve()
       }
     })
+  }
+
+	// Join graphs for join conditions
+	const getJoinGraphs = async (table) => {
+		const truncatedTable = table.split('-')[table.split('-').length - 1].split('.')[0]
+		try {
+			const response = await api.get('/apps/editor/join-graph', {
+				params: {
+					subdomain: props.subdomain,
+					id: truncatedTable,
+					db_id: state.database.value
+				},
+				signal: joinGraphsController.signal
+			})
+			dispatch(setJoinedGraphs({
+				joinedGraphs: {...state.joinedGraphs, [truncatedTable]: response.data.data},
+				query_id: props.query_id,
+				mode: 'api',
+				subdomain: props.subdomain
+			}))
+		} catch (error) {
+			props.catchError(error)
+		}
   }
 
   const getJoinConditionColumns = async(table, LHS, RHS) => {
