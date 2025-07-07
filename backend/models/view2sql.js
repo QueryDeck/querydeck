@@ -9,7 +9,6 @@ exports.convert = function(params){
         !params.subdomain || 
         // !ModelManager.models[params.subdomain] ||
         !params.currentModel ||
-        !params.roles ||
         !params.c ||
         !Array.isArray(params.c) ||
         !params.base
