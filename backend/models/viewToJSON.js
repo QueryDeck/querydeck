@@ -1,12 +1,11 @@
 'use strict';
-const allModels = require.main.require('./models/modelManager').models;
+// const allModels = require.main.require('./models/modelManager').models;
 const e = require('express');
 const _ = require('lodash');
 const {
     MYSQL,
     POSTGRES
 } = require('../envconfig.js').constant;
-const crypto = require('crypto');
 const {
     v4: uuidv4
 } = require('uuid');
@@ -21,7 +20,7 @@ module.exports = class ViewToJSON {
     constructor(data) {
         this.viewdata = data.viewdata;
         this.subdomain = data.subdomain;
-        this.currentModel = allModels[this.subdomain].databases[data.db_id];
+        this.currentModel = data.currentModel;
         this.db_id = data.db_id;
         // this.db_type = data.otherOpts && data.otherOpts.db_type || POSTGRES;
         // this.insert 

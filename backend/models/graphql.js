@@ -618,6 +618,7 @@ class GraphQLConverter {
             var json_mod = new v2json({
                 subdomain: this.subdomain,
                 db_id: this.db_id,
+                currentModel: this.currentModel.databases[this.db_id],
                 viewdata: {
                     columns: c,
                     base: base_table_id,
