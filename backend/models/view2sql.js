@@ -67,6 +67,7 @@ exports.convert = function(params){
         queryob = new v2json({
             subdomain: params.subdomain,
             db_id: params.db_id,
+            currentModel: currentModel,
             viewdata: {
               columns: params.c,
               all_columns: params.all_columns,
@@ -147,6 +148,7 @@ exports.convert = function(params){
         queryob = new v2json({
             subdomain: params.subdomain,
             db_id: params.db_id,
+            currentModel: currentModel,
             viewdata: {
               columns: params.c,
               all_columns: params.all_columns,
@@ -184,6 +186,7 @@ exports.convert = function(params){
         queryob = new v2json({
             subdomain: params.subdomain,
             db_id: params.db_id,
+            currentModel: currentModel,
             viewdata: {
               columns: params.c,
               all_columns: params.all_columns,
@@ -236,6 +239,7 @@ exports.convert = function(params){
       queryob = new v2json({
         subdomain: params.subdomain,
         db_id: params.db_id,
+        currentModel: currentModel,
         viewdata: {
           columns: params.c,
           all_columns: params.all_columns,
