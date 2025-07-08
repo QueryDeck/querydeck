@@ -1,4 +1,4 @@
-var ModelManager = require.main.require('./models/modelManager');
+// var ModelManager = require.main.require('./models/modelManager');
 var v2json = require.main.require('./models/viewToJSON.js');
 var json2sql = require.main.require('./models/JsonToSql.js');
 
@@ -7,7 +7,8 @@ exports.convert = function(params){
     if(
         !params.db_id || 
         !params.subdomain || 
-        !ModelManager.models[params.subdomain] ||
+        // !ModelManager.models[params.subdomain] ||
+        !params.currentModel ||
         !params.c ||
         !Array.isArray(params.c) ||
         !params.base
@@ -15,9 +16,11 @@ exports.convert = function(params){
 
     params.method = params.method || 'select';
 
-    let currentModel = ModelManager.models[params.subdomain].databases[params.db_id];
+    // let currentModel = ModelManager.models[params.subdomain].databases[params.db_id];
+    let currentModel = params.currentModel;
 
-    var roles = ModelManager.models[params.subdomain].appDetails.auth.roles;
+    // var roles = ModelManager.models[params.subdomain].appDetails.auth.roles;
+    var roles = params.roles;
 
     var role_arr = []
 

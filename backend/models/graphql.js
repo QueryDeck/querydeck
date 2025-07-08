@@ -221,7 +221,9 @@ class GraphQLConverter {
             subdomain: this.subdomain,
             w: where,
             graphql: true,
-            c: []
+            c: [],
+            currentModel: this.currentModel.databases[this.db_id],
+            roles: this.currentModel.appDetails.auth.roles
         });
     
         return {
@@ -341,7 +343,9 @@ class GraphQLConverter {
             subdomain: this.subdomain,
             return_c: return_nested,
             graphql: true,
-            on_conflict: result.on_conflict
+            on_conflict: result.on_conflict,
+            currentModel: this.currentModel.databases[this.db_id],
+            roles: this.currentModel.appDetails.auth.roles
             // insert_value_ob: result.insert_value_ob
         });
 
@@ -869,7 +873,9 @@ class GraphQLConverter {
             db_id: this.db_id,
             subdomain: this.subdomain,
             w: where,
-            graphql: true
+            graphql: true,
+            currentModel: this.currentModel.databases[this.db_id],
+            roles: this.currentModel.appDetails.auth.roles
         });
 
         return {

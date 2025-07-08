@@ -307,6 +307,7 @@ function autoGen(params, callback) {
     params.db_id = Object.keys(ModelManager.models[params.subdomain].databases)[0];
 
     var clientModel = ModelManager.models[params.subdomain].databases[params.db_id];
+    var roles = ModelManager.models[params.subdomain].appDetails.auth.roles;
 
     if (params.all) {
 
@@ -375,8 +376,11 @@ function autoGen(params, callback) {
             body_ob_copied.sorts_dynamic = auto_orderby;
             body_ob_copied.sorts = auto_orderby;
 
-
-            var current_query = v2sql.convert(body_ob_copied)
+            var current_query = v2sql.convert({
+                ...body_ob_copied,
+                currentModel: clientModel,
+                roles
+            })
 
             const formattedData = getFormattedData({
                 body_ob: body_ob_copied,
@@ -448,7 +452,11 @@ function autoGen(params, callback) {
                 }
 
 
-                var current_query = v2sql.convert(body_ob_copied)
+                var current_query = v2sql.convert({
+                    ...body_ob_copied,
+                    currentModel: clientModel,
+                    roles
+                })
 
                 const formattedData = getFormattedData({
                     body_ob: body_ob_copied,
@@ -492,7 +500,11 @@ function autoGen(params, callback) {
             body_ob_copied.on_conflict = {};
             body_ob_copied.table_alias = {};
 
-            current_query = v2sql.convert(body_ob_copied)
+            current_query = v2sql.convert({
+                ...body_ob_copied,
+                currentModel: clientModel,
+                roles
+            })
 
 
             body_ob_copied.request = current_query.formatted_request_body;
@@ -544,7 +556,11 @@ function autoGen(params, callback) {
                 body_ob_copied.on_conflict = {};
                 body_ob_copied.table_alias = {};
 
-                current_query = v2sql.convert(body_ob_copied)
+                current_query = v2sql.convert({
+                    ...body_ob_copied,
+                    currentModel: clientModel,
+                    roles
+                })
 
                 body_ob_copied.request = current_query.formatted_request_body;
                 body_ob_copied.request_detailed = current_query.detailed_body;
@@ -602,7 +618,11 @@ function autoGen(params, callback) {
                 body_ob_copied.table_alias = {};
 
 
-                current_query = v2sql.convert(body_ob_copied)
+                current_query = v2sql.convert({
+                    ...body_ob_copied,
+                    currentModel: clientModel,
+                    roles
+                })
 
                 body_ob_copied.request = current_query.formatted_request_body;
                 body_ob_copied.request_detailed = current_query.detailed_body;

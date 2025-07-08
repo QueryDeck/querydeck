@@ -492,9 +492,14 @@ module.exports = function (router) {
 
     var apiMethod;
 
-    final_object = v2sql.convert(req.body);
+    let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
+    let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
 
-    let currentModel = ModelManager.models[req.body.subdomain].databases[req.body.db_id];
+    final_object = v2sql.convert({
+      ...req.body,
+      currentModel,
+      roles
+    });
 
     var table_alias;
 
@@ -656,9 +661,15 @@ module.exports = function (router) {
 
     req.body.agg_paths = req.body.agg_paths || [];
 
-    final_object = v2sql.convert(req.body);
+    let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
+    let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
 
-    let currentModel = ModelManager.models[req.body.subdomain].databases[req.body.db_id];
+    final_object = v2sql.convert({
+      ...req.body,
+      currentModel,
+      roles
+    });
+
     let table_alias;
 
     if (req.body.method == 'insert') {
@@ -1084,11 +1095,16 @@ module.exports = function (router) {
     if (!req.clientModels[req.body.subdomain] || !req.clientModels[req.body.subdomain].databases[req.body.db_id]) return res.zend(null, 400, "Invalid value for  subdomain and db_id");
     if (req.user_id !== req.clientModels[req.body.subdomain].appDetails.created_by) return res.zend(null, 401, "Login Required");
 
-    var q = v2sql.convert(req.body)
+    let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
+    let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
+
+    var q = v2sql.convert({
+      ...req.body,
+      currentModel,
+      roles
+    });
 
     if (!q) return res.zend(null, 500, "unable to generate");
-
-    let currentModel = ModelManager.models[req.body.subdomain].databases[req.body.db_id];
 
     /*   
        add option to correctly format query text according to dbms 
