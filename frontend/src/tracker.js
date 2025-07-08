@@ -2,7 +2,7 @@ import OpenReplay from '@openreplay/tracker'
 
 const config = {
     projectKey: 'REACT_APP_OPENREPLAY_KEY',
-    ingestPoint: 'https://analytics.bluefind.com/ingest',
+    ingestPoint: 'REACT_APP_OPENREPLAY_INGEST',
     defaultInputMode: 0,
     network: {
         capturePayload: true,
