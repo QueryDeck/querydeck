@@ -22,6 +22,7 @@ import {
   setSortOptions,
   setSaved,
   setTablesList,
+  setJoinedGraphs
 } from '../../../../../lib/data/dataSlice'
 
 // Library imports
@@ -70,6 +71,8 @@ export function APIsaved (props) {
     filters: true
   })
 
+  const tempJoinConditionsRef = useRef(null)
+
   useEffect(() => {
     appAuthController = new AbortController()
     joinGraphsController = new AbortController()
@@ -102,6 +105,8 @@ export function APIsaved (props) {
       loadAPIcontroller.abort()
       searchNodesController.abort()
       tablesController.abort()
+      
+      tempJoinConditionsRef.current = null
     }
   }, [])
 
@@ -183,6 +188,26 @@ export function APIsaved (props) {
           subdomain: props.subdomain
         }))
         loadingRef.current.api = false
+        
+        if (data.data?.joinConditions && Object.keys(data.data.joinConditions).length > 0) {
+          tempJoinConditionsRef.current = data.data.joinConditions
+        }
+
+        if (data.data?.joinedGraphs && Object.keys(data.data.joinedGraphs).length > 0) {
+          const currentJoinedGraphs = state?.joinedGraphs || {}
+          
+          const mergedJoinedGraphs = {
+            ...currentJoinedGraphs,
+            ...data.data.joinedGraphs
+          }
+          
+          dispatch(setJoinedGraphs({
+            joinedGraphs: mergedJoinedGraphs,
+            query_id: props.query_id,
+            mode: 'api',
+            subdomain: props.subdomain
+          }))
+        }
       } catch (error) {
         catchError(error)
       }
@@ -196,8 +221,16 @@ export function APIsaved (props) {
       getJoinGraphs()
       loadNodes()
       loadFilters()
+      loadAllJoinedGraphs()
     }
   }, [state?.method])
+
+  useEffect(() => {
+    if (state?.joinConditions && Object.keys(state.joinConditions).length > 0 && tempJoinConditionsRef.current) {
+      tempJoinConditionsRef.current = null
+      loadAllJoinedGraphs()
+    }
+  }, [state?.joinConditions])
 
   // App auth
   const getAppAuth = async () => {
@@ -365,6 +398,57 @@ export function APIsaved (props) {
         loadingRef.current.filters = false
       } catch (error) {
         catchError(error)
+      }
+    }
+  }
+
+  const loadAllJoinedGraphs = async () => {
+    const joinConditions = state?.joinConditions || tempJoinConditionsRef.current || {}
+    
+    if (Object.keys(joinConditions).length > 0) {
+      try {
+        const joinedGraphsPromises = Object.keys(joinConditions).map(async (tableKey) => {
+          const truncatedTable = tableKey.split('-')[tableKey.split('-').length - 1].split('.')[0]
+          try {
+            const response = await api.get('/apps/editor/join-graph', {
+              params: {
+                subdomain: props.subdomain,
+                id: truncatedTable,
+                db_id: state?.database?.value
+              },
+              signal: joinGraphsController.signal
+            })
+            return { [truncatedTable]: response.data.data }
+          } catch (error) {
+            console.warn(`Failed to load join graph for table ${truncatedTable}:`, error)
+            return { [truncatedTable]: null }
+          }
+        })
+
+        const joinedGraphsResults = await Promise.all(joinedGraphsPromises)
+        const allJoinedGraphs = joinedGraphsResults.reduce((acc, result) => {
+          if (result && Object.values(result)[0] !== null) {
+            return { ...acc, ...result }
+          }
+          return acc
+        }, {})
+
+        if (Object.keys(allJoinedGraphs).length > 0) {
+          const currentJoinedGraphs = state?.joinedGraphs || {}
+          const mergedJoinedGraphs = {
+            ...currentJoinedGraphs,
+            ...allJoinedGraphs
+          }
+          
+          dispatch(setJoinedGraphs({
+            joinedGraphs: mergedJoinedGraphs,
+            query_id: props.query_id,
+            mode: 'api',
+            subdomain: props.subdomain
+          }))
+        }
+      } catch (error) {
+        console.warn('Failed to load some joined graphs:', error)
       }
     }
   }
