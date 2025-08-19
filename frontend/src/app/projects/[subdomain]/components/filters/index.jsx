@@ -1681,11 +1681,11 @@ const Filters = React.forwardRef((props, ref) => {
         return ({
           fieldName: rule.field.value,
           id: ruleId,
-          input: rule.field.type,
+          input: rule.method.value !== 'static' ? 'text' : rule.field.type,
           operator: rule.operator.value,
           method: rule.method.value,
-          type: rule.field.type,
-          value: rule.operator.disable_value ? null : (rule.field.type === 'number' ? Number(rule.value) : rule.value)
+          type: rule.method.value !== 'static' ? 'text' : rule.field.type,
+          value: rule.operator.disable_value ? null : ((rule.method.value !== 'static' ? 'text' : rule.field.type) === 'number' ? Number(rule.value) : rule.value)
         })
       }
     }
