@@ -1,7 +1,7 @@
 // React imports
 import React, { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
-import { useHistory } from 'react-router-dom'
+import { useHistory, Link } from 'react-router-dom'
 import AutoGenerateModal from '../../components/modals/autoGenerate/autoGenerate'
  
 // Redux
@@ -161,7 +161,9 @@ export const APIlist = props => {
                 width: window.innerWidth - 4 - 4 - position
               }}>
                 <div className='api-saved-details-empty'>
-                  Click on an API to view details
+                  <span>
+                    Click on an API to view details or <Link to={`/apps/${props.subdomain}/api/new`}>Create an API</Link>
+                  </span>
                 </div>
               </Card>
             }
