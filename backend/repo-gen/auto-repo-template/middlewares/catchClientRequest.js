@@ -5,7 +5,9 @@ var requestHandler = require.main.require('./models/requestHandler').handleReque
 
 var Routes = require.main.require('./lib/api-index.js')
 var Models = require.main.require('./lib/models.js');
-const appDetails = require.main.require('./lib/app.js');
+var appDetails = require.main.require('./lib/app.js');
+
+appDetails.auth.jwt_key = process.env.QD_JWT_SECRET;
 
 Models.query = db.query;
 
