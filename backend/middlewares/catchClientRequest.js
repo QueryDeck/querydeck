@@ -26,6 +26,7 @@ module.exports = function () {
       if(!allModels[subdomain]){
         return  res.status(400).send({ response_code : 400 , error : "Invalid subdomain"});
       }
+      
       requestHandler({
         request_path: req.path,
         request_method: req.method,
@@ -53,12 +54,14 @@ module.exports = function () {
           res.send(exec_data);
         }
         // record_query_log({
-        //   query_id: query_model.query_id,
         //   ip_address: clientip,
-        //   db_error: err,
+        //   // db_error: err,
+        //   request_method: req.method,
+        //   request_path: req.path,
         //   response_code: res_status,
         //   exec_time_end: Date.now(),
-        //   exec_time_start: exec_time_start
+        //   exec_time_start: exec_time_start,
+        //   subdomain: subdomain
         // })
       });
 
@@ -71,11 +74,14 @@ module.exports = function () {
 
 function record_query_log(params) {
   new DB({}).execute(
-    new ModelManager.pgtmodels.models.public.api_query_metrics().insert({
-      query_id: params.query_id,
+    new ModelManager.pgtmodels.models.public.api_logs().insert({
+      // query_id: params.query_id,
+      subdomain: params.subdomain,
       ip_address: params.ip_address,
-      db_error: params.db_error,
+      // db_error: params.db_error,
       response_code: params.response_code,
+      request_method: params.request_method,
+      request_path: params.request_path,
       exec_time: (params.exec_time_end - params.exec_time_start)
     }),
     function(err){

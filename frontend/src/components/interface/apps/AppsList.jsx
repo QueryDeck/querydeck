@@ -348,10 +348,11 @@ const AppsList = () => {
             >
                 <div
                     className='apps-list-app-name'
-                    onClick={() => history.push(`/apps/${app.subdomain}/api/new`)}
+                    onClick={() => history.push(`/apps/${app.subdomain}/api`)}
                 >
                     <div className='apps-list-app-name-text'>
                         {app.name}
+                        <Badge>{app.subdomain}</Badge>
                     </div>
                     <div className='apps-list-app-name-creation'>
                         <Badge>{timeCalculator(app.created_at)}</Badge>

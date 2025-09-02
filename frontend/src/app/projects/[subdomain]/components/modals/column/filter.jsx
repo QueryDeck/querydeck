@@ -225,7 +225,10 @@ const FilterSection = props => {
 									label: `${state?.joinDetails[state?.columnModal]?.type.toUpperCase()} JOIN`,
 									value: state?.joinDetails[state?.columnModal]?.type
 								}
-							) : null}
+							) : {
+								label: 'AGGREGATE',
+								value: 'agg'
+							}}
 							hideSelectedOptions
 							noOptionsMessage={() => 'No join types match the search term'}
 							onChange={option => joinDetailsRef.current.type = option.value}

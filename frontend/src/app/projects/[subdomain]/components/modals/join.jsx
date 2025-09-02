@@ -338,14 +338,22 @@ const JoinModal = props => {
       }))
 
 			const truncatedTable = checkedNode.key.split('-')[checkedNode.key.split('-').length - 1].split('.')[0]
-			const updatedJoinedGraphs = JSON.parse(JSON.stringify(state.joinedGraphs))
-			delete updatedJoinedGraphs[truncatedTable]
-			dispatch(setJoinedGraphs({
-        joinedGraphs: updatedJoinedGraphs,
-        query_id: props.query_id,
-        mode: props.mode,
-        subdomain: props.subdomain
-      }))
+			
+			const hasOtherKeysWithSameTable = state.joins.some(join => 
+				join.tableID !== checkedNode.key && 
+				join.tableID.split('-')[join.tableID.split('-').length - 1].split('.')[0] === truncatedTable
+			)
+			
+			if (!hasOtherKeysWithSameTable) {
+				const updatedJoinedGraphs = JSON.parse(JSON.stringify(state.joinedGraphs))
+				delete updatedJoinedGraphs[truncatedTable]
+				dispatch(setJoinedGraphs({
+					joinedGraphs: updatedJoinedGraphs,
+					query_id: props.query_id,
+					mode: props.mode,
+					subdomain: props.subdomain
+				}))
+			}
     } else {
       // Big Problem
       console.error('❗❗❗ Big Problem - Previous Joins = Current Joins')
