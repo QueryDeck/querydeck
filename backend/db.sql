@@ -256,3 +256,14 @@ create table be_logs (
     log_text text not null,
     log_time int default extract(epoch from now())::int
 );
+
+create table api_logs (
+    log_id text primary key default gen_random_uuid(),
+    subdomain text,
+    ip_address text,
+    response_code smallint,
+    exec_time int not null,
+    request_method text,
+    request_path text,
+    created_at int default extract(epoch from now())::int
+);

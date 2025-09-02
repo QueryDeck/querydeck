@@ -2,13 +2,9 @@
 // const allModels = require.main.require('./models/modelManager').models;
 const e = require('express');
 const _ = require('lodash');
-const {
-    MYSQL,
-    POSTGRES
-} = require('../envconfig.js').constant;
-const {
-    v4: uuidv4
-} = require('uuid');
+// const {
+//     v4: uuidv4
+// } = require('uuid');
 
 const pluralize = require('pluralize');
 
