@@ -392,7 +392,7 @@ const Authentication = (props) => {
             </Label>
 
             <Label className="list-card-label">
-              Client Secrets
+              Client Secrets (Development)
               <EditableTextArea
                 placeholder={"Enter client secret here"}
                 onChange={secretHandler}

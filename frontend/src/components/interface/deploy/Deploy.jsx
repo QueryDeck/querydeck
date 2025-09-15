@@ -34,20 +34,20 @@ const Deploy = (props) => {
         <Menu appid={props.appid} />
         <Card className="list-card-main">
           <Nav tabs>
-            <NavItem className="query-right-nav cursor-pointer" id="query">
-              <NavLink
-                className={tab !== "github" ? "active" : ""}
-                onClick={() => (tab !== "github" ? changeTab("github") : "")}
-              >
-                Github <FontAwesomeIcon icon={faGlobe} />
-              </NavLink>
-            </NavItem>
             <NavItem className="query-right-nav cursor-pointer">
               <NavLink
                 className={tab !== "cloud" ? "active" : ""}
                 onClick={() => (tab !== "cloud" ? changeTab("cloud") : "")}
               >
-                Cloud <FontAwesomeIcon icon={faCloudUploadAlt} />
+                <FontAwesomeIcon icon={faCloudUploadAlt} /> Cloud (Development)
+              </NavLink>
+            </NavItem>
+            <NavItem className="query-right-nav cursor-pointer" id="query">
+              <NavLink
+                className={tab !== "github" ? "active" : ""}
+                onClick={() => (tab !== "github" ? changeTab("github") : "")}
+              >
+                <FontAwesomeIcon icon={faGlobe} /> Github (Production)
               </NavLink>
             </NavItem>
           </Nav>
