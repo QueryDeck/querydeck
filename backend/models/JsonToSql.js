@@ -1027,6 +1027,11 @@ module.exports = class builder {
 							if(this.dynamicValues.query[key]) val = this.dynamicValues.query[key]
 								else throw new Error(`Query variable ${key} not found`)
 
+						} else if (conditions.rules[i].input_key.indexOf('BODY') > -1 && this.useDynamicValues) {
+
+							if(this.dynamicValues.body[key]) val = this.dynamicValues.body[key]
+								else throw new Error(`Body variable ${key} not found`)
+
 						} else if (conditions.rules[i].input_key.indexOf('URL') > -1 && this.useDynamicValues) {
 
 							if(this.dynamicValues.url_param_value) val = this.dynamicValues.url_param_value

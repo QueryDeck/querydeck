@@ -343,7 +343,8 @@ module.exports = function (router) {
             public.api_queries.deployed,
             public.api_queries.auth_required,
             public.api_queries.docs,
-            public.databases.name as db_name
+            public.databases.name as db_name,
+            public.api_queries.method as api_method
           FROM 
             public.api_queries 
             inner join public.databases on public.databases.db_id = public.api_queries.db_id
@@ -422,7 +423,8 @@ module.exports = function (router) {
           public.api_queries.query_id,
           public.api_queries.deployed,
           public.api_queries.auth_required,
-          public.api_queries.docs
+          public.api_queries.docs,
+          public.api_queries.method as api_method
         FROM 
           public.api_queries 
         WHERE 
@@ -515,7 +517,7 @@ module.exports = function (router) {
       table_alias = final_object.model.table;
     }
     else if (req.body.method == 'select') {
-      apiMethod = 'GET'
+      apiMethod = req.body.api_method == 'POST' ? 'POST' : 'GET'
 
       table_alias = final_object.model.table;
     }
