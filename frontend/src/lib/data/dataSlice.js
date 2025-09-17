@@ -633,27 +633,27 @@ const dataSlice = createSlice({
           case 'select':
             return {
               label: 'GET',
-              value: 'get',
+              value: 'GET',
             };
           case 'select_id':
             return {
               label: 'GET',
-              value: 'get',
+              value: 'GET',
             };
           case 'insert':
             return {
               label: 'POST',
-              value: 'post',
+              value: 'POST',
             };
           case 'update':
             return {
               label: 'PUT',
-              value: 'put',
+              value: 'PUT',
             };
           case 'delete':
             return {
               label: 'DELETE',
-              value: 'delete',
+              value: 'DELETE',
             };
           default:
             console.error('Invalid method', action.payload.method.value);

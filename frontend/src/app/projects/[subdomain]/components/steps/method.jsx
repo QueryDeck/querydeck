@@ -19,24 +19,24 @@ const OldMethod = (props) => {
     const options = [
       {
         label: 'GET',
-        value: 'get',
+        value: 'GET',
       },
       {
         label: 'POST',
-        value: 'insert',
+        value: 'POST',
       },
     
     ];
     if (state?.method?.value === 'update') {
       options.push({
         label: 'PUT',
-        value: 'put',
+        value: 'PUT',
       });
     }
     if (state?.method?.value === 'delete') {
       options.push({
         label: 'DELETE',
-        value: 'delete',
+        value: 'DELETE',
       });
     }
     return options;
