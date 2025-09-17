@@ -100,22 +100,6 @@ export const APIlist = props => {
   const onGenerateSuccess = ()=> { 
     getList()
   }
-  const resolveMethod = method => {
-    switch(method) {
-      case 'select':
-      case 'select_id':
-        return 'get'
-      case 'insert':
-        return 'post'
-      case 'update':
-        return 'put'
-      case 'delete':
-        return 'delete'
-      default:
-        console.error(`Unknown method: ${method}`)
-        break
-    }
-  }
 
   return(
     <div>
@@ -138,7 +122,6 @@ export const APIlist = props => {
             <Left
               catchError={catchError}
               dragging={isDragging}
-              resolveMethod={resolveMethod}
               subdomain={props.subdomain}
               width={position - 48 - 8 - 8}
             />
