@@ -7,7 +7,9 @@ const blank = {
     name: '',
     database: {},
 
-    method: {},
+    // Step 1
+    method: {}, // now called command
+    oldMethod: {}, // original method
     route: '/',
 
     // Step 2
@@ -626,6 +628,39 @@ const dataSlice = createSlice({
           formattedRoute = '/';
         }
       }
+      const setOldMethod = () => {
+        switch (action.payload.method.value) {
+          case 'select':
+            return {
+              label: 'GET',
+              value: 'get',
+            };
+          case 'select_id':
+            return {
+              label: 'GET',
+              value: 'get',
+            };
+          case 'insert':
+            return {
+              label: 'POST',
+              value: 'post',
+            };
+          case 'update':
+            return {
+              label: 'PUT',
+              value: 'put',
+            };
+          case 'delete':
+            return {
+              label: 'DELETE',
+              value: 'delete',
+            };
+          default:
+            console.error('Invalid method', action.payload.method.value);
+            return null
+        }
+      }
+     
       state.api = {
         ...state.api,
         [action.payload.subdomain]: {
@@ -638,9 +673,22 @@ const dataSlice = createSlice({
             database: state[action.payload.mode][action.payload.subdomain][action.payload.query_id].database,
             name: state[action.payload.mode][action.payload.subdomain][action.payload.query_id].name,
             method: action.payload.method,
+            oldMethod: setOldMethod(),
             route: formattedRoute,
             tables: state[action.payload.mode][action.payload.subdomain][action.payload.query_id].tables,
             operators: state[action.payload.mode][action.payload.subdomain][action.payload.query_id].operators,
+          }
+        }
+      }
+    },
+    setOldMethod(state, action) {
+      state.api = {
+        ...state.api,
+        [action.payload.subdomain]: {
+          ...state.api[action.payload.subdomain],
+          [action.payload.query_id]: {
+            ...state.api[action.payload.subdomain][action.payload.query_id],
+            oldMethod: action.payload.oldMethod,
           }
         }
       }
@@ -1479,6 +1527,7 @@ export const {
   setBase,
   setRoute,
   setMethod,
+  setOldMethod,
   setNodes,
   closeJoinModal,
   openJoinModal,
