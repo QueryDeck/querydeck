@@ -82,7 +82,7 @@ const FilterModal = props => {
                 fields={state?.filterFields}
                 filters={JSON.parse(state?.filters)}
                 joinGraphs={state?.joinGraphs}
-                selectPostMethod={state?.method?.value === 'select' && state?.oldMethod?.value === 'insert'}
+                selectPostMethod={state?.method?.value === 'select' && state?.oldMethod?.value === 'POST'}
                 mode={state?.method.value === 'select_id' ? `api-select-id-filters` : `api-${state?.method.value}-filters`}
                 operators={state?.operators}
                 sessionKeys={(state?.authentication?.value && state?.appAuth?.session_key_values) ? state?.appAuth?.session_key_values : {}}
