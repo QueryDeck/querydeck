@@ -7,6 +7,7 @@ import { Card } from 'reactstrap'
 // Components - Steps
 // import Database from '../../steps/database'
 import Base from '../../steps/base'
+import Command from '../../steps/command'
 import Method from '../../steps/method'
 import Route from '../../steps/route'
 import Join from '../../steps/join'
@@ -40,6 +41,15 @@ const Left = props => {
   const renderBase = () => (
     <Base
       key='base-step'
+      mode={props.mode}
+      query_id={props.query_id}
+      subdomain={props.subdomain}
+    />
+  )
+
+  const renderCommand = () => (
+    <Command
+      key='command-step'
       mode={props.mode}
       query_id={props.query_id}
       subdomain={props.subdomain}
@@ -226,6 +236,7 @@ const Left = props => {
 				<div className='query-left-builder'>
 					{/* {renderDatabase()} */}
 					{renderBase()}
+          {renderCommand()}
           {renderMethod()}
           {renderRoute()}
           {renderJoin()}

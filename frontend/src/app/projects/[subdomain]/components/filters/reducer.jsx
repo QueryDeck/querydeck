@@ -310,7 +310,18 @@ const filtersReducer = (state, action) => {
           ...state.rules,
           [action.rule]: {
             ...state.rules[action.rule],
-            value: {
+            value: action.selectPostMethod ? 
+            {
+              ...state.rules[action.rule].value,
+              field: action.field,
+              operator: null,
+              value: `QUERY.${action.field.value.split('.')[action.field.value.split('.').length - 1]}`,
+              method: {
+                label: 'Dynamic (Query parameters)',
+                value: 'dynamic_query'
+              }
+            }
+            : {
               ...state.rules[action.rule].value,
               field: action.field,
               operator: null,
@@ -346,6 +357,21 @@ const filtersReducer = (state, action) => {
     }
     // Update rule value
     case 'UPDATE_VALUE': {
+      const fixValues = () => {
+        switch(state.rules[action.rule].value.method.value) {
+          case 'dynamic':
+            return action.value.startsWith('QUERY.') ? action.value : `QUERY.${action.value}`
+          case 'dynamic_query':
+            return action.value.startsWith('QUERY.') ? action.value : `QUERY.${action.value}`
+          case 'dynamic_body':
+            return action.value.startsWith('BODY.') ? action.value : `BODY.${action.value}`
+          case 'session':
+            return action.value.startsWith('SESSION.') ? action.value : `SESSION.${action.value}`
+          default:
+            console.error('Invalid method', state.rules[action.rule].value.method.value);
+            return action.value
+        }
+      }
       return {
         ...state,
         rules: {
@@ -354,7 +380,7 @@ const filtersReducer = (state, action) => {
             ...state.rules[action.rule],
             value: {
               ...state.rules[action.rule].value,
-              value: state.rules[action.rule].value.method.value === 'dynamic' ? (action.value.startsWith('QUERY.') ? action.value : `QUERY.`) : action.value
+              value: fixValues()
             }
           }
         }
@@ -390,6 +416,14 @@ const filtersReducer = (state, action) => {
             updatedState.rules[action.rule].value.field.input = 'text'
             updatedState.rules[action.rule].value.field.type = 'text'
             updatedState.rules[action.rule].value.value = `QUERY.${updatedState.rules[action.rule].value.field.value.split('.')[updatedState.rules[action.rule].value.field.value.split('.').length - 1]}`
+          } else if (action.method.value === 'dynamic_query') {
+            updatedState.rules[action.rule].value.field.input = 'text'
+            updatedState.rules[action.rule].value.field.type = 'text'
+            updatedState.rules[action.rule].value.value = `QUERY.${updatedState.rules[action.rule].value.field.value.split('.')[updatedState.rules[action.rule].value.field.value.split('.').length - 1]}`
+          } else if (action.method.value === 'dynamic_body') {
+            updatedState.rules[action.rule].value.field.input = 'text'
+            updatedState.rules[action.rule].value.field.type = 'text'
+            updatedState.rules[action.rule].value.value = `BODY.${updatedState.rules[action.rule].value.field.value.split('.')[updatedState.rules[action.rule].value.field.value.split('.').length - 1]}`
           } else if (action.method.value === 'session') {
             updatedState.rules[action.rule].value.field.input = 'text'
             updatedState.rules[action.rule].value.field.type = 'text'

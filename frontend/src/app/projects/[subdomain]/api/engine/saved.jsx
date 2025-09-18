@@ -545,6 +545,7 @@ export function APIsaved (props) {
       generateAPI()
     }
   }, [
+    state?.oldMethod.value,
     state?.joins?.length,
     state?.joinDetails,
     state?.columns?.length,
@@ -601,6 +602,7 @@ export function APIsaved (props) {
         db_id: state.database.value,
         join_type: state.joinKeys,
         method: state.method.value.split('_')[0],
+        api_method: state.oldMethod.value,
         subdomain: props.subdomain
       }
       // Different params for different methods

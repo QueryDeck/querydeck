@@ -115,8 +115,8 @@ const Item = props => {
           <span style={{ paddingLeft: '4px' }}>
             {props.item.auth_required ? '🔐 ' : '🌐 '}
           </span>
-          <Badge className={`api-saved-list-item-badge-${props.resolveMethod(props.item.method)}`}>
-            {props.resolveMethod(props.item.method)?.toUpperCase()}
+          <Badge className={`api-saved-list-item-badge-${props?.item?.api_method?.toLowerCase()}`}>
+            {props?.item?.api_method}
           </Badge>
         </div>
         <div

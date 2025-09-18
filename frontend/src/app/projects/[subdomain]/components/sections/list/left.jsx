@@ -100,7 +100,6 @@ const Left = props => {
         catchError={props.catchError}
         item={item}
         key={item.query_id}
-        resolveMethod={props.resolveMethod}
         subdomain={props.subdomain}
         loadDatabaseFromApi={loadDatabaseFromApi}
       />

@@ -41,6 +41,7 @@ const Filters = React.forwardRef((props, ref) => {
     fields,
     filters,
     joinGraphs,
+    selectPostMethod,
     mode,
     operators,
     sessionKeys,
@@ -69,7 +70,25 @@ const Filters = React.forwardRef((props, ref) => {
     ]
   }
 
-  const methods = [{
+  const methods = selectPostMethod ?
+  [{
+    label: 'Types',
+    options: [
+      {
+        label: 'Static',
+        value: 'static'
+      },
+      {
+        label: 'Dynamic (Query parameters)',
+        value: 'dynamic_query'
+      },
+      {
+        label: 'Dynamic (Body parameters)',
+        value: 'dynamic_body'
+      }
+    ]
+  }]
+  : [{
     label: 'Types',
     options: [
       {
@@ -864,7 +883,8 @@ const Filters = React.forwardRef((props, ref) => {
     dispatch({
       type: 'UPDATE_FIELD',
       field,
-      rule
+      rule,
+      selectPostMethod
     })
   }
 
@@ -1244,15 +1264,15 @@ const Filters = React.forwardRef((props, ref) => {
               field: {
                 ...fieldsMap[mapKey][rule.fieldName],
                 input: (
-                  methodsMap[rule.method].value === 'dynamic' ||
-                  methodsMap[rule.method].value === 'session'
+                  methodsMap[rule.method]?.value.includes('dynamic') ||
+                  methodsMap[rule.method]?.value === 'session'
                 ) || (
                   rule.id === 'root_base' &&
                   mode === 'api-select-join-conditions'
                 ) ? 'text' : fieldsMap[mapKey][rule.fieldName].input,
                 type: (
-                  methodsMap[rule.method].value === 'dynamic' ||
-                  methodsMap[rule.method].value === 'session'
+                  methodsMap[rule.method]?.value.includes('dynamic') ||
+                  methodsMap[rule.method]?.value === 'session'
                 ) || (
                   rule.id === 'root_base' &&
                   mode === 'api-select-join-conditions'
@@ -1270,20 +1290,20 @@ const Filters = React.forwardRef((props, ref) => {
               rules[rule.id].config = {
                 ...defaultConfig.rules.root_base,
                 ...config?.rules?.root_base,
-                isDisabledValue: methodsMap[rule.method].value === 'session'
+                isDisabledValue: methodsMap[rule.method]?.value === 'session'
               }
             } else {
               rules[rule.id].config = {
                 ...defaultConfig.rules.base,
                 ...config?.rules?.base,
-                isDisabledValue: methodsMap[rule.method].value === 'session'
+                isDisabledValue: methodsMap[rule.method]?.value === 'session'
               }
             }
           } else {
             rules[rule.id].config = {
               ...defaultConfig.rules.vanilla,
               ...config?.rules?.vanilla,
-              isDisabledValue: methodsMap[rule.method].value === 'session'
+              isDisabledValue: methodsMap[rule.method]?.value === 'session'
             }
           }
         }
@@ -1701,7 +1721,7 @@ const Filters = React.forwardRef((props, ref) => {
       const filterRule = generateFilter(ruleId)
 
       // adds an input_key, required by backend to process dynamic rules
-      if (rule.method.value === 'dynamic' || rule.method.value === 'session') {
+      if (rule.method.value.includes('dynamic') || rule.method.value === 'session') {
         filterRule.input_key = rule.value
       }
 

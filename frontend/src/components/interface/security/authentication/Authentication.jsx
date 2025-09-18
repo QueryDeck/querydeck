@@ -358,7 +358,7 @@ const Authentication = (props) => {
         <>
           <div
             style={{
-              height: "calc(-227px + 100vh)",
+              height: "calc(-274px + 100vh)",
               overflowY: "auto",
               paddingRight: "5px",
               paddingTop:"25px",
@@ -392,7 +392,7 @@ const Authentication = (props) => {
             </Label>
 
             <Label className="list-card-label">
-              Client Secrets
+              Client Secrets (Development)
               <EditableTextArea
                 placeholder={"Enter client secret here"}
                 onChange={secretHandler}

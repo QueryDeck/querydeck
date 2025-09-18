@@ -929,7 +929,8 @@ module.exports = class builder {
 		var type = (conditions.condition && conditions.condition.toLowerCase() == 'or') ? ' OR ' : ' AND ';
 		if (this.useDynamicValues && conditions.conditional_on) {
 			let conditional_on_field = conditions.conditional_on.split('.').slice(1).join('.');
-			var conditional_on_value = _.get(this.dynamicValues.query,conditional_on_field);
+			var q_type = conditions.conditional_on.indexOf('QUERY') > -1 ? 'query' : 'body';
+			var conditional_on_value = _.get(this.dynamicValues[q_type],conditional_on_field);
 			if (!conditional_on_value || conditional_on_value === '') {
 				return 'true';
 			}
@@ -1024,8 +1025,15 @@ module.exports = class builder {
 
 						} else if (conditions.rules[i].input_key.indexOf('QUERY') > -1 && this.useDynamicValues) {
 
-							if(this.dynamicValues.query[key]) val = this.dynamicValues.query[key]
+							if(this.dynamicValues.query[key]) val = _.get(this.dynamicValues.query,key)
+							// if(this.dynamicValues.query[key]) val = this.dynamicValues.query[key]
 								else throw new Error(`Query variable ${key} not found`)
+
+						} else if (conditions.rules[i].input_key.indexOf('BODY') > -1 && this.useDynamicValues) {
+
+							if(this.dynamicValues.body[key]) val = _.get(this.dynamicValues.body,key)
+							// if(this.dynamicValues.body[key]) val = this.dynamicValues.body[key]
+								else throw new Error(`Body variable ${key} not found`)
 
 						} else if (conditions.rules[i].input_key.indexOf('URL') > -1 && this.useDynamicValues) {
 
