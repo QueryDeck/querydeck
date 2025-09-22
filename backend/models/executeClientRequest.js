@@ -400,7 +400,7 @@ function executeClientRequest(params, callback) {
             if(params.query_model.query_json.include_result_count) {
                 var result_ob = {
                     [query_exec_ob.query.base_alias]: {
-                        data: query_res.rows[0][query_exec_ob.query.base_alias]
+                        data: query_res.rows[0][query_exec_ob.query.base_alias] || []
                     }
                 }
                 if(params.query_model.query_json.include_result_count && query_res.rows[0][query_exec_ob.query.base_alias + '_count'] && query_res.rows[0][query_exec_ob.query.base_alias + '_count'][0]) {

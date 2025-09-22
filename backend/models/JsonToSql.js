@@ -224,6 +224,7 @@ module.exports = class builder {
 			for (var i = 0; i < model.joins.length; i++) {
 
 				if (model.joins[i].agg_type && agg_types.indexOf(model.joins[i].agg_type) > -1) {
+					if(options && options.result_count_only) continue;
 					model.joins[i].where = model.joins[i].on;
 					finalColumns.push('( ' + this.select(model.joins[i], {
 						agg_type: model.joins[i].agg_type
