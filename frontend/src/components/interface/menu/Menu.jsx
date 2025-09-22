@@ -91,7 +91,7 @@ const Menu = (props) => {
           {`{...}`} {state.tooltip ? <span>REST APIs</span> : ""}
         </Button>
         <Button
-          className='menu-btn'
+          className='menu-btn hide'
           color="falcon-primary"
           id="tour_api-saved"
           onClick={() => history.push(`/apps/${appid}/graphql`)}
