@@ -1263,20 +1263,22 @@ const Filters = React.forwardRef((props, ref) => {
               // modifies field type depending on field and method
               field: {
                 ...fieldsMap[mapKey][rule.fieldName],
-                input: (
-                  methodsMap[rule.method]?.value.includes('dynamic') ||
-                  methodsMap[rule.method]?.value === 'session'
-                ) || (
-                  rule.id === 'root_base' &&
-                  mode === 'api-select-join-conditions'
-                ) ? 'text' : fieldsMap[mapKey][rule.fieldName].input,
-                type: (
-                  methodsMap[rule.method]?.value.includes('dynamic') ||
-                  methodsMap[rule.method]?.value === 'session'
-                ) || (
-                  rule.id === 'root_base' &&
-                  mode === 'api-select-join-conditions'
-                )  ? 'text' : fieldsMap[mapKey][rule.fieldName].type,
+                // input: (
+                //   methodsMap[rule.method]?.value.includes('dynamic') ||
+                //   methodsMap[rule.method]?.value === 'session'
+                // ) || (
+                //   rule.id === 'root_base' &&
+                //   mode === 'api-select-join-conditions'
+                // ) ? 'text' : fieldsMap[mapKey][rule.fieldName].input,
+                input: fieldsMap[mapKey][rule.fieldName].default_type,
+                // type: (
+                //   methodsMap[rule.method]?.value.includes('dynamic') ||
+                //   methodsMap[rule.method]?.value === 'session'
+                // ) || (
+                //   rule.id === 'root_base' &&
+                //   mode === 'api-select-join-conditions'
+                // )  ? 'text' : fieldsMap[mapKey][rule.fieldName].type,
+                type: fieldsMap[mapKey][rule.fieldName].default_type,
               },
               operator: operatorsMap[rule.operator],
               value: rule.value,
@@ -1701,10 +1703,12 @@ const Filters = React.forwardRef((props, ref) => {
         return ({
           fieldName: rule.field.value,
           id: ruleId,
-          input: rule.method.value !== 'static' ? 'text' : rule.field.type,
+          // input: rule.method.value !== 'static' ? 'text' : rule.field.type,
+          input: rule.field.default_type,
           operator: rule.operator.value,
           method: rule.method.value,
-          type: rule.method.value !== 'static' ? 'text' : rule.field.type,
+          // type: rule.method.value !== 'static' ? 'text' : rule.field.type,
+          type: rule.field.default_type,
           value: rule.operator.disable_value ? null : ((rule.method.value !== 'static' ? 'text' : rule.field.type) === 'number' ? Number(rule.value) : rule.value)
         })
       }
