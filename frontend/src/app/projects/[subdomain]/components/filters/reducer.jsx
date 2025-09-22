@@ -413,26 +413,26 @@ const filtersReducer = (state, action) => {
         case 'api-update-filters':
         case 'api-delete-filters': {
           if (action.method.value === 'dynamic') {
-            updatedState.rules[action.rule].value.field.input = 'text'
-            updatedState.rules[action.rule].value.field.type = 'text'
+            // updatedState.rules[action.rule].value.field.input = 'text'
+            // updatedState.rules[action.rule].value.field.type = 'text'
             updatedState.rules[action.rule].value.value = `QUERY.${updatedState.rules[action.rule].value.field.value.split('.')[updatedState.rules[action.rule].value.field.value.split('.').length - 1]}`
           } else if (action.method.value === 'dynamic_query') {
-            updatedState.rules[action.rule].value.field.input = 'text'
-            updatedState.rules[action.rule].value.field.type = 'text'
+            // updatedState.rules[action.rule].value.field.input = 'text'
+            // updatedState.rules[action.rule].value.field.type = 'text'
             updatedState.rules[action.rule].value.value = `QUERY.${updatedState.rules[action.rule].value.field.value.split('.')[updatedState.rules[action.rule].value.field.value.split('.').length - 1]}`
           } else if (action.method.value === 'dynamic_body') {
-            updatedState.rules[action.rule].value.field.input = 'text'
-            updatedState.rules[action.rule].value.field.type = 'text'
+            // updatedState.rules[action.rule].value.field.input = 'text'
+            // updatedState.rules[action.rule].value.field.type = 'text'
             updatedState.rules[action.rule].value.value = `BODY.${updatedState.rules[action.rule].value.field.value.split('.')[updatedState.rules[action.rule].value.field.value.split('.').length - 1]}`
           } else if (action.method.value === 'session') {
-            updatedState.rules[action.rule].value.field.input = 'text'
-            updatedState.rules[action.rule].value.field.type = 'text'
+            // updatedState.rules[action.rule].value.field.input = 'text'
+            // updatedState.rules[action.rule].value.field.type = 'text'
             updatedState.rules[action.rule].config.isDisabledValue = true
             updatedState.rules[action.rule].value.value = `SESSION.${action.sessionKeys[updatedState.rules[action.rule].value.field.session_key].param_key}`
-          } else if (action.method.value === 'static') {
-            updatedState.rules[action.rule].value.field.input = updatedState.rules[action.rule].value.field.default_type
-            updatedState.rules[action.rule].value.field.type = updatedState.rules[action.rule].value.field.default_type
+          // } else if (action.method.value === 'static') {
           }
+          updatedState.rules[action.rule].value.field.input = updatedState.rules[action.rule].value.field.default_type
+          updatedState.rules[action.rule].value.field.type = updatedState.rules[action.rule].value.field.default_type
           break
         }
         default:
