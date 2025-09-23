@@ -14,7 +14,7 @@ exports.idToJoinPathOb = function(params) {
             rules: [{
                 columnName: currentModel.idToName[id_spl[1]].join('.'),
                 operator: '$columnref',
-                value: currentModel.idToName[id_spl[0]].join('.')
+                value: (params.base_alias ? params.base_alias + '.' + currentModel.idToName[id_spl[0]][2] : currentModel.idToName[id_spl[0]].join('.'))
             }]
 
         };
@@ -93,14 +93,18 @@ exports.idToJoinPathOb = function(params) {
                 }
                 if (!n3) {
                     if(params.joins[n1_id_full] && params.joins[n1_id_full].alias) {
+                        var col_val_name = n1.join('.');
+                        if(params.joins[n1_id_full].type !== 'agg') {
+                            col_val_name = params.joins[n1_id_full].alias + '.' + n1[n1.length - 1];
+                        }
                         return {
                             condition: 'AND',
                             rules: [{
                                 columnName: n2.join('.'),
                                 operator: '$columnref',
                                 // value: n1.join('.'),
-                                value: params.joins[n1_id_full].alias + '.' + n1[n1.length - 1],
-                                alias: params.joins[n1_id_full].alias + '.' + n1[n1.length - 1]
+                                value: col_val_name,
+                                alias: col_val_name
                             }]
                         }
                     }
@@ -115,13 +119,17 @@ exports.idToJoinPathOb = function(params) {
                 } else {
 
                     if(params.joins[n2_id_full] && params.joins[n2_id_full].alias) {
+                        var col_val_name = n2.join('.');
+                        if(params.joins[n2_id_full].type !== 'agg') {
+                            col_val_name = params.joins[n2_id_full].alias + '.' + n2[n2.length - 1];
+                        }
                         return {
                             condition: 'AND',
                             rules: [{
                                 columnName: n3.join('.'),
                                 operator: '$columnref',
-                                value: params.joins[n2_id_full].alias + '.' + n2[n2.length - 1],
-                                alias: params.joins[n2_id_full].alias + '.' + n2[n2.length - 1]
+                                value: col_val_name,
+                                alias: col_val_name
                             }]
                         }
                     }
