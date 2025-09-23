@@ -1296,7 +1296,7 @@ module.exports = class ViewToJSON {
                 // join
                 let id_spl0 = params.columns[i].id.split('$');
                 let column = id_spl0[1];
-                let id_pure = id_spl0[0];
+                let id_pure = params.columns[i].id_pure || id_spl0[0];
                 let id_spl = id_pure.split('-');
 
                 let rel_type = this.relType(id_pure);
@@ -1365,9 +1365,12 @@ module.exports = class ViewToJSON {
                                 }
                             }
 
+                            var base_alias;
+
                             if (longest_existing_subpath) {
                                 let new_agg_id_spl = params.agg_paths[j].split(longest_existing_subpath);
                                 agg_cluster_id = new_agg_id_spl[1].substr(1);
+                                base_alias = params.joins[longest_existing_subpath]?.alias;
                             }
 
                             if (!agg_clusters[agg_cluster_id]) {
@@ -1415,6 +1418,8 @@ module.exports = class ViewToJSON {
                             // agg_clusters[agg_cluster_id].sub_join_conditions = params.join_conditions[id_pure] || {};
                             agg_clusters[agg_cluster_id].sub_join_conditions = params.join_conditions[join_condition_id] || {};
                             agg_clusters[agg_cluster_id].join_conditions = params.join_conditions;
+                            agg_clusters[agg_cluster_id].joins = params.joins;
+                            agg_clusters[agg_cluster_id].base_alias = base_alias;
                             break aggloop;
                         }
                     }
@@ -1707,7 +1712,8 @@ module.exports = class ViewToJSON {
             agg_mod.on = modelutils.idToJoinPathOb({
                 id: agg_keys[i],
                 currentModel: this.currentModel,
-                joins: params.joins
+                joins: params.joins,
+                base_alias: agg_clusters[agg_keys[i]].base_alias
             });
             join_paths_text[agg_keys[i]] = modelutils.idToJoinPathText({
                 id: agg_keys[i],
