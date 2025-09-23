@@ -952,10 +952,50 @@ module.exports = class builder {
 				var exists_path_spl = conditions.rules[i].exists_path.split('-');
 				var schema_split = this.currentModel.idToName[exists_path_spl[exists_path_spl.length - 1]];
 
-				var exists_base_conditions = modelutils.idToJoinPathOb({
-					id: conditions.rules[i].exists_path,
-					currentModel: this.currentModel
-				});
+				// var exists_base_conditions = modelutils.idToJoinPathOb({
+				// 	id: conditions.rules[i].exists_path,
+				// 	currentModel: this.currentModel,
+				// 	joins: {
+				// 		[conditions.rules[i].exists_path]: {
+				// 			alias: (mymodel.replace_alias ? mymodel.table_alias : null)
+				// 		}
+				// 	}
+				// });
+				
+				// var lhs_col = this.currentModel.idToName[exists_path_spl[0]];
+				// var lhs_col_name = lhs_col.join('.');
+				// var lhs_alias_name = null;
+				// if(mymodel.replace_alias) {
+				// 	lhs_alias_name = mymodel.table_alias + '.' + lhs_col[2]
+				// }
+				// var exists_base_conditions = {
+				// 	condition: 'AND',
+				// 	rules: [{
+				// 		columnName: lhs_col_name,
+				// 		columnName_alias: lhs_alias_name,
+				// 		operator: '$columnref',
+				// 		value: schema_split.join('.')
+				// 	}]
+		
+				// }
+
+				var ref_col = this.currentModel.idToName[exists_path_spl[0]]
+				var ref_col_name = ref_col.join('.');
+				// var ref_alias_name = null;
+				if(mymodel.replace_alias) {
+					ref_col_name = mymodel.table_alias + '.' + ref_col[2]
+				}
+				var exists_base_conditions = {
+					condition: 'AND',
+					rules: [{
+						columnName: schema_split.join('.'),
+						// columnName_alias: lhs_alias_name,
+						operator: '$columnref',
+						value: ref_col_name
+					}]
+		
+				}
+
 				if(conditions.rules[i].exists_where && conditions.rules[i].exists_where.rules && conditions.rules[i].exists_where.rules.length > 0) {
 					exists_base_conditions.rules.push(conditions.rules[i].exists_where)
 				}
