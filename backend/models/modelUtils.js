@@ -94,9 +94,10 @@ exports.idToJoinPathOb = function(params) {
                 if (!n3) {
                     if(params.joins[n1_id_full] && params.joins[n1_id_full].alias) {
                         var col_val_name = n1.join('.');
-                        if(params.joins[n1_id_full].type !== 'agg') {
-                            col_val_name = params.joins[n1_id_full].alias + '.' + n1[n1.length - 1];
-                        }
+                        // if(params.joins[n1_id_full].type !== 'agg') {
+                        //     col_val_name = params.joins[n1_id_full].alias + '.' + n1[n1.length - 1];
+                        // }
+                        col_val_name = params.joins[n1_id_full].alias + '.' + n1[n1.length - 1];
                         return {
                             condition: 'AND',
                             rules: [{
@@ -120,9 +121,10 @@ exports.idToJoinPathOb = function(params) {
 
                     if(params.joins[n2_id_full] && params.joins[n2_id_full].alias) {
                         var col_val_name = n2.join('.');
-                        if(params.joins[n2_id_full].type !== 'agg') {
-                            col_val_name = params.joins[n2_id_full].alias + '.' + n2[n2.length - 1];
-                        }
+                        // if(params.joins[n2_id_full].type !== 'agg') {
+                        //     col_val_name = params.joins[n2_id_full].alias + '.' + n2[n2.length - 1];
+                        // }
+                        col_val_name = params.joins[n2_id_full].alias + '.' + n2[n2.length - 1];
                         return {
                             condition: 'AND',
                             rules: [{

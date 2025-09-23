@@ -257,7 +257,7 @@ module.exports = class builder {
 		var fq = 'SELECT ' +
 			(options && options.result_count_only ? 'COUNT(*)' : finalColumns.join(',')) +
 			' FROM ' +
-			`${this.quotes}${model.schema}${this.quotes}.${this.quotes}${model.table}${this.quotes}` +
+			`${this.quotes}${model.schema}${this.quotes}.${this.quotes}${model.table}${this.quotes}` + (model.agg_type ? ' AS ' + model.table_alias : '') +
 			jtext +
 			this.resolveWhere(model) +
 			(options && options.result_count_only ? '' : this.resolveGroup(model.groupby)) +
@@ -295,6 +295,11 @@ module.exports = class builder {
 
 			var col_name = model.columns[i].columnName;
 			var col_alias = model.columns[i].alias;
+
+			if(model.agg_type) {
+				col_name = model.table_alias + '.' + col_name.split('.').pop();
+				// col_alias = model.table_alias + '_' + col_name.split('.').pop();
+			}
 
 			if(replace_alias) {
 				col_name = model.table_alias + '.' + col_name.split('.').pop();
@@ -982,7 +987,7 @@ module.exports = class builder {
 				var ref_col = this.currentModel.idToName[exists_path_spl[0]]
 				var ref_col_name = ref_col.join('.');
 				// var ref_alias_name = null;
-				if(mymodel.replace_alias) {
+				if(mymodel.replace_alias || mymodel.agg_type) {
 					ref_col_name = mymodel.table_alias + '.' + ref_col[2]
 				}
 				var exists_base_conditions = {
@@ -1034,7 +1039,7 @@ module.exports = class builder {
 
 				var column_alias = conditions.rules[i].columnName || conditions.rules[i].fieldName || conditions.rules[i].id;
 
-				if(mymodel.replace_alias) {
+				if(mymodel.replace_alias || mymodel.agg_type) {
 					column_alias = mymodel.table_alias + '.' + column_alias.split('.').pop();
 				}
 
