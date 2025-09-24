@@ -1,3 +1,4 @@
+
 exports.idToJoinPathOb = function(params) {
 
     var id = params.id;
@@ -63,7 +64,6 @@ exports.idToJoinPathOb = function(params) {
         };
 
         for (let i = 0; i < id_spl.length; i = i + 2) {
-            const element = id_spl[i];
             if (i == 0) {
                 
                 init_w.rules = [{
@@ -73,9 +73,11 @@ exports.idToJoinPathOb = function(params) {
                 }];
 
             } else {
+
                 let n1 = currentModel.idToName[id_spl[i]];
                 let n2 = currentModel.idToName[id_spl[i + 1]];
                 let n3 = currentModel.idToName[id_spl[i + 2]];
+                let n4 = currentModel.idToName[id_spl[i + 3]];
                 
                 var n1_id_full = id_spl.slice(0, i).join('-');
                 var n2_id_full = id_spl.slice(0, i + 2).join('-');
@@ -91,6 +93,7 @@ exports.idToJoinPathOb = function(params) {
                         where: init_w
                     });
                 }
+
                 if (!n3) {
                     if(params.joins[n1_id_full] && params.joins[n1_id_full].alias) {
                         var col_val_name = n1.join('.');
@@ -120,15 +123,15 @@ exports.idToJoinPathOb = function(params) {
                 } else {
 
                     if(params.joins[n2_id_full] && params.joins[n2_id_full].alias) {
-                        var col_val_name = n2.join('.');
+                        var col_val_name = n3.join('.');
                         // if(params.joins[n2_id_full].type !== 'agg') {
                         //     col_val_name = params.joins[n2_id_full].alias + '.' + n2[n2.length - 1];
                         // }
-                        col_val_name = params.joins[n2_id_full].alias + '.' + n2[n2.length - 1];
+                        col_val_name = params.joins[n2_id_full].alias + '.' + n3[n3.length - 1];
                         return {
                             condition: 'AND',
                             rules: [{
-                                columnName: n3.join('.'),
+                                columnName: n4.join('.'),
                                 operator: '$columnref',
                                 value: col_val_name,
                                 alias: col_val_name
