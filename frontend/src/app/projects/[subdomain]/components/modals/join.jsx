@@ -143,23 +143,24 @@ const JoinModal = props => {
         signal: nodesController.signal
       })
       const data = response.data.data
-      const aliasMap = JSON.parse(JSON.stringify(state.joinDetails))
-			if (data.nodes) {
-				data.nodes.forEach(node => {
-					if(node.nodes) {
-						node.nodes.forEach(childNode => {
-							if(childNode.alias) {
-								aliasMap[childNode.id] = {
-									alias: childNode.alias,
-									type: 'agg'
-								}
+      const newJoinDetails = {}
+			data.forEach(node => {
+				if(node.nodes) {
+					node.nodes.forEach(childNode => {
+						if(childNode.alias) {
+							newJoinDetails[childNode.id] = {
+								alias: childNode.alias,
+								type: 'agg'
 							}
-						})
-					}
-				})
-			}
+						}
+					})
+				}
+			})
       dispatch(updateJoinDetails({
-        joinDetails: aliasMap,
+        joinDetails: {
+          ...state.joinDetails,
+          ...newJoinDetails
+        },
         mode: props.mode,
         query_id: props.query_id,
         subdomain: props.subdomain
