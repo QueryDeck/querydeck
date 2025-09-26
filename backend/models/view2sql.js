@@ -297,7 +297,7 @@ exports.convert = function(params){
     queryob.roles = role_arr;
 
     queryob.docs = docs;
-    queryob.llm_agent_tooling = {};
+    queryob.docs.llm_agent_tooling = {};
 
     return queryob;
 
