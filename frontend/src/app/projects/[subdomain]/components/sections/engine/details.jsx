@@ -15,7 +15,12 @@ import {
   Alert,
   Badge,
   Button,
-  Card
+  Card,
+  TabContent,
+  TabPane,
+  Nav,
+  NavItem,
+  NavLink
 } from 'reactstrap'
 import ReactJson from 'react-json-view'
 import { toast } from 'react-toastify'
@@ -34,6 +39,7 @@ const Details = props => {
     response: {}
   })
   const [command, setCommand] = useState(' ')
+  const [activeTab, setActiveTab] = useState('api')
 
   // Tab Label
   const copyAPI = () => {
@@ -72,6 +78,14 @@ const Details = props => {
   const copyQuery = () => {
     navigator.clipboard.writeText(docs?.sql_query?.text).then(() => {
       toast.success('Query copied!')
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const copyTooling = () => {
+    navigator.clipboard.writeText(docs?.llm_agent_tooling ? JSON.stringify(docs?.llm_agent_tooling) : '{}').then(() => {
+      toast.success('LLM Agent Tooling copied!')
     }).catch(err => {
       console.error(err)
     })
@@ -335,7 +349,7 @@ const Details = props => {
     }
   }
 
-  const renderResponse = () => {
+  const renderResponseDetailed = () => {
     if (JSON.stringify(docs?.response_detailed).length > 2) {
       return (
         <>
@@ -350,109 +364,152 @@ const Details = props => {
     }
   }
 
+  const renderTooling = () => (
+    JSON.stringify(docs?.llm_agent_tooling).length > 2 && <div className={styles.request}>
+      <div className={styles.request_heading}>
+        <span>
+          LLM Agent Tooling
+        </span>
+        <Button
+          color='falcon-primary'
+          onClick={copyTooling}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faCopy} />
+        </Button>
+      </div>
+      <div className={styles.request_body}>
+        <ReactJson
+          // collapsed={docs?.request.length <= 25 ? 3 : 2}
+          // collapseStringsAfterLength={50}
+          displayDataTypes={false}
+          name={null}
+          src={docs?.llm_agent_tooling}
+        />
+      </div>
+    </div>
+  )
+
   const renderParameters = () => {
     return (
       <div className={styles.parameters}>
         {renderQueryParameters()}
         {renderPathParameters()}
         {renderBodyParameters()}
-        {renderResponse()}
+        {renderResponseDetailed()}
       </div>
     )
   }
 
-  const renderData = () => {
+  const renderScript = () => {
     const badgeData = getBadgeData()
     return (
-      <div className={styles.data}>
-        <div className={styles.script} >
-          <div
-            className={badgeData?.heading}
-            onClick={copyAPI}
-          >
-            <Badge className={badgeData?.badge}>
-              {badgeData?.method}
-            </Badge>
-            <span>
-              https://{props.subdomain}.{apiBase}{docs?.apiRoute}
-            </span>
-          </div>
-          <div
-            className={styles.script_body}
-            onClick={copyCommand}
-          >
-            {command}
-          </div>
+      <div className={styles.script} >
+        <div
+          className={badgeData?.heading}
+          onClick={copyAPI}
+        >
+          <Badge className={badgeData?.badge}>
+            {badgeData?.method}
+          </Badge>
+          <span>
+            https://{props.subdomain}.{apiBase}{docs?.apiRoute}
+          </span>
         </div>
-        {JSON.stringify(docs?.request_body).length > 2 && <div className={styles.request}>
-          <div className={styles.request_heading}>
-            <span>
-              Request
-            </span>
-            <Button
-              color='falcon-primary'
-              onClick={copyRequest}
-              size='sm'
-            >
-              <FontAwesomeIcon icon={faCopy} />
-            </Button>
-          </div>
-          <div className={styles.request_body}>
-            <ReactJson
-              // collapsed={docs?.request.length <= 25 ? 3 : 2}
-              // collapseStringsAfterLength={50}
-              displayDataTypes={false}
-              name={null}
-              src={docs?.request_body}
-            />
-          </div>
-        </div>}
-        {JSON.stringify(docs?.response).length > 2 && <div className={styles.response}>
-          <div className={styles.response_heading}>
-            <span>
-              Response
-            </span>
-            <Button
-              color='falcon-primary'
-              onClick={copyResponse}
-              size='sm'
-            >
-              <FontAwesomeIcon icon={faCopy} />
-            </Button>
-          </div>
-          <div className={styles.response_body}>
-            <ReactJson
-              // collapsed={docs?.response.length <= 25 ? 4 : 3}
-              // collapseStringsAfterLength={50}
-              displayDataTypes={false}
-              name={null}
-              src={docs?.response}
-            />
-          </div>
-        </div>}
-        {docs?.sql_query.text.length ? <div className={styles.query}>
-          <div className={styles.query_heading}>
-            <span>
-              Query
-            </span>
-            <Button
-              color='falcon-primary'
-              onClick={copyQuery}
-              size='sm'
-            >
-              <FontAwesomeIcon icon={faCopy} />
-            </Button>
-          </div>
-          <div className={styles.query_body}>
-            <Alert
-              className={styles.alert}
-              color='warning'
-            >
-              This is a sample query. The actual query will differ depending on the parameters selected.
-            </Alert>
-            {docs?.sql_query.text}
-          </div>
-        </div> : null}
+        <div
+          className={styles.script_body}
+          onClick={copyCommand}
+        >
+          {command}
+        </div>
+      </div>
+    )
+  }
+
+  const renderRequest = () => (
+    JSON.stringify(docs?.request_body).length > 2 && <div className={styles.request}>
+      <div className={styles.request_heading}>
+        <span>
+          Request
+        </span>
+        <Button
+          color='falcon-primary'
+          onClick={copyRequest}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faCopy} />
+        </Button>
+      </div>
+      <div className={styles.request_body}>
+        <ReactJson
+          // collapsed={docs?.request.length <= 25 ? 3 : 2}
+          // collapseStringsAfterLength={50}
+          displayDataTypes={false}
+          name={null}
+          src={docs?.request_body}
+        />
+      </div>
+    </div>
+  )
+
+  const renderQuery = () => (
+    docs?.sql_query.text.length ? <div className={styles.query}>
+      <div className={styles.query_heading}>
+        <span>
+          Query
+        </span>
+        <Button
+          color='falcon-primary'
+          onClick={copyQuery}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faCopy} />
+        </Button>
+      </div>
+      <div className={styles.query_body}>
+        <Alert
+          className={styles.alert}
+          color='warning'
+        >
+          This is a sample query. The actual query will differ depending on the parameters selected.
+        </Alert>
+        {docs?.sql_query.text}
+      </div>
+    </div> : null
+  )
+
+  const renderResponse = () => (
+    JSON.stringify(docs?.response).length > 2 && <div className={styles.response}>
+      <div className={styles.response_heading}>
+        <span>
+          Response
+        </span>
+        <Button
+          color='falcon-primary'
+          onClick={copyResponse}
+          size='sm'
+        >
+          <FontAwesomeIcon icon={faCopy} />
+        </Button>
+      </div>
+      <div className={styles.response_body}>
+        <ReactJson
+          // collapsed={docs?.response.length <= 25 ? 4 : 3}
+          // collapseStringsAfterLength={50}
+          displayDataTypes={false}
+          name={null}
+          src={docs?.response}
+        />
+      </div>
+    </div>
+  )
+
+  const renderData = () => {
+    return (
+      <div className={styles.data}>
+        {renderScript()}
+        {renderRequest()}
+        {renderResponse()}
       </div>
     )
   }
@@ -472,10 +529,36 @@ const Details = props => {
         marginTop: '4px',
         width: props.width
       }}>
-        <div className={styles.details}>
-          {renderParameters()}
-          {renderData()}
-        </div>
+        <Nav tabs>
+          <NavItem>
+            <NavLink active={activeTab === 'api'} onClick={() => setActiveTab('api')}>
+              API
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink active={activeTab === 'query'} onClick={() => setActiveTab('query')}>
+              Query & Tooling
+            </NavLink>
+          </NavItem>
+        </Nav>
+        <TabContent activeTab={activeTab}>
+          <TabPane tabId='api'>
+            <div className={styles.details}>
+              {renderParameters()}
+              {renderData()}
+            </div>
+          </TabPane>
+          <TabPane tabId='query'>
+            <div className={styles.details}>
+              <div className={styles.parameters}>
+                {renderQuery()}
+              </div>
+              <div className={styles.data}>
+                {renderTooling()}
+              </div>
+            </div>
+          </TabPane>
+        </TabContent>
       </Card>
     )
   }
