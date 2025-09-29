@@ -1102,6 +1102,9 @@ module.exports = class builder {
 							query_path_ob.type = otherutils.getSuperType(this.getType(query_path_ob.column))
 						}
 
+						query_path_ob.required = (conditions.conditional_on ? false : true)
+
+						// console.log('pushing qpath', query_path_ob, conditions.conditional_on)
 						this.depthpaths.push(query_path_ob)
 					}else{
 						//console.log( 'else not key')
