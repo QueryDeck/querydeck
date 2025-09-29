@@ -340,7 +340,7 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: pd,
+              // enum: pd,
             },
             description:
               'Designation of people within investor organizations. Use this field when searching for specific roles within investor firms like Managing Partners, Investment Directors, etc. Select multiple designations when relevant, not just one. Ex: ["Managing Director", "Investment Manager"]',
@@ -357,7 +357,7 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: i,
+              // enum: i,
             },
             description:
               'The industry preference for given investor. Select multiple industries when relevant, not just one. Ex: ["Financial Technology (FinTech)", "Artificial Intelligence"]',
@@ -366,7 +366,7 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: t,
+              // enum: t,
             },
             description:
               'The type of investor. Select multiple types when relevant, not just one. Ex: ["Venture Capital", "Angel Investor"]',
@@ -376,7 +376,7 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: s,
+              // enum: s,
             },
             description:
               'The investment stage of the company. Select multiple stages when relevant, not just one. Ex: ["Seed", "Early Stage VC"]',
@@ -385,7 +385,7 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: c,
+              // enum: c,
             },
             description:
               'Investor country code. Use this field when searching for investors located in a specific country. This is different from the investorCountryPref field. An investor might be based in India but might prefer to invest in multiple countries. Select multiple countries when relevant, not just one. Ex: ["India", "United States"]',
@@ -394,35 +394,16 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: c,
+              // enum: c,
             },
             description:
               'Investor country preference, ex India. Use this field when searching for investors based on what country they prefer to invest in. This is different from the investorCountry field. An investor might be based in India but might prefer to invest in multiple countries. Select multiple countries when relevant, not just one. Ex: ["India", "United States"]',
           },
-          // investorPortfolioCompanyCountry: {
-          //   type: 'array',
-          //   items: {
-          //     type: 'string',
-          //     enum: c,
-          //   },
-          //   description:
-          //     'Investor portfolio company country code, ex India. Use this field when searching for investors based on what country their portfolio companies are located in. Select multiple countries when relevant, not just one. Ex: ["India", "United States"]',
-          // },
-          // investorPortfolioCompanyIndustry: {
-          //   type: 'array',
-          //   items: {
-          //     type: 'string',
-          //     enum: i,
-          //   },
-          //   description:
-          //     'Investor portfolio company industry. Select multiple industries when relevant, not just one. Ex: ["Financial Technology (FinTech)", "Artificial Intelligence"]. Use this field when searching for investors based on the industries of their portfolio companies.',
-          // },
-
           dealCountry: {
             type: 'array',
             items: {
               type: 'string',
-              enum: c,
+              // enum: c,
             },
             description:
               'Deal country criteria - Filter investors by the countries where they have made investments/deals. Used to find investors with deal activity in specific geographic markets. Select multiple countries when relevant, not just one. Ex: ["India", "United States"]',
@@ -431,7 +412,7 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: i,
+              // enum: i,
             },
             description:
               'Deal industry criteria - Filter investors by the industries where they have made investments/deals. Used to find investors with deal activity in specific industry sectors. Select multiple industries when relevant, not just one. Example: ["Financial Technology (FinTech)", "Artificial Intelligence", "Healthcare"]',
@@ -440,7 +421,7 @@ exports.convert = function(params){
             type: 'array',
             items: {
               type: 'string',
-              enum: d,
+              // enum: d,
             },
             description:
               'The type of Deal. Select multiple types when relevant, not just one. Ex: ["Capitalization", "Angel", "Seed Round"]',
