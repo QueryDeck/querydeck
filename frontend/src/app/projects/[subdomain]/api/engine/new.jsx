@@ -639,6 +639,7 @@ export function APInew (props) {
               }}
               dragging={isDragging}
               mode='api'
+              oldMethod={state?.oldMethod?.value}
               query_id='new'
               subdomain={props.subdomain}
               width={window.innerWidth - 4  - 4 - position}

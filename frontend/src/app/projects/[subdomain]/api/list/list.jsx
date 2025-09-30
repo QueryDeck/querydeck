@@ -135,6 +135,7 @@ export const APIlist = props => {
                 docs={state?.select_preview?.docs}
                 dragging={isDragging}
                 mode='api'
+                oldMethod={state?.select_preview?.api_method}
                 query_id={state?.select_preview?.query_id}
                 subdomain={props.subdomain}
                 width={window.innerWidth - 4 - 4 - position}

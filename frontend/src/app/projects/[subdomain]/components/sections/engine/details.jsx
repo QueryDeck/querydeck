@@ -32,7 +32,7 @@ import { apiBase } from '../../../../../../api';
 import styles from './details.module.scss'
 
 const Details = props => {
-  const { docs } = props
+  const { docs, oldMethod } = props
 
   const [docState, setDocState] = useState({
     request: {},
@@ -92,7 +92,7 @@ const Details = props => {
   }
 
   const getBadgeData = (status = null) => {
-    if (docs?.method === 'insert' || status === 200) {
+    if (docs?.method === 'insert' || oldMethod === 'POST' || status === 200) {
       return ({
         badge: styles.badge_success,
         heading: styles.script_heading_success,

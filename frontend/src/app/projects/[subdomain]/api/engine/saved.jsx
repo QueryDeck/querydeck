@@ -743,6 +743,7 @@ export function APIsaved (props) {
                 }}
                 dragging={isDragging}
                 mode='api'
+                oldMethod={state?.oldMethod}
                 query_id={props.query_id}
                 subdomain={props.subdomain}
                 width={window.innerWidth - 4 - 4 - position}
@@ -751,6 +752,7 @@ export function APIsaved (props) {
                 docs={listState?.list?.find(element => element.query_id === props.query_id)?.docs}
                 dragging={isDragging}
                 mode='api'
+                oldMethod={listState?.list?.find(element => element.query_id === props.query_id)?.docs?.api_method}
                 query_id={props.query_id}
                 subdomain={props.subdomain}
                 width={window.innerWidth - 4 - 4 - position}
