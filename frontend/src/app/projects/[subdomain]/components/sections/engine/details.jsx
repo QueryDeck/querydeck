@@ -34,6 +34,8 @@ const Details = props => {
     response: {}
   })
   const [command, setCommand] = useState(' ')
+  const [apiDescription, setApiDescription] = useState(docs?.description || '')
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
 
   // Tab Label
   const copyAPI = () => {
@@ -370,6 +372,55 @@ const Details = props => {
     </div>
   )
 
+  const renderAPIDescription = () => {
+    const handleDescriptionClick = () => {
+      if (!isEditingDescription) {
+        setIsEditingDescription(true)
+      }
+    }
+
+    const handleDescriptionBlur = () => {
+      setIsEditingDescription(false)
+      console.log('Saving description:', apiDescription)
+    }
+
+    const handleDescriptionChange = (e) => {
+      setApiDescription(e.target.value)
+    }
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsEditingDescription(false)
+      }
+    }
+
+    return (
+      <div className={styles.description}>
+        <div className={styles.description_heading}>
+          <span>{docs?.title || 'API Description'}</span>
+        </div>
+        <div className={styles.description_body} onClick={handleDescriptionClick}>
+          {isEditingDescription ? (
+            <textarea
+              autoFocus
+              className={styles.description_input}
+              onBlur={handleDescriptionBlur}
+              onChange={handleDescriptionChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe what this API does..."
+              rows={3}
+              value={apiDescription}
+            />
+          ) : (
+            <div className={styles.description_text}>
+              {apiDescription || 'Click to add a description...'}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   const renderParameters = () => {
     return (
       <div className={styles.parameters}>
@@ -488,6 +539,7 @@ const Details = props => {
   const renderData = () => {
     return (
       <div className={styles.data}>
+        {renderAPIDescription()}
         {renderScript()}
         {renderRequest()}
         {renderResponse()}
