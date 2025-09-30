@@ -54,6 +54,13 @@
     font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
+    padding: 2px;
+    border-radius: 3px;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: rgba($gray-400, 0.15);
+    }
 
     &:empty::before {
       color: $gray-500;
@@ -63,16 +70,23 @@
   }
 
   &_input {
-    background: transparent;
-    border: none;
+    background-color: white;
+    border: 2px solid $primary;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba($primary, 0.15);
     color: $gray-800;
     font-family: inherit;
     font-size: 14px;
     line-height: 1.5;
     outline: none;
-    padding: 0;
+    padding: 6px 8px;
     resize: vertical;
     width: 100%;
+    transition: box-shadow 0.2s ease;
+
+    &:focus {
+      box-shadow: 0 3px 12px rgba($primary, 0.25);
+    }
 
     &::placeholder {
       color: $gray-500;
@@ -112,6 +126,66 @@
   &_info {
     font-size: 14px;
     padding-left: 6px;
+  }
+
+  &_description {
+    &_wrapper {
+      cursor: text;
+      margin-top: 4px;
+      padding-left: 6px;
+    }
+
+    &_text {
+      color: $gray-600;
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 3px 6px;
+      border-radius: 3px;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: rgba($gray-300, 0.3);
+      }
+    }
+
+    &_placeholder {
+      color: $gray-400;
+      font-size: 12px;
+      font-style: italic;
+      padding: 3px 6px;
+      border-radius: 3px;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background-color: rgba($gray-300, 0.3);
+        color: $gray-500;
+      }
+    }
+
+    &_input {
+      background-color: white;
+      border: 2px solid $primary;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba($primary, 0.12);
+      color: $gray-800;
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.4;
+      outline: none;
+      padding: 4px 6px;
+      resize: vertical;
+      width: 100%;
+      transition: box-shadow 0.2s ease;
+
+      &:focus {
+        box-shadow: 0 2px 8px rgba($primary, 0.2);
+      }
+
+      &::placeholder {
+        color: $gray-400;
+        font-style: italic;
+      }
+    }
   }
 
   &_container {

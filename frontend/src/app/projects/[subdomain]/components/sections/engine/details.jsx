@@ -36,6 +36,8 @@ const Details = props => {
   const [command, setCommand] = useState(' ')
   const [apiDescription, setApiDescription] = useState(docs?.description || '')
   const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const [editingField, setEditingField] = useState(null)
+  const [fieldDescriptions, setFieldDescriptions] = useState({})
 
   // Tab Label
   const copyAPI = () => {
@@ -132,7 +134,37 @@ const Details = props => {
     setCommand(updatedCommand)
   }
 
-  const renderParameter = (parameter, datatype, required = false, info = null) => {
+  const renderParameter = (parameter, datatype, required = false, info = null, fieldKey = null) => {
+    const uniqueKey = fieldKey || parameter
+    const currentDescription = fieldDescriptions[uniqueKey] !== undefined ? fieldDescriptions[uniqueKey] : (info || '')
+    const isEditing = editingField === uniqueKey
+
+    const handleFieldClick = () => {
+      setEditingField(uniqueKey)
+      setFieldDescriptions({
+        ...fieldDescriptions,
+        [uniqueKey]: currentDescription
+      })
+    }
+
+    const handleFieldBlur = () => {
+      setEditingField(null)
+      console.log('Saving field description:', uniqueKey, fieldDescriptions[uniqueKey])
+    }
+
+    const handleFieldChange = (e) => {
+      setFieldDescriptions({
+        ...fieldDescriptions,
+        [uniqueKey]: e.target.value
+      })
+    }
+
+    const handleFieldKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setEditingField(null)
+      }
+    }
+
     return (
       <>
         <div
@@ -149,9 +181,24 @@ const Details = props => {
             Required
           </div>}
         </div>
-        {info?.length && <div className={styles.parameter_info}>
-          {info}
-        </div>}
+        <div className={styles.parameter_description_wrapper} onClick={!isEditing ? handleFieldClick : undefined}>
+          {isEditing ? (
+            <textarea
+              autoFocus
+              className={styles.parameter_description_input}
+              onBlur={handleFieldBlur}
+              onChange={handleFieldChange}
+              onKeyDown={handleFieldKeyDown}
+              placeholder="Add field description..."
+              rows={2}
+              value={currentDescription}
+            />
+          ) : (
+            <div className={currentDescription ? styles.parameter_description_text : styles.parameter_description_placeholder}>
+              {currentDescription || 'Add description...'}
+            </div>
+          )}
+        </div>
       </>
     )
   }
@@ -222,9 +269,10 @@ const Details = props => {
     }
   }
 
-  const parseData = (data, key = null, dataType) => {
+  const parseData = (data, key = null, dataType, parentPath = '') => {
     if (data.$qd_column) {
-      return renderParameter(key, data.type, data.required, data.details)
+      const fieldKey = parentPath ? `${parentPath}.${key}` : key
+      return renderParameter(key, data.type, data.required, data.details, fieldKey)
     } else {
       const renderAction = element => {
         if (
@@ -303,13 +351,14 @@ const Details = props => {
 
       const result = []
       Object.keys(data).forEach(element => {
-        const children = parseData(data[element], element, dataType)
+        const currentPath = parentPath ? `${parentPath}.${element}` : element
+        const children = parseData(data[element], element, dataType, currentPath)
         if (!data[element].$qd_column) {
           result.push(
             <div className={(dataType === 'request' && docState.request[element]) ||
               (dataType === 'response' && docState.response[element]) ? styles.parameter_container_collapsed : styles.parameter_container_heading}>
               <div className={styles.parameter_container_heading_content}>
-                {renderParameter(element, data[element].constructor === Array ? 'array' : 'object', data[element].required, data[element].details)}
+                {renderParameter(element, data[element].constructor === Array ? 'array' : 'object', data[element].required, data[element].details, currentPath)}
               </div>
               {isNaN(element) && renderAction(element)}
             </div>
