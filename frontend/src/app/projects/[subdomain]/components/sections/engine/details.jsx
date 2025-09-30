@@ -16,11 +16,6 @@ import {
   Badge,
   Button,
   Card,
-  TabContent,
-  TabPane,
-  Nav,
-  NavItem,
-  NavLink
 } from 'reactstrap'
 import ReactJson from 'react-json-view'
 import { toast } from 'react-toastify'
@@ -39,7 +34,6 @@ const Details = props => {
     response: {}
   })
   const [command, setCommand] = useState(' ')
-  const [activeTab, setActiveTab] = useState('api')
 
   // Tab Label
   const copyAPI = () => {
@@ -200,14 +194,14 @@ const Details = props => {
             $qd_column: true,
             type: queryParams[param].type,
             details: queryParams[param].description,
-            required: false
+            required: Boolean(queryParams[param].required)
           }
         } else {
           data[param] = {
             $qd_column: true,
             type: queryParams[param].type,
             details: queryParams[param].description,
-            required: true
+            required: Boolean(queryParams[param].required)
           }
         }
       })
@@ -349,23 +343,9 @@ const Details = props => {
     }
   }
 
-  const renderResponseDetailed = () => {
-    if (JSON.stringify(docs?.response_detailed).length > 2) {
-      return (
-        <>
-          <div className={styles.parameters_title}>
-            Response
-          </div>
-          <div className={styles.parameters_content}>
-            {parseData(docs?.response_detailed, null, 'response')}
-          </div>
-        </>
-      )
-    }
-  }
 
   const renderTooling = () => (
-    JSON.stringify(docs?.llm_agent_tooling)?.length > 2 && <div className={styles.request}>
+    JSON.stringify(docs?.llm_agent_tooling)?.length > 2 && <div className={styles.request} style={{ paddingTop: 8 }}>
       <div className={styles.request_heading}>
         <span>
           LLM Agent Tooling
@@ -378,7 +358,7 @@ const Details = props => {
           <FontAwesomeIcon icon={faCopy} />
         </Button>
       </div>
-      <div className={styles.request_body}>
+      <div className={styles.request_body} style={{ paddingTop:  3}}>
         <ReactJson
           // collapsed={docs?.request.length <= 25 ? 3 : 2}
           // collapseStringsAfterLength={50}
@@ -396,7 +376,8 @@ const Details = props => {
         {renderQueryParameters()}
         {renderPathParameters()}
         {renderBodyParameters()}
-        {renderResponseDetailed()}
+        {renderTooling()}
+        {/* {renderResponseDetailed()} */}
       </div>
     )
   }
@@ -510,6 +491,7 @@ const Details = props => {
         {renderScript()}
         {renderRequest()}
         {renderResponse()}
+        {renderQuery()}
       </div>
     )
   }
@@ -529,36 +511,11 @@ const Details = props => {
         marginTop: '4px',
         width: props.width
       }}>
-        <Nav tabs>
-          <NavItem>
-            <NavLink active={activeTab === 'api'} onClick={() => setActiveTab('api')}>
-              API
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink active={activeTab === 'query'} onClick={() => setActiveTab('query')}>
-              Query & Tooling
-            </NavLink>
-          </NavItem>
-        </Nav>
-        <TabContent activeTab={activeTab}>
-          <TabPane tabId='api'>
-            <div className={styles.details}>
-              {renderParameters()}
-              {renderData()}
-            </div>
-          </TabPane>
-          <TabPane tabId='query'>
-            <div className={styles.details}>
-              <div className={styles.parameters}>
-                {renderQuery()}
-              </div>
-              <div className={styles.data}>
-                {renderTooling()}
-              </div>
-            </div>
-          </TabPane>
-        </TabContent>
+          <div className={styles.details}>
+          {renderParameters()}
+          {renderData()}
+        </div>
+ 
       </Card>
     )
   }
