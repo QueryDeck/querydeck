@@ -502,23 +502,15 @@ module.exports = function (router) {
 
     if (req.body.method == 'insert') {
       apiMethod = 'POST'
-
-      table_alias = currentModel.tidToName[req.body.base][1];
     }
     else if (req.body.method == 'update') {
       apiMethod = 'PUT'
-
-      table_alias = final_object.model.table;
     }
     else if (req.body.method == 'select') {
       apiMethod = req.body.api_method == 'POST' ? 'POST' : 'GET'
-
-      table_alias = final_object.model.table;
     }
     else if (req.body.method == 'delete') {
       apiMethod = 'DELETE'
-
-      table_alias = final_object.model.table;
     }
     else {
       return res.zend(null, 400, "Invalid method");
@@ -531,6 +523,12 @@ module.exports = function (router) {
       currentModel,
       roles
     });
+
+    if(req.body.method == 'insert') {
+      table_alias = currentModel.tidToName[req.body.base][1]
+    } else {
+      table_alias = final_object.model.table;
+    }
 
     final_object.model.method = req.body.method;
     final_object.model = JSON.stringify(final_object.model)  // for insert  'model' is array 
