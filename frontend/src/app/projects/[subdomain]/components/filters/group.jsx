@@ -104,7 +104,7 @@ const Group = props => {
           onClick={() => props.updateConditionalRulesModal(groupId)}
           size='sm'
         >
-          <FontAwesomeIcon icon={faCog} /> Conditional Rules
+          <FontAwesomeIcon icon={faCog} /> Conditional {props.groups[groupId]?.conditionalRules?.value ? `on ${props.groups[groupId]?.conditionalRules?.value}` : 'Rules'}
         </Button>
       )
     }
