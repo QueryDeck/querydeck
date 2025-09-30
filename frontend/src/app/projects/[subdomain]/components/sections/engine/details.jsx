@@ -365,7 +365,7 @@ const Details = props => {
   }
 
   const renderTooling = () => (
-    JSON.stringify(docs?.llm_agent_tooling).length > 2 && <div className={styles.request}>
+    JSON.stringify(docs?.llm_agent_tooling)?.length > 2 && <div className={styles.request}>
       <div className={styles.request_heading}>
         <span>
           LLM Agent Tooling
