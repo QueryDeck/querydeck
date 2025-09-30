@@ -1110,8 +1110,11 @@ module.exports = class builder {
 						//console.log( 'else not key')
 					}
 					// check for array
-					if(conditions.rules[i].operator == 'in' && !Array.isArray(val) && this.useDynamicValues) {
-						val = [val]
+					if(conditions.rules[i].operator == 'in') {
+						query_path_ob.array_input = true;
+						if(this.useDynamicValues && !Array.isArray(val)) {
+							val = [val]
+						}
 					}
 					val = this.getParamMapIndex(val)
 					param_val = true;

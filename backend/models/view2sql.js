@@ -60,9 +60,22 @@ exports.convert = function(params){
       apiRoute: params.apiRoute
     };
     
+    var llm_ob = {
+      name: null,
+      description: null,
+      input_schema: {
+        type: 'object',
+        properties: {},
+        required: []
+      }
+    };
+
     if(params.method == 'select'){
 
       docs.title = (params.select_by_id ? 'Get ' : 'List ') + cleanTname(currentModel.tidToName[params.base][1], (params.select_by_id ? false : true)) + (params.select_by_id ? ' by ID' : '');
+
+      llm_ob.description = docs.title;
+      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
 
         queryob = new v2json({
             subdomain: params.subdomain,
@@ -101,10 +114,18 @@ exports.convert = function(params){
               type: 'number',
               description: 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
             }
+            llm_ob.input_schema.properties._limit = {
+              type: 'number',
+              description: 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
+            }
           }
 
           if(queryob.model.offset_dynamic) {
             request_query_params._offset = {
+              type: 'number',
+              description: 'The initial index from which to return the results (default: 0)'
+            }
+            llm_ob.input_schema.properties._offset = {
               type: 'number',
               description: 'The initial index from which to return the results (default: 0)'
             }
@@ -120,16 +141,30 @@ exports.convert = function(params){
             if(queryob.model.orderby && queryob.model.orderby.length > 0) {
               request_query_params._order.description += ' (default: ' + queryob.model.orderby.map(col => (col.name.split('.').pop() + ':' + (col.asc ? 'asc' : 'desc'))).join(',') + ')'
             }
+            llm_ob.input_schema.properties._order = {
+              type: 'text',
+              description: 'Order results by columns. Format: column1:asc,column2:desc. Available columns: ' + 
+                queryob.model.orderby_dynamic_columns.map(col => col.alias).join(', ')
+            }
+            if(queryob.model.orderby && queryob.model.orderby.length > 0) {
+              llm_ob.input_schema.properties._order.description += ' (default: ' + queryob.model.orderby.map(col => (col.name.split('.').pop() + ':' + (col.asc ? 'asc' : 'desc'))).join(',') + ')'
+            }
           }
 
           queryob.query.querypaths = queryob.query.querypaths || [];
 
           for(let i = 0; i < queryob.query.querypaths.length; i++) {
             if(queryob.query.querypaths[i].input_key.indexOf('QUERY') > -1) {
-              request_query_params[queryob.query.querypaths[i].input_key.split('.')[1]] = {
+              var var_name = queryob.query.querypaths[i].input_key.split('.')[1];
+              request_query_params[var_name] = {
                 type: queryob.query.querypaths[i].type,
-                required: queryob.query.querypaths[i].required
+                required: queryob.query.querypaths[i].required,
+                array_input: queryob.query.querypaths[i].array_input
               };
+              llm_ob.input_schema.properties[var_name] = {
+                type: queryob.query.querypaths[i].array_input ? 'array' : queryob.query.querypaths[i].type
+              };
+              if(queryob.query.querypaths[i].required) llm_ob.input_schema.required.push(var_name);
             }
           }
 
@@ -144,6 +179,9 @@ exports.convert = function(params){
     } else if(params.method == 'insert'){
 
       docs.title = 'Create ' + cleanTname(currentModel.tidToName[params.base][1], true);
+
+      llm_ob.description = docs.title;
+      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
 
         queryob = new v2json({
             subdomain: params.subdomain,
@@ -179,9 +217,24 @@ exports.convert = function(params){
 
           docs.sql_query = {text: queryob.query.text};
 
+          var res_table = Object.keys(docs.request_body_detailed);
+          var sample_ob = Array.isArray(docs.request_body_detailed[res_table]) ? docs.request_body_detailed[res_table][0] : docs.request_body_detailed[res_table];
+          var res_cols = Object.keys(sample_ob);
+
+          for(let i = 0; i < res_cols.length; i++) {
+            if(!sample_ob[res_cols[i]].$qd_column) continue;
+            llm_ob.input_schema.properties[res_cols[i]] = {
+              type: sample_ob[res_cols[i]].type
+            };
+            if(sample_ob[res_cols[i]].required) llm_ob.input_schema.required.push(res_cols[i]);
+          }
+
     } else if(params.method == 'update'){
 
       docs.title = 'Update ' + cleanTname(currentModel.tidToName[params.base][1], false);
+
+      llm_ob.description = docs.title;
+      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
 
         queryob = new v2json({
             subdomain: params.subdomain,
@@ -228,6 +281,19 @@ exports.convert = function(params){
             docs.response_detailed = queryob.response_detailed || {};
 
             docs.sql_query = {text: queryob.query.text};
+
+            var res_table = Object.keys(docs.request_body_detailed);
+            var sample_ob = Array.isArray(docs.request_body_detailed[res_table]) ? docs.request_body_detailed[res_table][0] : docs.request_body_detailed[res_table];
+            var res_cols = Object.keys(sample_ob);
+  
+            for(let i = 0; i < res_cols.length; i++) {
+              if(!sample_ob[res_cols[i]].$qd_column) continue;
+              llm_ob.input_schema.properties[res_cols[i]] = {
+                type: sample_ob[res_cols[i]].type
+              };
+              if(sample_ob[res_cols[i]].required) llm_ob.input_schema.required.push(res_cols[i]);
+            }
+
           } else {
             return null;
           }
@@ -235,6 +301,9 @@ exports.convert = function(params){
     } else if(params.method == 'delete') {
 
       docs.title = 'Delete ' + cleanTname(currentModel.tidToName[params.base][1], false);
+
+      llm_ob.description = docs.title;
+      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
       
       queryob = new v2json({
         subdomain: params.subdomain,
@@ -293,237 +362,13 @@ exports.convert = function(params){
     docs.allowed_roles = allowed_role_names;
     docs.auth_required = params.auth_required;
     docs.request_url_param = queryob.url_param_column;
+    docs.api_method = params.api_method;
 
     queryob.roles = role_arr;
 
     queryob.docs = docs;
-    queryob.docs.llm_agent_tooling = {
-      name: 'search_investors',
-      description: `Get the investors filters and search for investors or people within investor organizations. Filters are same as tool_input produced by this tool. 
-         If user is asking to perform a search to find any investor or people within investor firms, provide brief of the filters applied based on tool result.
-         Do not use if query is about a single investor and user is providing the name. 
-         If user asking to narrow down filter with a vague ask, ask the user to try to get more details from user like geography, industries, etc.
-         ex user: Further refine this search result. assistant: Can you please help me with specific sector or country.
 
-         RETURNS:
-         totalResultNumber: Total number of results found after applying filters.`,
-      input_schema: {
-        type: 'object',
-        properties: {
-          cities: {
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-            description:
-              'City name, ex New York. Use this field when searching for investors based on what city they are based in. Select multiple cities when relevant, not just one. Ex: ["New York", "Los Angeles"]',
-          },
-          isPeople: {
-            type: 'boolean',
-            description:
-              'Set to true when searching for specific people within investor organizations (e.g., "find managers at VC firms", "search for partners"). Set to false when searching for investor firms/entities themselves (e.g., "find VCs investing in fintech", "search for angel investors"). Default is false.',
-          },
-          has_email: {
-            type: 'boolean',
-            description:
-              'Set to true when searching for people within investor organizations who have email addresses available (e.g., "find VC partners with contact emails", "search for investment managers with email contacts"). Only relevant when isPeople is true. Set to false when email availability is not a requirement. Default is false.',
-          },
-          states: {
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-            description:
-              'State name, ex California. Use this field when searching for investors based on what state they are based in. Select multiple states when relevant, not just one. Ex: ["Texas", "California"]',
-          },
-          designations: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: pd,
-            },
-            description:
-              'Designation of people within investor organizations. Use this field when searching for specific roles within investor firms like Managing Partners, Investment Directors, etc. Select multiple designations when relevant, not just one. Ex: ["Managing Director", "Investment Manager"]',
-          },
-          keyword: {
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-            description:
-              'Specific keywords or terms used to find industries or categorize data in a simple searchable word form. Examples: ["tech", "technology", "IT", "iot", "bio"]. These keywords help identify which types of business the investor wants to invest.',
-          },
-          investorIndustries: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: i,
-            },
-            description:
-              'The industry preference for given investor. Select multiple industries when relevant, not just one. Ex: ["Financial Technology (FinTech)", "Artificial Intelligence"]',
-          },
-          investorsType: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: t,
-            },
-            description:
-              'The type of investor. Select multiple types when relevant, not just one. Ex: ["Venture Capital", "Angel Investor"]',
-          },
-
-          investmentStage: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: s,
-            },
-            description:
-              'The investment stage of the company. Select multiple stages when relevant, not just one. Ex: ["Seed", "Early Stage VC"]',
-          },
-          investorCountryHQ: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: c,
-            },
-            description:
-              'Investor country code. Use this field when searching for investors located in a specific country. This is different from the investorCountryPref field. An investor might be based in India but might prefer to invest in multiple countries. Select multiple countries when relevant, not just one. Ex: ["India", "United States"]',
-          },
-          investorCountryPref: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: c,
-            },
-            description:
-              'Investor country preference, ex India. Use this field when searching for investors based on what country they prefer to invest in. This is different from the investorCountry field. An investor might be based in India but might prefer to invest in multiple countries. Select multiple countries when relevant, not just one. Ex: ["India", "United States"]',
-          },
-          dealCountry: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: c,
-            },
-            description:
-              'Deal country criteria - Filter investors by the countries where they have made investments/deals. Used to find investors with deal activity in specific geographic markets. Select multiple countries when relevant, not just one. Ex: ["India", "United States"]',
-          },
-          dealIndustry: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: i,
-            },
-            description:
-              'Deal industry criteria - Filter investors by the industries where they have made investments/deals. Used to find investors with deal activity in specific industry sectors. Select multiple industries when relevant, not just one. Example: ["Financial Technology (FinTech)", "Artificial Intelligence", "Healthcare"]',
-          },
-          dealType: {
-            type: 'array',
-            items: {
-              type: 'string',
-              // enum: d,
-            },
-            description:
-              'The type of Deal. Select multiple types when relevant, not just one. Ex: ["Capitalization", "Angel", "Seed Round"]',
-          },
-          minDealSize: {
-            type: 'number',
-            description:
-              'Minimum deal amount raised by the company, always in million USD',
-          },
-          maxDealSize: {
-            type: 'number',
-            description:
-              'Maximum deal amount raised by the company, always in million USD',
-          },
-          minAUM: {
-            type: 'number',
-            description:
-              'Minimum AUM(Asset Under Management) raised by the company, always in million USD',
-          },
-          maxAUM: {
-            type: 'number',
-            description:
-              'Maximum AUM(Asset Under Management) raised by the company, always in million USD',
-          },
-          dealDateMin: {
-            type: 'string',
-            format: 'date',
-            description:
-              'Minimum deal date in format YYYY-MM-DD, ex 2025-05-14',
-          },
-          dealDateMax: {
-            type: 'string',
-            format: 'date',
-            description:
-              'Maximum deal date in format YYYY-MM-DD, ex 2025-05-14',
-          },
-          minYearFounded: {
-            type: 'number',
-            description: 'The Minimum year a company was founded.',
-          },
-          maxYearFounded: {
-            type: 'number',
-            description: 'The Maximum year a company was founded.',
-          },
-
-          // Fund Criteria fields
-
-          minInvestmentRequired: {
-            type: 'number',
-            description:
-              'Minimum investment amount preferred by the investor, always in million USD. Use this when searching for investors with specific investment criteria.',
-          },
-          maxInvestmentRequired: {
-            type: 'number',
-            description:
-              'Maximum investment amount preferred by the investor, always in million USD. Use this when searching for investors with specific investment criteria.',
-          },
-
-          valuationMin: {
-            type: 'number',
-            description:
-              'Minimum valuation amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific valuation criteria.',
-          },
-          valuationMax: {
-            type: 'number',
-            description:
-              'Maximum valuation amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific valuation criteria.',
-          },
-          revenueMin: {
-            type: 'number',
-            description:
-              'Minimum revenue amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific revenue criteria.',
-          },
-          revenueMax: {
-            type: 'number',
-            description:
-              'Maximum revenue amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific revenue criteria.',
-          },
-          ebitdaMin: {
-            type: 'number',
-            description:
-              'Minimum EBITDA amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific EBITDA criteria.',
-          },
-          ebitdaMax: {
-            type: 'number',
-            description:
-              'Maximum EBITDA amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific EBITDA criteria.',
-          },
-          ebitMin: {
-            type: 'number',
-            description:
-              'Minimum EBIT amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific EBIT criteria.',
-          },
-          ebitMax: {
-            type: 'number',
-            description:
-              'Maximum EBIT amount (always in million USD) for companies that the investor prefers to invest in. Use this when searching for investors with specific EBIT criteria.',
-          },
-        },
-        required: ['At least one of the fields is required', 'isPeople'],
-      },
-    };
+    queryob.docs.llm_agent_tooling = llm_ob;
 
     return queryob;
 

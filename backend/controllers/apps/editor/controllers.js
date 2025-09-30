@@ -497,12 +497,6 @@ module.exports = function (router) {
     let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
     let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
 
-    final_object = v2sql.convert({
-      ...req.body,
-      currentModel,
-      roles
-    });
-
     var table_alias;
 
 
@@ -529,6 +523,14 @@ module.exports = function (router) {
     else {
       return res.zend(null, 400, "Invalid method");
     }
+
+    req.body.api_method = apiMethod;
+
+    final_object = v2sql.convert({
+      ...req.body,
+      currentModel,
+      roles
+    });
 
     final_object.model.method = req.body.method;
     final_object.model = JSON.stringify(final_object.model)  // for insert  'model' is array 
@@ -595,7 +597,7 @@ module.exports = function (router) {
         app_id: new req.models.public.subdomain_gen().select({ app_id: true }).where({
           name: req.body.subdomain
         }),
-        method: apiMethod,
+        method: req.body.api_method,
         route: clean_route
       })
     ], function (err, result) {
