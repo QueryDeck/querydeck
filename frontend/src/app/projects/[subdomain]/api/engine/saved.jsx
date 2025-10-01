@@ -22,7 +22,8 @@ import {
   setSortOptions,
   setSaved,
   setTablesList,
-  setJoinedGraphs
+  setJoinedGraphs,
+  setCustomDocs
 } from '../../../../../lib/data/dataSlice'
 
 // Library imports
@@ -545,6 +546,7 @@ export function APIsaved (props) {
       generateAPI()
     }
   }, [
+    JSON.stringify(state?.custom_docs),
     state?.oldMethod.value,
     state?.joins?.length,
     state?.joinDetails,
@@ -599,6 +601,7 @@ export function APIsaved (props) {
         agg_paths: [],
         base: state.base.value,
         c: state.columns,
+        custom_docs: state.custom_docs,
         db_id: state.database.value,
         join_type: state.joinKeys,
         method: state.method.value.split('_')[0],
@@ -745,6 +748,7 @@ export function APIsaved (props) {
                 mode='api'
                 oldMethod={state?.oldMethod}
                 query_id={props.query_id}
+                setCustomDocs={(custom_docs) => dispatch(setCustomDocs({custom_docs, mode: 'api', query_id: props.query_id, subdomain: props.subdomain}))}
                 subdomain={props.subdomain}
                 width={window.innerWidth - 4 - 4 - position}
               /> :
@@ -754,6 +758,7 @@ export function APIsaved (props) {
                 mode='api'
                 oldMethod={listState?.list?.find(element => element.query_id === props.query_id)?.docs?.api_method}
                 query_id={props.query_id}
+                setCustomDocs={(custom_docs) => dispatch(setCustomDocs({custom_docs, mode: 'api', query_id: props.query_id, subdomain: props.subdomain}))}
                 subdomain={props.subdomain}
                 width={window.innerWidth - 4 - 4 - position}
               />

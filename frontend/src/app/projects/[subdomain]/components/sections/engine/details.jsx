@@ -27,17 +27,21 @@ import { apiBase } from '../../../../../../api';
 import styles from './details.module.scss'
 
 const Details = props => {
-  const { docs, oldMethod } = props
+  const { docs, oldMethod, setCustomDocs } = props
 
   const [docState, setDocState] = useState({
     request: {},
     response: {}
   })
   const [command, setCommand] = useState(' ')
-  const [apiDescription, setApiDescription] = useState(docs?.llm_agent_tooling?.description || '')
+  const [apiDescription, setApiDescription] = useState('')
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [editingField, setEditingField] = useState(null)
   const [fieldDescriptions, setFieldDescriptions] = useState({})
+
+  useEffect(() => {
+    setApiDescription(docs?.llm_agent_tooling?.description || '')
+  }, [docs])
 
   // Tab Label
   const copyAPI = () => {
@@ -180,24 +184,34 @@ const Details = props => {
             Required
           </div>}
         </div>
-        <div className={styles.parameter_description_wrapper} onClick={!isEditing ? handleFieldClick : undefined}>
-          {isEditing ? (
-            <textarea
-              autoFocus
-              className={styles.parameter_description_input}
-              onBlur={handleFieldBlur}
-              onChange={handleFieldChange}
-              onKeyDown={handleFieldKeyDown}
-              placeholder="Add field description..."
-              rows={2}
-              value={currentDescription}
-            />
-          ) : (
-            <div className={currentDescription ? styles.parameter_description_text : styles.parameter_description_placeholder}>
-              {currentDescription || 'Add description...'}
+        {
+          setCustomDocs
+          ?
+          (
+            <div className={styles.parameter_description_wrapper} onClick={!isEditing ? handleFieldClick : undefined}>
+              {isEditing ? (
+                <textarea
+                  autoFocus
+                  className={styles.parameter_description_input}
+                  onBlur={handleFieldBlur}
+                  onChange={handleFieldChange}
+                  onKeyDown={handleFieldKeyDown}
+                  placeholder="Add field description..."
+                  rows={2}
+                  value={currentDescription}
+                />
+              ) : (
+                <div className={currentDescription ? styles.parameter_description_text : styles.parameter_description_placeholder}>
+                  {currentDescription || 'Add description...'}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          ) : (
+            currentDescription && <div className={styles.parameter_description_readonly}>
+              {currentDescription}
+            </div>
+          )
+        }
       </>
     )
   }
@@ -429,7 +443,9 @@ const Details = props => {
 
     const handleDescriptionBlur = () => {
       setIsEditingDescription(false)
-      console.log('Saving description:', apiDescription)
+      setCustomDocs({
+        description: apiDescription
+      })
     }
 
     const handleDescriptionChange = (e) => {
@@ -447,24 +463,32 @@ const Details = props => {
         <div className={styles.description_heading}>
           <span>{docs?.title || 'API Description'}</span>
         </div>
-        <div className={styles.description_body} onClick={handleDescriptionClick}>
-          {isEditingDescription ? (
-            <textarea
-              autoFocus
-              className={styles.description_input}
-              onBlur={handleDescriptionBlur}
-              onChange={handleDescriptionChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Describe what this API does..."
-              rows={3}
-              value={apiDescription}
-            />
-          ) : (
-            <div className={styles.description_text}>
-              {apiDescription || 'Click to add a description...'}
+        {
+          setCustomDocs ? (
+            <div className={styles.description_body} onClick={handleDescriptionClick}>
+              {isEditingDescription ? (
+                <textarea
+                  autoFocus
+                  className={styles.description_input}
+                  onBlur={handleDescriptionBlur}
+                  onChange={handleDescriptionChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Describe what this API does..."
+                  rows={3}
+                  value={apiDescription}
+                />
+              ) : (
+                <div className={styles.description_text}>
+                  {apiDescription || 'Click to add a description...'}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          )
+          :
+          <div className={styles.description_readonly}>
+            {apiDescription || 'No description available'}
+          </div>
+        }
       </div>
     )
   }

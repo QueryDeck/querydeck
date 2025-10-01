@@ -38,6 +38,19 @@
     white-space: pre;
   }
 
+  &_readonly {
+    background-color: $gray-100;
+    border: 1px solid $gray-300;
+    border-radius: 0 0 5px 5px;
+    color: $gray-600;
+    cursor: text;
+    line-height: 1.5;
+    margin-bottom: 6px;
+    min-height: 40px;
+    overflow: auto;
+    padding: 6px;
+  }
+
   &_body {
     background-color: $gray-100;
     border: 1px solid $gray-300;
@@ -146,6 +159,15 @@
       &:hover {
         background-color: rgba($gray-300, 0.3);
       }
+    }
+
+    &_readonly {
+      color: $gray-600;
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 3px 6px;
+      border-radius: 3px;
+      transition: background-color 0.15s ease;
     }
 
     &_placeholder {

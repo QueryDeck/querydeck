@@ -108,6 +108,7 @@ const blank = {
     /////// LHS END ////////
 
     ///// RHS (Viewer) /////
+    custom_docs: {},
     docs: {},
     /////// RHS END ////////
 
@@ -1393,6 +1394,21 @@ const dataSlice = createSlice({
         }
       }
     },
+    setCustomDocs (state, action) {
+      state[action.payload.mode] = {
+        ...state[action.payload.mode],
+        [action.payload.subdomain]: {
+          ...state[action.payload.mode][action.payload.subdomain],
+          [action.payload.query_id]: {
+            ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id],
+            custom_docs: {
+              ...state[action.payload.mode][action.payload.subdomain][action.payload.query_id].custom_docs,
+              ...action.payload.custom_docs
+            }
+          }
+        }
+      }
+    },
     setResult (state, action) {
       state[action.payload.mode] = {
         ...state[action.payload.mode],
@@ -1567,6 +1583,7 @@ export const {
   setLimit,
   toggleDynamicLimit,
   toggleIncludeResultCount,
+  setCustomDocs,
   setResult,
   closeWizardModal,
   openAutoGenerateModal,
