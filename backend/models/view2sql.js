@@ -267,7 +267,7 @@ exports.convert = function(params){
             if(queryob.url_param_column) {
               llm_ob.input_schema.properties[queryob.url_param_column.column] = {
                 type: queryob.url_param_column.type,
-                description: params.custom_docs && params.custom_docs.request_url[queryob.url_param_column.column] && params.custom_docs.request_url[queryob.url_param_column.column].description ? params.custom_docs.request_url[queryob.url_param_column.column].description : null
+                description: params.custom_docs && params.custom_docs.request_url && params.custom_docs.request_url[queryob.url_param_column.column] && params.custom_docs.request_url[queryob.url_param_column.column].description ? params.custom_docs.request_url[queryob.url_param_column.column].description : null
               }
               llm_ob.input_schema.required.push(queryob.url_param_column.column);
             }
