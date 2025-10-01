@@ -74,9 +74,6 @@ exports.convert = function(params){
 
       docs.title = (params.select_by_id ? 'Get ' : 'List ') + cleanTname(currentModel.tidToName[params.base][1], (params.select_by_id ? false : true)) + (params.select_by_id ? ' by ID' : '');
 
-      llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
-      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
-
         queryob = new v2json({
             subdomain: params.subdomain,
             db_id: params.db_id,
@@ -370,6 +367,11 @@ exports.convert = function(params){
         return null;
       }
     }
+
+    docs.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
+
+    llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
+    llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
 
 
     docs.method = params.method;
