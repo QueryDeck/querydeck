@@ -60,6 +60,14 @@
     min-height: 40px;
     overflow: auto;
     padding: 6px;
+    position: relative;
+    
+    &:hover {
+      .parameter_description_edit_icon {
+        opacity: 0.7;
+        transform: scale(1.15);
+      }
+    }
   }
 
   &_text {
@@ -67,12 +75,18 @@
     font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
-    padding: 2px;
-    border-radius: 3px;
-    transition: background-color 0.15s ease;
+    padding: 8px 32px 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: rgba($primary, 0.02);
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 30px;
 
     &:hover {
-      background-color: rgba($gray-400, 0.15);
+      background-color: rgba($primary, 0.05);
+      border-color: rgba($primary, 0.2);
+      box-shadow: 0 1px 3px rgba($primary, 0.1);
     }
 
     &:empty::before {
@@ -146,18 +160,32 @@
       cursor: text;
       margin-top: 4px;
       padding-left: 6px;
+      position: relative;
+      
+      &:hover {
+        .parameter_description_edit_icon {
+          opacity: 0.7;
+          transform: scale(1.15);
+        }
+      }
     }
 
     &_text {
-      color: $gray-600;
+      color: $gray-700;
       font-size: 13px;
       line-height: 1.4;
-      padding: 3px 6px;
-      border-radius: 3px;
-      transition: background-color 0.15s ease;
+      padding: 6px 28px 6px 8px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background-color: rgba($primary, 0.02);
+      transition: all 0.2s ease;
+      position: relative;
+      min-height: 20px;
 
       &:hover {
-        background-color: rgba($gray-300, 0.3);
+        background-color: rgba($primary, 0.05);
+        border-color: rgba($primary, 0.2);
+        box-shadow: 0 1px 3px rgba($primary, 0.1);
       }
     }
 
@@ -174,14 +202,30 @@
       color: $gray-400;
       font-size: 12px;
       font-style: italic;
-      padding: 3px 6px;
-      border-radius: 3px;
-      transition: all 0.15s ease;
+      padding: 6px 28px 6px 8px;
+      border: 1px dashed rgba($gray-400, 0.5);
+      border-radius: 4px;
+      background-color: rgba($gray-100, 0.5);
+      transition: all 0.2s ease;
+      min-height: 20px;
 
       &:hover {
-        background-color: rgba($gray-300, 0.3);
+        background-color: rgba($primary, 0.05);
+        border-color: rgba($primary, 0.3);
         color: $gray-500;
+        box-shadow: 0 1px 3px rgba($primary, 0.1);
       }
+    }
+
+    &_edit_icon {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      opacity: 0.2;
+      transition: all 0.25s ease;
+      color: $primary;
+      font-size: 11px;
+      pointer-events: none;
     }
 
     &_input {

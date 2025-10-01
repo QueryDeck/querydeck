@@ -7,6 +7,7 @@ import React, {
 // Library imports
 import {
   faCopy,
+  faEdit,
   faMinus,
   faPlus
 } from '@fortawesome/free-solid-svg-icons'
@@ -157,6 +158,10 @@ const Details = props => {
             ) : (
               <div className={currentDescription ? styles.parameter_description_text : styles.parameter_description_placeholder}>
                 {currentDescription || 'Add description...'}
+                <FontAwesomeIcon 
+                  icon={faEdit} 
+                  className={styles.parameter_description_edit_icon}
+                />
               </div>
             )}
           </div>
@@ -515,6 +520,10 @@ const Details = props => {
               ) : (
                 <div className={styles.description_text}>
                   {apiDescription || 'Click to add a description...'}
+                  <FontAwesomeIcon 
+                    icon={faEdit} 
+                    className={styles.parameter_description_edit_icon}
+                  />
                 </div>
               )}
             </div>
