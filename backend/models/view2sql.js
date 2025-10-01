@@ -181,6 +181,8 @@ exports.convert = function(params){
       llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
       llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
 
+      console.log('params.allow_multiple_row_paths', params.allow_multiple_row_paths, params.single_base_insert)
+
         queryob = new v2json({
             subdomain: params.subdomain,
             db_id: params.db_id,
@@ -197,7 +199,7 @@ exports.convert = function(params){
               limit: params.limit,
               offset: params.offset,
               base: params.base,
-              single_base_insert: params.single_base_insert,
+              single_base_insert: (params.llm ? true : params.single_base_insert),
               graphql: params.graphql
             }
           }).convertInsert();
