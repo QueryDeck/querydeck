@@ -482,6 +482,8 @@ module.exports = function (router) {
 
     var clean_route_spl = []
 
+    req.body.llm = true;
+
     for (let i = 0; i < api_route_spl.length; i++) {
       const element = api_route_spl[i];
       if (element == '') continue;
@@ -662,6 +664,8 @@ module.exports = function (router) {
 
 
     req.body.agg_paths = req.body.agg_paths || [];
+
+    req.body.llm = true;
 
     let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
     let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
@@ -1099,6 +1103,8 @@ module.exports = function (router) {
 
     let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
     let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
+
+    req.body.llm = true;
 
     var q = v2sql.convert({
       ...req.body,
