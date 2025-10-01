@@ -34,7 +34,7 @@ const Details = props => {
     response: {}
   })
   const [command, setCommand] = useState(' ')
-  const [apiDescription, setApiDescription] = useState(docs?.description || '')
+  const [apiDescription, setApiDescription] = useState(docs?.llm_agent_tooling?.description || '')
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [editingField, setEditingField] = useState(null)
   const [fieldDescriptions, setFieldDescriptions] = useState({})
@@ -149,7 +149,6 @@ const Details = props => {
 
     const handleFieldBlur = () => {
       setEditingField(null)
-      console.log('Saving field description:', uniqueKey, fieldDescriptions[uniqueKey])
     }
 
     const handleFieldChange = (e) => {
@@ -473,6 +472,7 @@ const Details = props => {
   const renderParameters = () => {
     return (
       <div className={styles.parameters}>
+        {renderAPIDescription()}
         {renderQueryParameters()}
         {renderPathParameters()}
         {renderBodyParameters()}
@@ -588,7 +588,6 @@ const Details = props => {
   const renderData = () => {
     return (
       <div className={styles.data}>
-        {renderAPIDescription()}
         {renderScript()}
         {renderRequest()}
         {renderResponse()}
