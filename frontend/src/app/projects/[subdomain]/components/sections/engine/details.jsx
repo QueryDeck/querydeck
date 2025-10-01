@@ -535,7 +535,6 @@ const Details = props => {
         {renderQueryParameters()}
         {renderPathParameters()}
         {renderBodyParameters()}
-        {renderTooling()}
         {/* {renderResponseDetailed()} */}
       </div>
     )
@@ -648,6 +647,7 @@ const Details = props => {
     return (
       <div className={styles.data}>
         {renderScript()}
+        {renderTooling()}
         {renderRequest()}
         {renderResponse()}
         {renderQuery()}
