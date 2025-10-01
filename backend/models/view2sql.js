@@ -109,23 +109,17 @@ exports.convert = function(params){
           if(queryob.model.limit_dynamic) {
             request_query_params._limit = {
               type: 'number',
-              description: 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
+              description: params.custom_docs.request_query._limit.description || 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
             }
-            llm_ob.input_schema.properties._limit = {
-              type: 'number',
-              description: 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
-            }
+            llm_ob.input_schema.properties._limit = request_query_params._limit
           }
 
           if(queryob.model.offset_dynamic) {
             request_query_params._offset = {
               type: 'number',
-              description: 'The initial index from which to return the results (default: 0)'
+              description: params.custom_docs.request_query._offset.description || 'The initial index from which to return the results (default: 0)'
             }
-            llm_ob.input_schema.properties._offset = {
-              type: 'number',
-              description: 'The initial index from which to return the results (default: 0)'
-            }
+            llm_ob.input_schema.properties._offset = request_query_params._offset
           }
 
           if(queryob.model.orderby_dynamic && queryob.model.orderby_dynamic_columns.length > 0) {
@@ -138,14 +132,18 @@ exports.convert = function(params){
             if(queryob.model.orderby && queryob.model.orderby.length > 0) {
               request_query_params._order.description += ' (default: ' + queryob.model.orderby.map(col => (col.name.split('.').pop() + ':' + (col.asc ? 'asc' : 'desc'))).join(',') + ')'
             }
-            llm_ob.input_schema.properties._order = {
-              type: 'text',
-              description: 'Order results by columns. Format: column1:asc,column2:desc. Available columns: ' + 
-                queryob.model.orderby_dynamic_columns.map(col => col.alias).join(', ')
+            if(params.custom_docs.request_query._order) {
+              request_query_params._order.description = params.custom_docs.request_query._order.description;
             }
-            if(queryob.model.orderby && queryob.model.orderby.length > 0) {
-              llm_ob.input_schema.properties._order.description += ' (default: ' + queryob.model.orderby.map(col => (col.name.split('.').pop() + ':' + (col.asc ? 'asc' : 'desc'))).join(',') + ')'
+            llm_ob.input_schema.properties._order = request_query_params._order
+          }
+
+          if(queryob.url_param_column) {
+            llm_ob.input_schema.properties[queryob.url_param_column.column] = {
+              type: queryob.url_param_column.type,
+              description: params.custom_docs && params.custom_docs.request_url[queryob.url_param_column.column] && params.custom_docs.request_url[queryob.url_param_column.column].description ? params.custom_docs.request_url[queryob.url_param_column.column].description : null
             }
+            llm_ob.input_schema.required.push(queryob.url_param_column.column);
           }
 
           queryob.query.querypaths = queryob.query.querypaths || [];
@@ -176,7 +174,7 @@ exports.convert = function(params){
 
     } else if(params.method == 'insert'){
 
-      docs.title = 'Create ' + cleanTname(currentModel.tidToName[params.base][1], true);
+      docs.title = 'Create ' + cleanTname(currentModel.tidToName[params.base][1], (params.llm ? false : true));
 
       llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
       llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
@@ -269,7 +267,7 @@ exports.convert = function(params){
             if(queryob.url_param_column) {
               llm_ob.input_schema.properties[queryob.url_param_column.column] = {
                 type: queryob.url_param_column.type,
-                description: params.custom_docs && params.custom_docs.request_url && params.custom_docs.request_url.description ? params.custom_docs.request_url.description : null
+                description: params.custom_docs && params.custom_docs.request_url[queryob.url_param_column.column] && params.custom_docs.request_url[queryob.url_param_column.column].description ? params.custom_docs.request_url[queryob.url_param_column.column].description : null
               }
               llm_ob.input_schema.required.push(queryob.url_param_column.column);
             }
@@ -390,6 +388,8 @@ exports.convert = function(params){
     queryob.roles = role_arr;
 
     queryob.docs = docs;
+
+    queryob.docs.custom_docs = params.custom_docs;
 
     queryob.docs.llm_agent_tooling = llm_ob;
 
