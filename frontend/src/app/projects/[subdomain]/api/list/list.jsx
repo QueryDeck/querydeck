@@ -132,6 +132,7 @@ export const APIlist = props => {
             {
               state?.select_preview?.docs ?
               <Details
+                customDocs={state?.select_preview?.docs?.custom_docs}
                 docs={state?.select_preview?.docs}
                 dragging={isDragging}
                 mode='api'

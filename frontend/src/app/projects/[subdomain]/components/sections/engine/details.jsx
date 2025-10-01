@@ -162,11 +162,13 @@ const Details = props => {
           </div>
         )
       } else {
-        return (
-          <div className={styles.parameter_description_readonly}>
-            {currentDescription}
-          </div>
-        )
+        if (currentDescription) {
+          return (
+            <div className={styles.parameter_description_readonly}>
+              {currentDescription}
+            </div>
+          )
+        }
       }
     }
   }
