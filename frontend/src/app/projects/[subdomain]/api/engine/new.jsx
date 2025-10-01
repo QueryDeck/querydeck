@@ -635,6 +635,7 @@ export function APInew (props) {
           {
             (state?.docs && Object.keys(state?.docs)?.length) ?
             <Details
+              customDocs={state?.custom_docs}
               docs={{
                 ...state?.docs,
                 apiRoute: state?.route,

@@ -739,6 +739,7 @@ export function APIsaved (props) {
             {
               (state?.docs && Object.keys(state?.docs)?.length) ?
               <Details
+                customDocs={state?.custom_docs}
                 docs={{
                   ...state?.docs,
                   apiRoute: state?.route,
@@ -753,6 +754,7 @@ export function APIsaved (props) {
                 width={window.innerWidth - 4 - 4 - position}
               /> :
               <Details
+                customDocs={state?.custom_docs}
                 docs={listState?.list?.find(element => element.query_id === props.query_id)?.docs}
                 dragging={isDragging}
                 mode='api'

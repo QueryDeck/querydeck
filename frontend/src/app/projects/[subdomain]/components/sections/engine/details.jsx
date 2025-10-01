@@ -27,7 +27,7 @@ import { apiBase } from '../../../../../../api';
 import styles from './details.module.scss'
 
 const Details = props => {
-  const { docs, oldMethod, setCustomDocs } = props
+  const { customDocs, docs, oldMethod, setCustomDocs } = props
 
   const [docState, setDocState] = useState({
     request: {},
@@ -138,9 +138,44 @@ const Details = props => {
     setCommand(updatedCommand)
   }
 
-  const renderParameter = (parameter, datatype, required = false, info = null, fieldKey = null) => {
+  const renderDescription = (showDescription, fieldKey, fieldType, parameter, currentDescription, customDocs, isEditing, handleFieldClick, handleFieldBlur, handleFieldChange, handleFieldKeyDown) => {
+    if (showDescription && fieldKey?.split('.')?.length <= 3) {
+      if (setCustomDocs) {
+        return (
+          <div className={styles.parameter_description_wrapper} onClick={!isEditing ? handleFieldClick : undefined}>
+            {isEditing ? (
+              <textarea
+                autoFocus
+                className={styles.parameter_description_input}
+                onBlur={handleFieldBlur}
+                onChange={handleFieldChange}
+                onKeyDown={handleFieldKeyDown}
+                placeholder="Add field description..."
+                rows={2}
+                value={currentDescription}
+              />
+            ) : (
+              <div className={currentDescription ? styles.parameter_description_text : styles.parameter_description_placeholder}>
+                {currentDescription || 'Add description...'}
+              </div>
+            )}
+          </div>
+        )
+      } else {
+        return (
+          <div className={styles.parameter_description_readonly}>
+            {currentDescription}
+          </div>
+        )
+      }
+    }
+  }
+
+  const renderParameter = (parameter, fieldType, datatype, required = false, info = null, fieldKey = null, showDescription = true) => {
     const uniqueKey = fieldKey || parameter
-    const currentDescription = fieldDescriptions[uniqueKey] !== undefined ? fieldDescriptions[uniqueKey] : (info || '')
+    const currentDescription = fieldDescriptions[uniqueKey] !== undefined 
+      ? fieldDescriptions[uniqueKey] 
+      : (customDocs?.[fieldType]?.[parameter]?.description || info || '')
     const isEditing = editingField === uniqueKey
 
     const handleFieldClick = () => {
@@ -153,6 +188,14 @@ const Details = props => {
 
     const handleFieldBlur = () => {
       setEditingField(null)
+      setCustomDocs({
+        [fieldType]: {
+          ...customDocs?.[fieldType],
+          [parameter]: {
+            description: currentDescription
+          }
+        }
+      })
     }
 
     const handleFieldChange = (e) => {
@@ -165,6 +208,12 @@ const Details = props => {
     const handleFieldKeyDown = (e) => {
       if (e.key === 'Escape') {
         setEditingField(null)
+        // Revert unsaved changes
+        const originalDescription = customDocs?.[fieldType]?.[parameter]?.description || info || ''
+        setFieldDescriptions({
+          ...fieldDescriptions,
+          [uniqueKey]: originalDescription
+        })
       }
     }
 
@@ -184,34 +233,19 @@ const Details = props => {
             Required
           </div>}
         </div>
-        {
-          setCustomDocs
-          ?
-          (
-            <div className={styles.parameter_description_wrapper} onClick={!isEditing ? handleFieldClick : undefined}>
-              {isEditing ? (
-                <textarea
-                  autoFocus
-                  className={styles.parameter_description_input}
-                  onBlur={handleFieldBlur}
-                  onChange={handleFieldChange}
-                  onKeyDown={handleFieldKeyDown}
-                  placeholder="Add field description..."
-                  rows={2}
-                  value={currentDescription}
-                />
-              ) : (
-                <div className={currentDescription ? styles.parameter_description_text : styles.parameter_description_placeholder}>
-                  {currentDescription || 'Add description...'}
-                </div>
-              )}
-            </div>
-          ) : (
-            currentDescription && <div className={styles.parameter_description_readonly}>
-              {currentDescription}
-            </div>
-          )
-        }
+        {renderDescription(
+          showDescription,
+          fieldKey,
+          fieldType,
+          parameter,
+          currentDescription,
+          customDocs,
+          isEditing,
+          handleFieldClick,
+          handleFieldBlur,
+          handleFieldChange,
+          handleFieldKeyDown
+        )}
       </>
     )
   }
@@ -238,7 +272,7 @@ const Details = props => {
               Path Parameters
             </div>
             <div className={styles.parameters_content}>
-              {parseData(data, null, 'request')}
+              {parseData(data, null, 'request', 'request_url')}
             </div>
           </>
         )
@@ -275,17 +309,16 @@ const Details = props => {
             Query Parameters
           </div>
           <div className={styles.parameters_content}>
-            {parseData(data, null, 'request')}
+            {parseData(data, null, 'request', 'request_query')}
           </div>
         </>
       )
     }
   }
 
-  const parseData = (data, key = null, dataType, parentPath = '') => {
+  const parseData = (data, key = null, dataType, fieldType, parentPath = '') => {
     if (data.$qd_column) {
-      const fieldKey = parentPath ? `${parentPath}.${key}` : key
-      return renderParameter(key, data.type, data.required, data.details, fieldKey)
+      return renderParameter(key, fieldType, data.type, data.required, data.details, parentPath)
     } else {
       const renderAction = element => {
         if (
@@ -365,13 +398,13 @@ const Details = props => {
       const result = []
       Object.keys(data).forEach(element => {
         const currentPath = parentPath ? `${parentPath}.${element}` : element
-        const children = parseData(data[element], element, dataType, currentPath)
+        const children = parseData(data[element], element, dataType, fieldType, currentPath)
         if (!data[element].$qd_column) {
           result.push(
             <div className={(dataType === 'request' && docState.request[element]) ||
               (dataType === 'response' && docState.response[element]) ? styles.parameter_container_collapsed : styles.parameter_container_heading}>
               <div className={styles.parameter_container_heading_content}>
-                {renderParameter(element, data[element].constructor === Array ? 'array' : 'object', data[element].required, data[element].details, currentPath)}
+                {renderParameter(element, fieldType, data[element].constructor === Array ? 'array' : 'object', data[element].required, data[element].details, null, false)} 
               </div>
               {isNaN(element) && renderAction(element)}
             </div>
@@ -400,7 +433,7 @@ const Details = props => {
             Body Parameters
           </div>
           <div className={styles.parameters_content}>
-            {parseData(docs?.request_body_detailed, null, 'request')}
+            {parseData(docs?.request_body_detailed, null, 'request', 'request_body')}
           </div>
         </>
       )
