@@ -109,7 +109,7 @@ exports.convert = function(params){
           if(queryob.model.limit_dynamic) {
             request_query_params._limit = {
               type: 'number',
-              description: params.custom_docs.request_query._limit.description || 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
+              description: params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query._limit && params.custom_docs.request_query._limit.description ? params.custom_docs.request_query._limit.description : 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
             }
             llm_ob.input_schema.properties._limit = request_query_params._limit
           }
@@ -117,7 +117,7 @@ exports.convert = function(params){
           if(queryob.model.offset_dynamic) {
             request_query_params._offset = {
               type: 'number',
-              description: params.custom_docs.request_query._offset.description || 'The initial index from which to return the results (default: 0)'
+              description: params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query._offset && params.custom_docs.request_query._offset.description ? params.custom_docs.request_query._offset.description : 'The initial index from which to return the results (default: 0)'
             }
             llm_ob.input_schema.properties._offset = request_query_params._offset
           }
@@ -132,7 +132,7 @@ exports.convert = function(params){
             if(queryob.model.orderby && queryob.model.orderby.length > 0) {
               request_query_params._order.description += ' (default: ' + queryob.model.orderby.map(col => (col.name.split('.').pop() + ':' + (col.asc ? 'asc' : 'desc'))).join(',') + ')'
             }
-            if(params.custom_docs.request_query._order) {
+            if(params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query._order) {
               request_query_params._order.description = params.custom_docs.request_query._order.description;
             }
             llm_ob.input_schema.properties._order = request_query_params._order
