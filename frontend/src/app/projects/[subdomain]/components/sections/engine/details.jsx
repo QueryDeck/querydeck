@@ -578,7 +578,7 @@ const Details = props => {
     JSON.stringify(docs?.request_body).length > 2 && <div className={styles.request}>
       <div className={styles.request_heading}>
         <span>
-          Request
+          Sample Request
         </span>
         <Button
           color='falcon-primary'
@@ -604,7 +604,7 @@ const Details = props => {
     docs?.sql_query.text.length ? <div className={styles.query}>
       <div className={styles.query_heading}>
         <span>
-          Query
+          Sample Query
         </span>
         <Button
           color='falcon-primary'
@@ -630,7 +630,7 @@ const Details = props => {
     JSON.stringify(docs?.response).length > 2 && <div className={styles.response}>
       <div className={styles.response_heading}>
         <span>
-          Response
+          Sample Response
         </span>
         <Button
           color='falcon-primary'
