@@ -39,10 +39,23 @@ const Details = props => {
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [editingField, setEditingField] = useState(null)
   const [fieldDescriptions, setFieldDescriptions] = useState({})
+  const [collapsedSections, setCollapsedSections] = useState({
+    tooling: false,
+    request: true,
+    response: true,
+    query: false
+  })
 
   useEffect(() => {
     setApiDescription(docs?.llm_agent_tooling?.description || '')
   }, [docs])
+
+  const toggleSection = (section) => {
+    setCollapsedSections({
+      ...collapsedSections,
+      [section]: !collapsedSections[section]
+    })
+  }
 
   // Tab Label
   const copyAPI = () => {
@@ -450,27 +463,38 @@ const Details = props => {
 
   const renderTooling = () => (
     JSON.stringify(docs?.llm_agent_tooling)?.length > 2 && <div className={styles.request} style={{ paddingTop: 8 }}>
-      <div className={styles.request_heading}>
+      <div className={styles.request_heading} style={{ borderRadius: collapsedSections.tooling ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.tooling ? '4px' : '0' }}>
         <span>
           LLM Agent Tooling
         </span>
-        <Button
-          color='falcon-primary'
-          onClick={copyTooling}
-          size='sm'
-        >
-          <FontAwesomeIcon icon={faCopy} />
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('tooling')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.tooling ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyTooling}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
       </div>
-      <div className={styles.request_body} style={{ paddingTop:  3}}>
-        <ReactJson
-          // collapsed={docs?.request.length <= 25 ? 3 : 2}
-          // collapseStringsAfterLength={50}
-          displayDataTypes={false}
-          name={null}
-          src={docs?.llm_agent_tooling}
-        />
-      </div>
+      {!collapsedSections.tooling && (
+        <div className={styles.request_body} style={{ paddingTop:  3}}>
+          <ReactJson
+            // collapsed={docs?.request.length <= 25 ? 3 : 2}
+            // collapseStringsAfterLength={50}
+            displayDataTypes={false}
+            name={null}
+            src={docs?.llm_agent_tooling}
+          />
+        </div>
+      )}
     </div>
   )
 
@@ -576,79 +600,112 @@ const Details = props => {
 
   const renderRequest = () => (
     JSON.stringify(docs?.request_body).length > 2 && <div className={styles.request}>
-      <div className={styles.request_heading}>
+      <div className={styles.request_heading} style={{ borderRadius: collapsedSections.request ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.request ? '4px' : '0' }}>
         <span>
           Sample Request
         </span>
-        <Button
-          color='falcon-primary'
-          onClick={copyRequest}
-          size='sm'
-        >
-          <FontAwesomeIcon icon={faCopy} />
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('request')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.request ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyRequest}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
       </div>
-      <div className={styles.request_body}>
-        <ReactJson
-          // collapsed={docs?.request.length <= 25 ? 3 : 2}
-          // collapseStringsAfterLength={50}
-          displayDataTypes={false}
-          name={null}
-          src={docs?.request_body}
-        />
-      </div>
+      {!collapsedSections.request && (
+        <div className={styles.request_body}>
+          <ReactJson
+            // collapsed={docs?.request.length <= 25 ? 3 : 2}
+            // collapseStringsAfterLength={50}
+            displayDataTypes={false}
+            name={null}
+            src={docs?.request_body}
+          />
+        </div>
+      )}
     </div>
   )
 
   const renderQuery = () => (
     docs?.sql_query.text.length ? <div className={styles.query}>
-      <div className={styles.query_heading}>
+      <div className={styles.query_heading} style={{ borderRadius: collapsedSections.query ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.query ? '4px' : '0' }}>
         <span>
           Sample Query
         </span>
-        <Button
-          color='falcon-primary'
-          onClick={copyQuery}
-          size='sm'
-        >
-          <FontAwesomeIcon icon={faCopy} />
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('query')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.query ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyQuery}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
       </div>
-      <div className={styles.query_body}>
-        <Alert
-          className={styles.alert}
-          color='warning'
-        >
-          This is a sample query. The actual query will differ depending on the parameters selected.
-        </Alert>
-        {docs?.sql_query.text}
-      </div>
+      {!collapsedSections.query && (
+        <div className={styles.query_body}>
+          <Alert
+            className={styles.alert}
+            color='warning'
+          >
+            This is a sample query. The actual query will differ depending on the parameters selected.
+          </Alert>
+          {docs?.sql_query.text}
+        </div>
+      )}
     </div> : null
   )
 
   const renderResponse = () => (
     JSON.stringify(docs?.response).length > 2 && <div className={styles.response}>
-      <div className={styles.response_heading}>
+      <div className={styles.response_heading} style={{ borderRadius: collapsedSections.response ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.response ? '4px' : '0' }}>
         <span>
           Sample Response
         </span>
-        <Button
-          color='falcon-primary'
-          onClick={copyResponse}
-          size='sm'
-        >
-          <FontAwesomeIcon icon={faCopy} />
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('response')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.response ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyResponse}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
       </div>
-      <div className={styles.response_body}>
-        <ReactJson
-          // collapsed={docs?.response.length <= 25 ? 4 : 3}
-          // collapseStringsAfterLength={50}
-          displayDataTypes={false}
-          name={null}
-          src={docs?.response}
-        />
-      </div>
+      {!collapsedSections.response && (
+        <div className={styles.response_body}>
+          <ReactJson
+            // collapsed={docs?.response.length <= 25 ? 4 : 3}
+            // collapseStringsAfterLength={50}
+            displayDataTypes={false}
+            name={null}
+            src={docs?.response}
+          />
+        </div>
+      )}
     </div>
   )
 
