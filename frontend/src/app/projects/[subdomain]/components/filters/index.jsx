@@ -1801,6 +1801,7 @@ const Filters = React.forwardRef((props, ref) => {
         conditionalRulesModal={state.conditionalRulesModal}
         modifyConditionalRules={modifyConditionalRules}
         rules={state.rules}
+        sessionKeys={sessionKeys}
         toggleDisableRule={toggleDisableRule}
         updateConditionalRulesModal={updateConditionalRulesModal}
       />

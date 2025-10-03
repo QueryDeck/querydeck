@@ -30,6 +30,7 @@ const ConditionalRules = props => {
 
   const rules = getChildren(props.conditionalRulesModal, [])
   const options = []
+  
   rules.forEach(rule => {
     if (props.rules[rule].value.field && props.rules[rule].value.field.label !== 'EXISTS') {
       options.push({
@@ -38,6 +39,17 @@ const ConditionalRules = props => {
       })
     }
   })
+  
+  if (props.sessionKeys && Object.keys(props.sessionKeys).length > 0) {
+    Object.values(props.sessionKeys).forEach(sessionKey => {
+      if (sessionKey.param_key) {
+        options.push({
+          label: `SESSION.${sessionKey.param_key}`,
+          value: `SESSION.${sessionKey.param_key}`
+        })
+      }
+    })
+  }
   // const options = rules.map(rule => ({
   //   label: props.rules[rule]?.value?.value ? props.rules[rule]?.value?.value : `QUERY.${props.rules[rule].value.field.label}`,
   //   value: props.rules[rule]?.value?.value ? props.rules[rule]?.value?.value : `QUERY.${props.rules[rule].value.field.label}`
@@ -94,11 +106,35 @@ const ConditionalRules = props => {
         {/* {renderRules()} */}
         <Creatable
           isClearable
-          isValidNewOption={value => value.includes('QUERY.') || value.includes('SESSION.')}
+          isValidNewOption={(inputValue) => {
+            if (!inputValue || inputValue.trim() === '') return false
+            return true
+          }}
+          formatCreateLabel={(inputValue) => {
+            if (inputValue.startsWith('QUERY.') || inputValue.startsWith('SESSION.')) {
+              return `Create "${inputValue}"`
+            }
+            return `Create "QUERY.${inputValue}"`
+          }}
           options={options}
           placeholder='Select a rule'
           value={props.groups[props.conditionalRulesModal]?.conditionalRules}
-          onChange={value => props.modifyConditionalRules(props.conditionalRulesModal, value)}
+          onChange={value => {
+            if (value && !value.__isNew__) {
+              props.modifyConditionalRules(props.conditionalRulesModal, value)
+            } else if (value && value.__isNew__) {
+              const inputValue = value.value
+              const formattedValue = inputValue.startsWith('QUERY.') || inputValue.startsWith('SESSION.') 
+                ? inputValue 
+                : `QUERY.${inputValue}`
+              props.modifyConditionalRules(props.conditionalRulesModal, {
+                label: formattedValue,
+                value: formattedValue
+              })
+            } else {
+              props.modifyConditionalRules(props.conditionalRulesModal, value)
+            }
+          }}
         />
       </ModalBody>
     </Modal>
