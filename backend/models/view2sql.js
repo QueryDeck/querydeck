@@ -60,6 +60,16 @@ exports.convert = function(params){
       apiRoute: params.apiRoute
     };
     
+    var llm_ob = {
+      name: null,
+      description: null,
+      input_schema: {
+        type: 'object',
+        properties: {},
+        required: []
+      }
+    };
+
     if(params.method == 'select'){
 
       docs.title = (params.select_by_id ? 'Get ' : 'List ') + cleanTname(currentModel.tidToName[params.base][1], (params.select_by_id ? false : true)) + (params.select_by_id ? ' by ID' : '');
@@ -99,15 +109,17 @@ exports.convert = function(params){
           if(queryob.model.limit_dynamic) {
             request_query_params._limit = {
               type: 'number',
-              description: 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
+              description: params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query._limit && params.custom_docs.request_query._limit.description ? params.custom_docs.request_query._limit.description : 'Number of results to return per page (default: ' + queryob.model.limit + ', max: 1000)'
             }
+            llm_ob.input_schema.properties._limit = request_query_params._limit
           }
 
           if(queryob.model.offset_dynamic) {
             request_query_params._offset = {
               type: 'number',
-              description: 'The initial index from which to return the results (default: 0)'
+              description: params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query._offset && params.custom_docs.request_query._offset.description ? params.custom_docs.request_query._offset.description : 'The initial index from which to return the results (default: 0)'
             }
+            llm_ob.input_schema.properties._offset = request_query_params._offset
           }
 
           if(queryob.model.orderby_dynamic && queryob.model.orderby_dynamic_columns.length > 0) {
@@ -120,16 +132,35 @@ exports.convert = function(params){
             if(queryob.model.orderby && queryob.model.orderby.length > 0) {
               request_query_params._order.description += ' (default: ' + queryob.model.orderby.map(col => (col.name.split('.').pop() + ':' + (col.asc ? 'asc' : 'desc'))).join(',') + ')'
             }
+            if(params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query._order) {
+              request_query_params._order.description = params.custom_docs.request_query._order.description;
+            }
+            llm_ob.input_schema.properties._order = request_query_params._order
+          }
+
+          if(queryob.url_param_column) {
+            llm_ob.input_schema.properties[queryob.url_param_column.column] = {
+              type: queryob.url_param_column.type,
+              description: params.custom_docs && params.custom_docs.request_url[queryob.url_param_column.column] && params.custom_docs.request_url[queryob.url_param_column.column].description ? params.custom_docs.request_url[queryob.url_param_column.column].description : null
+            }
+            llm_ob.input_schema.required.push(queryob.url_param_column.column);
           }
 
           queryob.query.querypaths = queryob.query.querypaths || [];
 
           for(let i = 0; i < queryob.query.querypaths.length; i++) {
             if(queryob.query.querypaths[i].input_key.indexOf('QUERY') > -1) {
-              request_query_params[queryob.query.querypaths[i].input_key.split('.')[1]] = {
+              var var_name = queryob.query.querypaths[i].input_key.split('.')[1];
+              request_query_params[var_name] = {
                 type: queryob.query.querypaths[i].type,
-                required: true
+                required: queryob.query.querypaths[i].required,
+                array_input: queryob.query.querypaths[i].array_input
               };
+              llm_ob.input_schema.properties[var_name] = {
+                type: queryob.query.querypaths[i].array_input ? 'array' : queryob.query.querypaths[i].type,
+                description: params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query[var_name] && params.custom_docs.request_query[var_name].description ? params.custom_docs.request_query[var_name].description : null
+              };
+              if(queryob.query.querypaths[i].required) llm_ob.input_schema.required.push(var_name);
             }
           }
 
@@ -143,7 +174,12 @@ exports.convert = function(params){
 
     } else if(params.method == 'insert'){
 
-      docs.title = 'Create ' + cleanTname(currentModel.tidToName[params.base][1], true);
+      docs.title = 'Create ' + cleanTname(currentModel.tidToName[params.base][1], (params.llm ? false : true));
+
+      llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
+      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
+
+      console.log('params.allow_multiple_row_paths', params.allow_multiple_row_paths, params.single_base_insert)
 
         queryob = new v2json({
             subdomain: params.subdomain,
@@ -161,7 +197,7 @@ exports.convert = function(params){
               limit: params.limit,
               offset: params.offset,
               base: params.base,
-              single_base_insert: params.single_base_insert,
+              single_base_insert: (params.llm ? true : params.single_base_insert),
               graphql: params.graphql
             }
           }).convertInsert();
@@ -179,9 +215,25 @@ exports.convert = function(params){
 
           docs.sql_query = {text: queryob.query.text};
 
+          var res_table = Object.keys(docs.request_body_detailed);
+          var sample_ob = Array.isArray(docs.request_body_detailed[res_table]) ? docs.request_body_detailed[res_table][0] : docs.request_body_detailed[res_table];
+          var res_cols = Object.keys(sample_ob);
+
+          for(let i = 0; i < res_cols.length; i++) {
+            if(!sample_ob[res_cols[i]].$qd_column) continue;
+            llm_ob.input_schema.properties[res_cols[i]] = {
+              type: sample_ob[res_cols[i]].type,
+              description: params.custom_docs && params.custom_docs.request_body && params.custom_docs.request_body[res_cols[i]] && params.custom_docs.request_body[res_cols[i]].description ? params.custom_docs.request_body[res_cols[i]].description : null
+            };
+            if(sample_ob[res_cols[i]].required) llm_ob.input_schema.required.push(res_cols[i]);
+          }
+
     } else if(params.method == 'update'){
 
       docs.title = 'Update ' + cleanTname(currentModel.tidToName[params.base][1], false);
+
+      llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
+      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
 
         queryob = new v2json({
             subdomain: params.subdomain,
@@ -212,11 +264,27 @@ exports.convert = function(params){
 
             queryob.query.querypaths = queryob.query.querypaths || [];
 
+            if(queryob.url_param_column) {
+              llm_ob.input_schema.properties[queryob.url_param_column.column] = {
+                type: queryob.url_param_column.type,
+                description: params.custom_docs && params.custom_docs.request_url && params.custom_docs.request_url[queryob.url_param_column.column] && params.custom_docs.request_url[queryob.url_param_column.column].description ? params.custom_docs.request_url[queryob.url_param_column.column].description : null
+              }
+              llm_ob.input_schema.required.push(queryob.url_param_column.column);
+            }
+
             for(let i = 0; i < queryob.query.querypaths.length; i++) {
               if(queryob.query.querypaths[i].input_key.indexOf('QUERY') > -1) {
-                request_query_params[queryob.query.querypaths[i].input_key.split('.')[1]] = {
-                  type: queryob.query.querypaths[i].type
+                var var_name = queryob.query.querypaths[i].input_key.split('.')[1];
+                request_query_params[var_name] = {
+                  type: queryob.query.querypaths[i].type,
+                  required: queryob.query.querypaths[i].required,
+                  array_input: queryob.query.querypaths[i].array_input
                 };
+                llm_ob.input_schema.properties[var_name] = {
+                  type: queryob.query.querypaths[i].type,
+                  description: params.custom_docs && params.custom_docs.request_query && params.custom_docs.request_query[var_name] && params.custom_docs.request_query[var_name].description ? params.custom_docs.request_query[var_name].description : null
+                };
+                if(queryob.query.querypaths[i].required) llm_ob.input_schema.required.push(var_name);
               }
             }
 
@@ -228,6 +296,20 @@ exports.convert = function(params){
             docs.response_detailed = queryob.response_detailed || {};
 
             docs.sql_query = {text: queryob.query.text};
+
+            var res_table = Object.keys(docs.request_body_detailed);
+            var sample_ob = Array.isArray(docs.request_body_detailed[res_table]) ? docs.request_body_detailed[res_table][0] : docs.request_body_detailed[res_table];
+            var res_cols = Object.keys(sample_ob);
+  
+            for(let i = 0; i < res_cols.length; i++) {
+              if(!sample_ob[res_cols[i]].$qd_column) continue;
+              llm_ob.input_schema.properties[res_cols[i]] = {
+                type: sample_ob[res_cols[i]].type,
+                description: params.custom_docs && params.custom_docs.request_body && params.custom_docs.request_body[res_cols[i]] && params.custom_docs.request_body[res_cols[i]].description ? params.custom_docs.request_body[res_cols[i]].description : null
+              };
+              if(sample_ob[res_cols[i]].required) llm_ob.input_schema.required.push(res_cols[i]);
+            }
+
           } else {
             return null;
           }
@@ -235,6 +317,9 @@ exports.convert = function(params){
     } else if(params.method == 'delete') {
 
       docs.title = 'Delete ' + cleanTname(currentModel.tidToName[params.base][1], false);
+
+      llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
+      llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
       
       queryob = new v2json({
         subdomain: params.subdomain,
@@ -283,6 +368,11 @@ exports.convert = function(params){
       }
     }
 
+    docs.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
+
+    llm_ob.description = params.custom_docs && params.custom_docs.description ? params.custom_docs.description : docs.title;
+    llm_ob.name = docs.title.replace(/\s/g, '_').toLowerCase();
+
 
     docs.method = params.method;
     docs.request_query = request_query_params;
@@ -293,10 +383,15 @@ exports.convert = function(params){
     docs.allowed_roles = allowed_role_names;
     docs.auth_required = params.auth_required;
     docs.request_url_param = queryob.url_param_column;
+    docs.api_method = params.api_method;
 
     queryob.roles = role_arr;
 
     queryob.docs = docs;
+
+    queryob.docs.custom_docs = params.custom_docs;
+
+    queryob.docs.llm_agent_tooling = llm_ob;
 
     return queryob;
 

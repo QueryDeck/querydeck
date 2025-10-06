@@ -493,7 +493,7 @@ const ColumnSection = props => {
               id='column'
             >
               <NavLink className={state?.columnMode !== 'column' ? 'active' : ''}>
-                Columns
+                Insert Columns
               </NavLink>
             </NavItem>
             <NavItem
@@ -509,7 +509,7 @@ const ColumnSection = props => {
                   subdomain: props.subdomain
                 })))}
               >
-                Conflicting Columns
+                Update Columns
               </NavLink>
             </NavItem>
             <NavItem

@@ -278,7 +278,7 @@ const ReturnSection = props => {
                   subdomain: props.subdomain
                 })))}
               >
-                Columns
+                Insert Columns
               </NavLink>
             </NavItem>
             <NavItem
@@ -294,7 +294,7 @@ const ReturnSection = props => {
                   subdomain: props.subdomain
                 })))}
               >
-                Conflicting Columns
+                Update Columns
               </NavLink>
             </NavItem>
             <NavItem

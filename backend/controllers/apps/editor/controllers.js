@@ -482,6 +482,8 @@ module.exports = function (router) {
 
     var clean_route_spl = []
 
+    req.body.llm = true;
+
     for (let i = 0; i < api_route_spl.length; i++) {
       const element = api_route_spl[i];
       if (element == '') continue;
@@ -497,37 +499,37 @@ module.exports = function (router) {
     let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
     let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
 
+    var table_alias;
+
+
+    if (req.body.method == 'insert') {
+      apiMethod = 'POST'
+    }
+    else if (req.body.method == 'update') {
+      apiMethod = 'PUT'
+    }
+    else if (req.body.method == 'select') {
+      apiMethod = req.body.api_method == 'POST' ? 'POST' : 'GET'
+    }
+    else if (req.body.method == 'delete') {
+      apiMethod = 'DELETE'
+    }
+    else {
+      return res.zend(null, 400, "Invalid method");
+    }
+
+    req.body.api_method = apiMethod;
+
     final_object = v2sql.convert({
       ...req.body,
       currentModel,
       roles
     });
 
-    var table_alias;
-
-
-    if (req.body.method == 'insert') {
-      apiMethod = 'POST'
-
-      table_alias = currentModel.tidToName[req.body.base][1];
-    }
-    else if (req.body.method == 'update') {
-      apiMethod = 'PUT'
-
+    if(req.body.method == 'insert') {
+      table_alias = currentModel.tidToName[req.body.base][1]
+    } else {
       table_alias = final_object.model.table;
-    }
-    else if (req.body.method == 'select') {
-      apiMethod = req.body.api_method == 'POST' ? 'POST' : 'GET'
-
-      table_alias = final_object.model.table;
-    }
-    else if (req.body.method == 'delete') {
-      apiMethod = 'DELETE'
-
-      table_alias = final_object.model.table;
-    }
-    else {
-      return res.zend(null, 400, "Invalid method");
     }
 
     final_object.model.method = req.body.method;
@@ -595,7 +597,7 @@ module.exports = function (router) {
         app_id: new req.models.public.subdomain_gen().select({ app_id: true }).where({
           name: req.body.subdomain
         }),
-        method: apiMethod,
+        method: req.body.api_method,
         route: clean_route
       })
     ], function (err, result) {
@@ -662,6 +664,8 @@ module.exports = function (router) {
 
 
     req.body.agg_paths = req.body.agg_paths || [];
+
+    req.body.llm = true;
 
     let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
     let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
@@ -1099,6 +1103,8 @@ module.exports = function (router) {
 
     let currentModel = req.clientModels[req.body.subdomain].databases[req.body.db_id];
     let roles = req.clientModels[req.body.subdomain].appDetails.auth.roles;
+
+    req.body.llm = true;
 
     var q = v2sql.convert({
       ...req.body,

@@ -7,6 +7,7 @@ import React, {
 // Library imports
 import {
   faCopy,
+  faEdit,
   faMinus,
   faPlus
 } from '@fortawesome/free-solid-svg-icons'
@@ -15,7 +16,7 @@ import {
   Alert,
   Badge,
   Button,
-  Card
+  Card,
 } from 'reactstrap'
 import ReactJson from 'react-json-view'
 import { toast } from 'react-toastify'
@@ -27,13 +28,34 @@ import { apiBase } from '../../../../../../api';
 import styles from './details.module.scss'
 
 const Details = props => {
-  const { docs } = props
+  const { customDocs, docs, oldMethod, setCustomDocs } = props
 
   const [docState, setDocState] = useState({
     request: {},
     response: {}
   })
   const [command, setCommand] = useState(' ')
+  const [apiDescription, setApiDescription] = useState('')
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const [editingField, setEditingField] = useState(null)
+  const [fieldDescriptions, setFieldDescriptions] = useState({})
+  const [collapsedSections, setCollapsedSections] = useState({
+    tooling: false,
+    request: true,
+    response: true,
+    query: false
+  })
+
+  useEffect(() => {
+    setApiDescription(docs?.llm_agent_tooling?.description || '')
+  }, [docs])
+
+  const toggleSection = (section) => {
+    setCollapsedSections({
+      ...collapsedSections,
+      [section]: !collapsedSections[section]
+    })
+  }
 
   // Tab Label
   const copyAPI = () => {
@@ -77,8 +99,16 @@ const Details = props => {
     })
   }
 
+  const copyTooling = () => {
+    navigator.clipboard.writeText(docs?.llm_agent_tooling ? JSON.stringify(docs?.llm_agent_tooling) : '{}').then(() => {
+      toast.success('LLM Agent Tooling copied!')
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
   const getBadgeData = (status = null) => {
-    if (docs?.method === 'insert' || status === 200) {
+    if (docs?.method === 'insert' || oldMethod === 'POST' || status === 200) {
       return ({
         badge: styles.badge_success,
         heading: styles.script_heading_success,
@@ -122,7 +152,91 @@ const Details = props => {
     setCommand(updatedCommand)
   }
 
-  const renderParameter = (parameter, datatype, required = false, info = null) => {
+  const renderDescription = (showDescription, fieldKey, fieldType, parameter, currentDescription, customDocs, isEditing, handleFieldClick, handleFieldBlur, handleFieldChange, handleFieldKeyDown) => {
+    if (showDescription && fieldKey?.split('.')?.length <= 3) {
+      if (setCustomDocs) {
+        return (
+          <div className={styles.parameter_description_wrapper} onClick={!isEditing ? handleFieldClick : undefined}>
+            {isEditing ? (
+              <textarea
+                autoFocus
+                className={styles.parameter_description_input}
+                onBlur={handleFieldBlur}
+                onChange={handleFieldChange}
+                onKeyDown={handleFieldKeyDown}
+                placeholder="Add field description..."
+                rows={2}
+                value={currentDescription}
+              />
+            ) : (
+              <div className={currentDescription ? styles.parameter_description_text : styles.parameter_description_placeholder}>
+                {currentDescription || 'Add description...'}
+                <FontAwesomeIcon 
+                  icon={faEdit} 
+                  className={styles.parameter_description_edit_icon}
+                />
+              </div>
+            )}
+          </div>
+        )
+      } else {
+        if (currentDescription) {
+          return (
+            <div className={styles.parameter_description_readonly}>
+              {currentDescription}
+            </div>
+          )
+        }
+      }
+    }
+  }
+
+  const renderParameter = (parameter, fieldType, datatype, required = false, info = null, fieldKey = null, showDescription = true) => {
+    const uniqueKey = fieldKey || parameter
+    const currentDescription = fieldDescriptions[uniqueKey] !== undefined 
+      ? fieldDescriptions[uniqueKey] 
+      : (customDocs?.[fieldType]?.[parameter]?.description || info || '')
+    const isEditing = editingField === uniqueKey
+
+    const handleFieldClick = () => {
+      setEditingField(uniqueKey)
+      setFieldDescriptions({
+        ...fieldDescriptions,
+        [uniqueKey]: currentDescription
+      })
+    }
+
+    const handleFieldBlur = () => {
+      setEditingField(null)
+      setCustomDocs({
+        [fieldType]: {
+          ...customDocs?.[fieldType],
+          [parameter]: {
+            description: currentDescription
+          }
+        }
+      })
+    }
+
+    const handleFieldChange = (e) => {
+      setFieldDescriptions({
+        ...fieldDescriptions,
+        [uniqueKey]: e.target.value
+      })
+    }
+
+    const handleFieldKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setEditingField(null)
+        // Revert unsaved changes
+        const originalDescription = customDocs?.[fieldType]?.[parameter]?.description || info || ''
+        setFieldDescriptions({
+          ...fieldDescriptions,
+          [uniqueKey]: originalDescription
+        })
+      }
+    }
+
     return (
       <>
         <div
@@ -139,9 +253,19 @@ const Details = props => {
             Required
           </div>}
         </div>
-        {info?.length && <div className={styles.parameter_info}>
-          {info}
-        </div>}
+        {renderDescription(
+          showDescription,
+          fieldKey,
+          fieldType,
+          parameter,
+          currentDescription,
+          customDocs,
+          isEditing,
+          handleFieldClick,
+          handleFieldBlur,
+          handleFieldChange,
+          handleFieldKeyDown
+        )}
       </>
     )
   }
@@ -168,7 +292,7 @@ const Details = props => {
               Path Parameters
             </div>
             <div className={styles.parameters_content}>
-              {parseData(data, null, 'request')}
+              {parseData(data, null, 'request', 'request_url')}
             </div>
           </>
         )
@@ -186,14 +310,14 @@ const Details = props => {
             $qd_column: true,
             type: queryParams[param].type,
             details: queryParams[param].description,
-            required: false
+            required: Boolean(queryParams[param].required)
           }
         } else {
           data[param] = {
             $qd_column: true,
             type: queryParams[param].type,
             details: queryParams[param].description,
-            required: true
+            required: Boolean(queryParams[param].required)
           }
         }
       })
@@ -205,16 +329,16 @@ const Details = props => {
             Query Parameters
           </div>
           <div className={styles.parameters_content}>
-            {parseData(data, null, 'request')}
+            {parseData(data, null, 'request', 'request_query')}
           </div>
         </>
       )
     }
   }
 
-  const parseData = (data, key = null, dataType) => {
+  const parseData = (data, key = null, dataType, fieldType, parentPath = '') => {
     if (data.$qd_column) {
-      return renderParameter(key, data.type, data.required, data.details)
+      return renderParameter(key, fieldType, data.type, data.required, data.details, parentPath)
     } else {
       const renderAction = element => {
         if (
@@ -293,13 +417,14 @@ const Details = props => {
 
       const result = []
       Object.keys(data).forEach(element => {
-        const children = parseData(data[element], element, dataType)
+        const currentPath = parentPath ? `${parentPath}.${element}` : element
+        const children = parseData(data[element], element, dataType, fieldType, currentPath)
         if (!data[element].$qd_column) {
           result.push(
             <div className={(dataType === 'request' && docState.request[element]) ||
               (dataType === 'response' && docState.response[element]) ? styles.parameter_container_collapsed : styles.parameter_container_heading}>
               <div className={styles.parameter_container_heading_content}>
-                {renderParameter(element, data[element].constructor === Array ? 'array' : 'object', data[element].required, data[element].details)}
+                {renderParameter(element, fieldType, data[element].constructor === Array ? 'array' : 'object', data[element].required, data[element].details, null, false)} 
               </div>
               {isNaN(element) && renderAction(element)}
             </div>
@@ -328,131 +453,270 @@ const Details = props => {
             Body Parameters
           </div>
           <div className={styles.parameters_content}>
-            {parseData(docs?.request_body_detailed, null, 'request')}
+            {parseData(docs?.request_body_detailed, null, 'request', 'request_body')}
           </div>
         </>
       )
     }
   }
 
-  const renderResponse = () => {
-    if (JSON.stringify(docs?.response_detailed).length > 2) {
-      return (
-        <>
-          <div className={styles.parameters_title}>
-            Response
-          </div>
-          <div className={styles.parameters_content}>
-            {parseData(docs?.response_detailed, null, 'response')}
-          </div>
-        </>
-      )
+
+  const renderTooling = () => (
+    JSON.stringify(docs?.llm_agent_tooling)?.length > 2 && <div className={styles.request} style={{ paddingTop: 8 }}>
+      <div className={styles.request_heading} style={{ borderRadius: collapsedSections.tooling ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.tooling ? '4px' : '0' }}>
+        <span>
+          LLM Agent Tooling
+        </span>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('tooling')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.tooling ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyTooling}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
+      </div>
+      {!collapsedSections.tooling && (
+        <div className={styles.request_body} style={{ paddingTop:  3}}>
+          <ReactJson
+            // collapsed={docs?.request.length <= 25 ? 3 : 2}
+            // collapseStringsAfterLength={50}
+            displayDataTypes={false}
+            name={null}
+            src={docs?.llm_agent_tooling}
+          />
+        </div>
+      )}
+    </div>
+  )
+
+  const renderAPIDescription = () => {
+    const handleDescriptionClick = () => {
+      if (!isEditingDescription) {
+        setIsEditingDescription(true)
+      }
     }
+
+    const handleDescriptionBlur = () => {
+      setIsEditingDescription(false)
+      setCustomDocs({
+        description: apiDescription
+      })
+    }
+
+    const handleDescriptionChange = (e) => {
+      setApiDescription(e.target.value)
+    }
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsEditingDescription(false)
+      }
+    }
+
+    return (
+      <div className={styles.description}>
+        <div className={styles.description_heading}>
+          <span>{docs?.title || 'API Description'}</span>
+        </div>
+        {
+          setCustomDocs ? (
+            <div className={styles.description_body} onClick={handleDescriptionClick}>
+              {isEditingDescription ? (
+                <textarea
+                  autoFocus
+                  className={styles.description_input}
+                  onBlur={handleDescriptionBlur}
+                  onChange={handleDescriptionChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Describe what this API does..."
+                  rows={3}
+                  value={apiDescription}
+                />
+              ) : (
+                <div className={styles.description_text}>
+                  {apiDescription || 'Click to add a description...'}
+                  <FontAwesomeIcon 
+                    icon={faEdit} 
+                    className={styles.parameter_description_edit_icon}
+                  />
+                </div>
+              )}
+            </div>
+          )
+          :
+          <div className={styles.description_readonly}>
+            {apiDescription || 'No description available'}
+          </div>
+        }
+      </div>
+    )
   }
 
   const renderParameters = () => {
     return (
       <div className={styles.parameters}>
+        {renderAPIDescription()}
         {renderQueryParameters()}
         {renderPathParameters()}
         {renderBodyParameters()}
-        {renderResponse()}
+        {/* {renderResponseDetailed()} */}
       </div>
     )
   }
 
-  const renderData = () => {
+  const renderScript = () => {
     const badgeData = getBadgeData()
     return (
-      <div className={styles.data}>
-        <div className={styles.script} >
-          <div
-            className={badgeData?.heading}
-            onClick={copyAPI}
-          >
-            <Badge className={badgeData?.badge}>
-              {badgeData?.method}
-            </Badge>
-            <span>
-              https://{props.subdomain}.{apiBase}{docs?.apiRoute}
-            </span>
-          </div>
-          <div
-            className={styles.script_body}
-            onClick={copyCommand}
-          >
-            {command}
-          </div>
+      <div className={styles.script} >
+        <div
+          className={badgeData?.heading}
+          onClick={copyAPI}
+        >
+          <Badge className={badgeData?.badge}>
+            {badgeData?.method}
+          </Badge>
+          <span>
+            https://{props.subdomain}.{apiBase}{docs?.apiRoute}
+          </span>
         </div>
-        {JSON.stringify(docs?.request_body).length > 2 && <div className={styles.request}>
-          <div className={styles.request_heading}>
-            <span>
-              Request
-            </span>
-            <Button
-              color='falcon-primary'
-              onClick={copyRequest}
-              size='sm'
-            >
-              <FontAwesomeIcon icon={faCopy} />
-            </Button>
-          </div>
-          <div className={styles.request_body}>
-            <ReactJson
-              // collapsed={docs?.request.length <= 25 ? 3 : 2}
-              // collapseStringsAfterLength={50}
-              displayDataTypes={false}
-              name={null}
-              src={docs?.request_body}
-            />
-          </div>
-        </div>}
-        {JSON.stringify(docs?.response).length > 2 && <div className={styles.response}>
-          <div className={styles.response_heading}>
-            <span>
-              Response
-            </span>
-            <Button
-              color='falcon-primary'
-              onClick={copyResponse}
-              size='sm'
-            >
-              <FontAwesomeIcon icon={faCopy} />
-            </Button>
-          </div>
-          <div className={styles.response_body}>
-            <ReactJson
-              // collapsed={docs?.response.length <= 25 ? 4 : 3}
-              // collapseStringsAfterLength={50}
-              displayDataTypes={false}
-              name={null}
-              src={docs?.response}
-            />
-          </div>
-        </div>}
-        {docs?.sql_query.text.length ? <div className={styles.query}>
-          <div className={styles.query_heading}>
-            <span>
-              Query
-            </span>
-            <Button
-              color='falcon-primary'
-              onClick={copyQuery}
-              size='sm'
-            >
-              <FontAwesomeIcon icon={faCopy} />
-            </Button>
-          </div>
-          <div className={styles.query_body}>
-            <Alert
-              className={styles.alert}
-              color='warning'
-            >
-              This is a sample query. The actual query will differ depending on the parameters selected.
-            </Alert>
-            {docs?.sql_query.text}
-          </div>
-        </div> : null}
+        <div
+          className={styles.script_body}
+          onClick={copyCommand}
+        >
+          {command}
+        </div>
+      </div>
+    )
+  }
+
+  const renderRequest = () => (
+    JSON.stringify(docs?.request_body).length > 2 && <div className={styles.request}>
+      <div className={styles.request_heading} style={{ borderRadius: collapsedSections.request ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.request ? '4px' : '0' }}>
+        <span>
+          Sample Request
+        </span>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('request')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.request ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyRequest}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
+      </div>
+      {!collapsedSections.request && (
+        <div className={styles.request_body}>
+          <ReactJson
+            // collapsed={docs?.request.length <= 25 ? 3 : 2}
+            // collapseStringsAfterLength={50}
+            displayDataTypes={false}
+            name={null}
+            src={docs?.request_body}
+          />
+        </div>
+      )}
+    </div>
+  )
+
+  const renderQuery = () => (
+    docs?.sql_query.text.length ? <div className={styles.query}>
+      <div className={styles.query_heading} style={{ borderRadius: collapsedSections.query ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.query ? '4px' : '0' }}>
+        <span>
+          Sample Query
+        </span>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('query')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.query ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyQuery}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
+      </div>
+      {!collapsedSections.query && (
+        <div className={styles.query_body}>
+          <Alert
+            className={styles.alert}
+            color='warning'
+          >
+            This is a sample query. The actual query will differ depending on the parameters selected.
+          </Alert>
+          {docs?.sql_query.text}
+        </div>
+      )}
+    </div> : null
+  )
+
+  const renderResponse = () => (
+    JSON.stringify(docs?.response).length > 2 && <div className={styles.response}>
+      <div className={styles.response_heading} style={{ borderRadius: collapsedSections.response ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.response ? '4px' : '0' }}>
+        <span>
+          Sample Response
+        </span>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            color='falcon-primary'
+            onClick={() => toggleSection('response')}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={collapsedSections.response ? faPlus : faMinus} />
+          </Button>
+          <Button
+            color='falcon-primary'
+            onClick={copyResponse}
+            size='sm'
+          >
+            <FontAwesomeIcon icon={faCopy} />
+          </Button>
+        </div>
+      </div>
+      {!collapsedSections.response && (
+        <div className={styles.response_body}>
+          <ReactJson
+            // collapsed={docs?.response.length <= 25 ? 4 : 3}
+            // collapseStringsAfterLength={50}
+            displayDataTypes={false}
+            name={null}
+            src={docs?.response}
+          />
+        </div>
+      )}
+    </div>
+  )
+
+  const renderData = () => {
+    return (
+      <div className={styles.data}>
+        {renderScript()}
+        {renderTooling()}
+        {renderRequest()}
+        {renderResponse()}
+        {renderQuery()}
       </div>
     )
   }
@@ -472,10 +736,11 @@ const Details = props => {
         marginTop: '4px',
         width: props.width
       }}>
-        <div className={styles.details}>
+          <div className={styles.details}>
           {renderParameters()}
           {renderData()}
         </div>
+ 
       </Card>
     )
   }

@@ -19,7 +19,8 @@ import {
   setJoinGraphs,
   setResult,
   setSortOptions,
-  updateJoinDetails
+  updateJoinDetails,
+  setCustomDocs
 } from '../../../../../lib/data/dataSlice'
 
 // Library imports
@@ -442,6 +443,7 @@ export function APInew (props) {
       generateAPI()
     }
   }, [
+    JSON.stringify(state?.custom_docs),
     state?.oldMethod.value,
     state?.joins?.length,
     state?.joinDetails,
@@ -496,6 +498,7 @@ export function APInew (props) {
         agg_paths: [],
         base: state.base.value,
         c: state.columns,
+        custom_docs: state.custom_docs,
         db_id: state.database.value,
         join_type: state.joinKeys,
         method: state.method.value.split('_')[0],
@@ -632,6 +635,7 @@ export function APInew (props) {
           {
             (state?.docs && Object.keys(state?.docs)?.length) ?
             <Details
+              customDocs={state?.custom_docs}
               docs={{
                 ...state?.docs,
                 apiRoute: state?.route,
@@ -639,7 +643,9 @@ export function APInew (props) {
               }}
               dragging={isDragging}
               mode='api'
+              oldMethod={state?.oldMethod?.value}
               query_id='new'
+              setCustomDocs={(custom_docs) => dispatch(setCustomDocs({custom_docs, mode: 'api', query_id: 'new', subdomain: props.subdomain}))}
               subdomain={props.subdomain}
               width={window.innerWidth - 4  - 4 - position}
             /> :

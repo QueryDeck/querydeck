@@ -23,6 +23,7 @@ module.exports = class builder {
 
 		this.depthmap = this.depthmap || [];
 		this.depthpaths = this.depthpaths || [];
+		this.qvars = this.qvars || [];
 		this.qref_map = {};
 		this.session_vars_used = [];
 
@@ -168,6 +169,7 @@ module.exports = class builder {
 			getParamMapAsIndexArr: this.getParamMapAsIndexArr(),
 			paramMap: this.paramMap,
 			querypaths: this.depthpaths,
+			qvars: this.qvars,
 			session_vars_used: this.session_vars_used
 		};
 		var finalQuery = 'WITH ';
@@ -189,6 +191,7 @@ module.exports = class builder {
 			getParamMapAsIndexArr: this.getParamMapAsIndexArr(),
 			paramMap: this.paramMap,
 			querypaths: this.depthpaths,
+			qvars: this.qvars,
 			session_vars_used: this.session_vars_used
 		};
 	}
@@ -923,7 +926,7 @@ module.exports = class builder {
 		return ' WHERE ' + w;
 	}
 
-	resolveConditions(conditions, mymodel, dp, depthpath) {
+	resolveConditions(conditions, mymodel, dp, depthpath, parent_conditonal) {
 
 		dp = dp || {
 			depth: 0
@@ -932,11 +935,19 @@ module.exports = class builder {
 
 		var condt = '';
 
+		parent_conditonal = parent_conditonal || conditions.parent_conditonal;
+
+		var conditional_on_field;
+		var conditional_on_field_added = false;
+		var conditional_on_field_type;
+		if(conditions.conditional_on) {
+			conditional_on_field = conditions.conditional_on.split('.').slice(1).join('.');
+			conditional_on_field_type = conditions.conditional_on.indexOf('QUERY') > -1 ? 'query' : 'body';
+		}
+
 		var type = (conditions.condition && conditions.condition.toLowerCase() == 'or') ? ' OR ' : ' AND ';
 		if (this.useDynamicValues && conditions.conditional_on) {
-			let conditional_on_field = conditions.conditional_on.split('.').slice(1).join('.');
-			var q_type = conditions.conditional_on.indexOf('QUERY') > -1 ? 'query' : 'body';
-			var conditional_on_value = _.get(this.dynamicValues[q_type],conditional_on_field);
+			var conditional_on_value = _.get(this.dynamicValues[conditional_on_field_type],conditional_on_field);
 			if (!conditional_on_value || conditional_on_value === '') {
 				return 'true';
 			}
@@ -950,7 +961,7 @@ module.exports = class builder {
 				condt += ' ( ' + this.resolveConditions(conditions.rules[i], mymodel, ({
 					depth: dp.depth + 1,
 					superindex: i
-				}), depthpath + 'rules[' + i + '].') + ' ) ';
+				}), depthpath + 'rules[' + i + '].', (conditions.conditional_on || parent_conditonal ? true : false)) + ' ) ';
 
 			} else if(conditions.rules[i].operator && conditions.rules[i].operator.indexOf('exists') > -1) {
 
@@ -1000,6 +1011,8 @@ module.exports = class builder {
 					}]
 		
 				}
+
+				exists_base_conditions.parent_conditonal = (conditions.conditional_on || parent_conditonal ? true : false);
 
 				if(conditions.rules[i].exists_where && conditions.rules[i].exists_where.rules && conditions.rules[i].exists_where.rules.length > 0) {
 					exists_base_conditions.rules.push(conditions.rules[i].exists_where)
@@ -1057,7 +1070,12 @@ module.exports = class builder {
 						var key_spl = conditions.rules[i].input_key.split('.');
 						key_spl.shift();
 						var key = key_spl.join('.');
-						
+						if(conditional_on_field && key == conditional_on_field && !conditional_on_field_added) {
+							conditional_on_field_added = true;
+						}
+						if(conditions.rules[i].input_key.indexOf('QUERY') > -1) {
+							this.qvars.push(key)
+						}
 						if(conditions.rules[i].input_key.indexOf('SESSION') > -1) {
 
 							if(this.useDynamicValues) {
@@ -1102,13 +1120,19 @@ module.exports = class builder {
 							query_path_ob.type = otherutils.getSuperType(this.getType(query_path_ob.column))
 						}
 
+						query_path_ob.required = (conditions.conditional_on || parent_conditonal ? false : true)
+
+						// console.log('pushing qpath', query_path_ob, conditions.conditional_on)
 						this.depthpaths.push(query_path_ob)
 					}else{
 						//console.log( 'else not key')
 					}
 					// check for array
-					if(conditions.rules[i].operator == 'in' && !Array.isArray(val) && this.useDynamicValues) {
-						val = [val]
+					if(conditions.rules[i].operator == 'in') {
+						query_path_ob.array_input = true;
+						if(this.useDynamicValues && !Array.isArray(val)) {
+							val = [val]
+						}
 					}
 					val = this.getParamMapIndex(val)
 					param_val = true;
@@ -1131,6 +1155,12 @@ module.exports = class builder {
 		if (conditions.not) {
 			if (conditions.rules.length > 1) condt = ' NOT (' + condt + ' ) ';
 			else condt = ' NOT ' + condt;
+		}
+
+		if(conditional_on_field && !conditional_on_field_added) {
+			if(conditional_on_field_type == 'query') {
+				this.qvars.push(conditional_on_field)
+			}
 		}
 
 		return condt;
