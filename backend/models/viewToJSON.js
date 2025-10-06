@@ -6,8 +6,6 @@ const _ = require('lodash');
 //     v4: uuidv4
 // } = require('uuid');
 
-const pluralize = require('pluralize');
-
 const otherutils = require("./utils");
 const modelutils = require.main.require('./models/modelUtils')
 
@@ -1868,8 +1866,8 @@ module.exports = class ViewToJSON {
         return {
             model: main_model,
             request: request_sample,
-            response: response_sample,
-            response_detailed: response_sample_detailed,
+            response: {[tab_name_spl[1]]: {data: response_sample[tab_name_spl[1]]}},
+            response_detailed: {[tab_name_spl[1]]: {data: response_sample_detailed[tab_name_spl[1]]}},
             join_paths_where: join_paths_where,
             base_table_name_arr: tab_name_spl,
             all_col_names: all_col_names,
