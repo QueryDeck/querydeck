@@ -17,7 +17,7 @@ var s = session({
   "saveUninitialized": false,
   // "rolling": true,  // it will refresh token expiration  to new maxage   
   "store": new MongoStore({
-    mongoUrl: process.env.MONGO_CONN_URL,
+    mongoUrl: 'mongodb://mongo:27017/qd_session',
     collection: 'sessions',
     autoRemove: 'native',
     autoRemoveInterval: 1440

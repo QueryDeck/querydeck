@@ -15,9 +15,9 @@ var compression = require('compression');
 app.on('start', function () {
   console.log('Application ready to serve requests.');
   console.log('Environment: %s', app.kraken.get('env:env'));
-  // reSyncSchema();
-  // refreshGithub.start();
-  // slack.sendAppStartedNotification();
+  reSyncSchema();
+  refreshGithub.start();
+  slack.sendAppStartedNotification();
 });
 
 app.use('/.well-known', express.static('.well-known')); //###  for ssl certificate genration 
