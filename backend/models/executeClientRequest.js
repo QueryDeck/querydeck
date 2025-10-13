@@ -109,7 +109,8 @@ function executeClientRequest(params, callback) {
                     if(matchingColumn) {
                         orderByArr.push({
                             id: matchingColumn.id,
-                            name: matchingColumn.name,
+                            // name: matchingColumn.name,
+                            name: matchingColumn.alias,
                             asc: direction.toLowerCase() === 'asc'
                         });
                     }
