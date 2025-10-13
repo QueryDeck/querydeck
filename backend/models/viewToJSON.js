@@ -1426,19 +1426,28 @@ module.exports = class ViewToJSON {
 
                 // all_col_names.push(col_arr.join('.'))
 
-                let alias = params.columns[i].alias; /* let should not be used here */
+                // var alias = params.columns[i].alias; /* let should not be used here */
 
-                if (col_last_name_arr.indexOf(col_arr[2]) > -1) { // if column with same name already exist then  use alias 
-                    // force alias
-                    // col_last_name_arr.ind
-                    let ref_id_name = currentModel.idToName[id_spl[id_spl.length - 1]];
-                    alias = alias || ref_id_name[0] + '.' + ref_id_name[1] + '.' + col_arr[2];
-                    col_last_name_arr.push(alias);
-                    response_sample[tab_name_spl[1]][0][alias.split('.').slice(1, 3).join(".")] = col_arr[2];
-                } else {
-                    col_last_name_arr.push(col_arr[2]);
-                    response_sample[tab_name_spl[1]][0][col_arr[2]] = col_arr[2];
-                }
+                // console.log('alt_alias_prefix', alt_alias_prefix)
+                // var ref_id_name = currentModel.idToName[id_spl[id_spl.length - 1]];
+                var alias = alt_alias_prefix + col_arr[2];
+
+                // if (col_last_name_arr.indexOf(col_arr[2]) > -1) { // if column with same name already exist then  use alias 
+                //     // force alias
+                //     // col_last_name_arr.ind
+                //     let ref_id_name = currentModel.idToName[id_spl[id_spl.length - 1]];
+                //     alias = alias || ref_id_name[0] + '.' + ref_id_name[1] + '.' + col_arr[2];
+                //     col_last_name_arr.push(alias);
+                //     response_sample[tab_name_spl[1]][0][alias.split('.').slice(1, 3).join(".")] = col_arr[2];
+                // } else {
+                //     col_last_name_arr.push(col_arr[2]);
+                //     response_sample[tab_name_spl[1]][0][col_arr[2]] = col_arr[2];
+                // }
+
+                col_last_name_arr.push(alias);
+                response_sample[tab_name_spl[1]][0][alias] = col_arr[2];
+
+                
 
                 let join_type = "INNER"; // default join type 
                 if (params.joins[id_pure].type && params.joins[id_pure].type != 'agg') {
@@ -1783,11 +1792,11 @@ module.exports = class ViewToJSON {
             let agg_key_1 = Object.keys(agg_complete_return.response);
 
             if (agg_mod.agg_type == 'json_agg') {
-                response_sample[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response[agg_key_1];
-                response_sample_detailed[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response_detailed[agg_key_1];
+                response_sample[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response[agg_key_1].data;
+                response_sample_detailed[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response_detailed[agg_key_1].data;
             } else {
-                response_sample[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response[agg_key_1][0];
-                response_sample_detailed[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response_detailed[agg_key_1][0];
+                response_sample[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response[agg_key_1].data[0];
+                response_sample_detailed[tab_name_spl[1]][0][agg_mod.table_alias] = agg_complete_return.response_detailed[agg_key_1].data[0];
             }
 
         }
@@ -1863,11 +1872,14 @@ module.exports = class ViewToJSON {
             }
         }
         main_model.condition_count = condition_count(main_model.where);
+        // console.log(response_sample[tab_name_spl[1]])
         return {
             model: main_model,
             request: request_sample,
             response: {[tab_name_spl[1]]: {data: response_sample[tab_name_spl[1]]}},
             response_detailed: {[tab_name_spl[1]]: {data: response_sample_detailed[tab_name_spl[1]]}},
+            // response: response_sample,
+            // response_detailed: response_sample_detailed,
             join_paths_where: join_paths_where,
             base_table_name_arr: tab_name_spl,
             all_col_names: all_col_names,
