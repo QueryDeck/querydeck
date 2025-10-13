@@ -16,7 +16,7 @@
 - [Installation](#️-installation)
 - [Documentation](#-documentation)
 
-[QueryDeck](https://querydeck.io) generates RESTful APIs from existing SQL databases. Use the visual no-code builder to create complex SQL queries with deep joins, nested inserts, dynamic parameters and turn them into fully functional REST APIs. Deploy your APIs instantly or push them as a Nodejs app to your GitHub repository.
+[QueryDeck](https://querydeck.io) generates instant REST APIs, LLM agent tools and MCPs for Postgres. Use the visual no-code builder to create complex SQL queries with deep joins, nested inserts, dynamic parameters and turn them into fully functional REST APIs. Deploy your APIs and toold instantly or push them as a Nodejs app to your GitHub repository.
 
 ## Features
 
@@ -34,12 +34,6 @@ Build complex APIs without writing SQL code:
   - Flexible parameter configuration
   - Runtime query customization
   - Support for complex filtering and sorting
-
-### Multi-Engine Support
-Compatible with major SQL databases:
-- PostgreSQL
-- MySQL
-- Microsoft SQL Server
 
 ### Automated Schema Analysis
 - **Intelligent Schema Introspection**: Automatically maps and analyzes your database structure
