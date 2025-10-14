@@ -413,7 +413,7 @@ const Authentication = (props) => {
             />
           </Label>
           <Label className="list-card-label">
-            User Session Column
+            User Table Column
             <Input
               placeholder={"Selected Column "}
               type="text"
