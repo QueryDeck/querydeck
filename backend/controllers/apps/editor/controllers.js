@@ -1048,23 +1048,19 @@ module.exports = function (router) {
       sel_api_query_metrics AS (
         SELECT json_build_object (
             'total_row_count',   count(*) OVER(),
-            'ip_address',  api_query_metrics.ip_address,
-            'query_metric_id',  api_query_metrics.query_metric_id,
-            'db_error',   api_query_metrics.db_error,
-            'response_code',  api_query_metrics.response_code,
-            'exec_time',  api_query_metrics.exec_time,
-            'created_at',    api_query_metrics.created_at,
-            'query_id', api_queries.query_id,
-            'method',  api_queries.method,
-            'apiRotue',  api_queries.route
+            'ip_address',  api_logs.ip_address,
+            'query_metric_id',  api_logs.log_id,
+            'db_error',   NULL,
+            'response_code',  api_logs.response_code,
+            'exec_time',  api_logs.exec_time,
+            'created_at',    api_logs.created_at,
+            'query_id', NULL,
+            'method',  api_logs.request_method,
+            'apiRotue',  api_logs.request_path
           ) as query_metrics
-        FROM public.api_query_metrics
-          inner join public.api_queries on public.api_queries.query_id = public.api_query_metrics.query_id
-        WHERE public.api_queries.db_id = (
-            SELECT db_id
-            from apps_sel
-          )
-        ORDER BY public.api_query_metrics.created_at DESC OFFSET $3
+        FROM public.api_logs
+        WHERE api_logs.subdomain = $1
+        ORDER BY api_logs.created_at DESC OFFSET $3
         LIMIT $4
       )
        SELECT  

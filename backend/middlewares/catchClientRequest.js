@@ -53,16 +53,17 @@ module.exports = function () {
         } else {
           res.send(exec_data);
         }
-        // record_query_log({
-        //   ip_address: clientip,
-        //   // db_error: err,
-        //   request_method: req.method,
-        //   request_path: req.path,
-        //   response_code: res_status,
-        //   exec_time_end: Date.now(),
-        //   exec_time_start: exec_time_start,
-        //   subdomain: subdomain
-        // })
+
+        record_query_log({
+          ip_address: clientip,
+          // db_error: err,
+          request_method: req.method,
+          request_path: req.path,
+          response_code: res_status,
+          exec_time_end: Date.now(),
+          exec_time_start: exec_time_start,
+          subdomain: subdomain
+        })
       });
 
     } else {
