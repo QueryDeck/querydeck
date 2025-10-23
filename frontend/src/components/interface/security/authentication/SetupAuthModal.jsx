@@ -307,7 +307,7 @@ const SetupAuthModal = (props) => {
           <div className="list-card-label security-auth-dropdown-bx">
             <span style={{ fontSize: "14px", fontWeight: 500 }}>
               {" "}
-              User Session Column{" "}
+              User Table Column{" "}
             </span>
 
             <div className="database-modal-enum-body-toolbar">

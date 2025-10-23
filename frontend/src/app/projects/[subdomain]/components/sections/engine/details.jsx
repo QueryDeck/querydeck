@@ -41,8 +41,8 @@ const Details = props => {
   const [fieldDescriptions, setFieldDescriptions] = useState({})
   const [collapsedSections, setCollapsedSections] = useState({
     tooling: false,
-    request: true,
-    response: true,
+    request: false,
+    response: false,
     query: false
   })
 
@@ -460,7 +460,7 @@ const Details = props => {
     }
   }
 
-
+  // eslint-disable-next-line no-unused-vars
   const renderTooling = () => (
     JSON.stringify(docs?.llm_agent_tooling)?.length > 2 && <div className={styles.request} style={{ paddingTop: 8 }}>
       <div className={styles.request_heading} style={{ borderRadius: collapsedSections.tooling ? '5px' : '5px 5px 0 0', marginBottom: collapsedSections.tooling ? '4px' : '0' }}>
@@ -713,7 +713,7 @@ const Details = props => {
     return (
       <div className={styles.data}>
         {renderScript()}
-        {renderTooling()}
+        {/* {renderTooling()} */}
         {renderRequest()}
         {renderResponse()}
         {renderQuery()}

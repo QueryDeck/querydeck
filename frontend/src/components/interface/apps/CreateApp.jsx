@@ -392,6 +392,7 @@ const CreateApp = () => {
     </div>
   );
 
+  // eslint-disable-next-line no-unused-vars
   const renderDatabases = () => {
     const databases = [
       {
@@ -481,7 +482,7 @@ const CreateApp = () => {
             Click to learn more on how to get started with QueryDeck.
           </a>
         </Alert>
-        {renderDatabases()}
+        {/* {renderDatabases()} */}
         <Nav tabs>
           <NavItem className="query-right-nav cursor-pointer">
             <NavLink
@@ -520,7 +521,6 @@ const CreateApp = () => {
   const renderConnDetailsTab = () => {
     return (
       <>
-        <br />
         {renderDatabaseConnString()}
         {renderFields()}
         {renderAcknowledgement()}
